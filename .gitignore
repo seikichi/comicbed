@@ -1,0 +1,13 @@
+*~
+\#*
+dist/
+node_modules/
+bower_components/
+*.js
+!Gruntfile.js
+
+Thumb.db
+.DS_Store
+*.js.map
+DefinitelyTyped
+assets/vendor
