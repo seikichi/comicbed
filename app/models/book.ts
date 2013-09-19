@@ -1,4 +1,5 @@
 import Backbone = require('backbone');
+import PDFJS = require('pdfjs');
 
 import Page = require('models/page');
 
@@ -23,7 +24,7 @@ module Book {
     getPageImage(pageNum: number): Image.ModelInterface;
 
     close(): void;
-
+    openFile(file: File): void;
     // // TODO(seikichi)
     // openFile() {}
     // openURL() {}
@@ -89,6 +90,21 @@ module Book {
       // Note: (this.pages == null) <=> !this.get('isOpen')
       this.pages = null;
       super();
+    }
+
+    openFile(file: File): void {
+      // TODO(seikichi):
+      // - openFile を短時間に連打したら面倒なことになりそう
+      // - 「今開いてる処理」は常に1つになるように deferred か何かで頑張る？
+      var fileReader = new FileReader();
+      fileReader.onload = (event: any) => {
+        var buffer = event.target.result;
+        var uint8Array = new Uint8Array(buffer);
+        PDFJS.getDocument({data: uint8Array}).then((document: PDFJS.PDFDocument) => {
+          this.pages = Page.createPdfPageCollection(document);
+          this.set({isOpen: true});
+        });
+      };
     }
 
     close(): void {

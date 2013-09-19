@@ -8,7 +8,9 @@ declare module PDFJS {
 
   interface GetDocumentOptions {
     url?: string;
+    data?: ArrayBuffer;
     httpHeaders?: string;
+    password?: string;
   }
 
   function getDocument(options?: GetDocumentOptions): JQueryPromise<PDFDocument>;
