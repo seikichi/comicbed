@@ -22,10 +22,13 @@ require.config({
     },
     pdfjs: {
       exports: 'PDFJS'
+    },
+    log4javascript: {
+      exports: 'log4javascript'
     }
   }
 });
 
-require([], () => {
-  console.log('Hello, world!');
+require(['utils/logger'], (logger: log4javascript.Log4Javascript) => {
+  logger.info('Hello, world!');
 });
