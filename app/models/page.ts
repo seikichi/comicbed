@@ -6,7 +6,7 @@ module Page {
   // public
   export interface ModelInterface { }
   export interface CollectionInterface {
-    loadPageImageDataURL(pageNum: number): JQueryPromise<string>;
+    getPageImageDataURL(pageNum: number): JQueryPromise<string>;
   }
   export interface Attributes {
     name?: string;
@@ -39,15 +39,15 @@ module Page {
       super([], {});
     }
 
-    loadPageImageDataURL(pageNum: number): JQueryPromise<string> {
+    getPageImageDataURL(pageNum: number): JQueryPromise<string> {
       var originalPageNum = this.at(pageNum).get('originalPageNum');
       var deferred = $.Deferred<string>();
+      var canvas = document.createElement('canvas');
 
       this.document.getPage(originalPageNum).then((page: PDFJS.PDFPageProxy) => {
+        // prepare canvas using PDF page dimensions
         var scale = 1.0;
         var viewport = page.getViewport(scale);
-        // prepare canvas using PDF page dimensions
-        var canvas = document.createElement('canvas');
         var context = canvas.getContext('2d');
         canvas.height = viewport.height;
         canvas.width = viewport.width;
@@ -56,13 +56,11 @@ module Page {
           canvasContext: context,
           viewport: viewport,
         };
-        page.render(renderContext).then(() => {
-          // resolve with a Data URL of the PDF page
-          var dataURL: string = canvas.toDataURL();
-          deferred.resolve(dataURL);
-        }).fail(() => {
-          deferred.reject();
-        });
+        return page.render(renderContext);
+      }).then(() => {
+        // resolve with a Data URL of the PDF page
+        var dataURL: string = canvas.toDataURL();
+        deferred.resolve(dataURL);
       }).fail(() => {
         deferred.reject();
       });
