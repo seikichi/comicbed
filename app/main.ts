@@ -5,8 +5,9 @@ require.config({
     backbone: '../assets/vendor/backbone/js/backbone',
     text: '../assets/vendor/text/js/text',
     handlebars: '../assets/vendor/handlebars/js/handlebars',
+    log4javascript: '../assets/vendor/log4javascript/js/log4javascript',
 
-    handlebars: '../assets/app/pdfjs/js/pdfjs',
+    pdfjs: '../assets/app/pdfjs/js/pdfjs',
   },
   shim: {
     underscore: {

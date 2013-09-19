@@ -13,7 +13,8 @@
     "backbone": "*",
     "text": "*",
     "requirejs": "*",
-    "handlebars": "*"
+    "handlebars": "*",
+    "log4javascript": "*"
   },
   "exportsOverride": {
     "underscore": {
@@ -33,6 +34,9 @@
     },
     "handlebars": {
       "js": "handlebars.js"
+    },
+    "log4javascript": {
+      "js": "log4javascript.js"
     }
   }
 }
