@@ -1,16 +1,19 @@
 import $ = require('jquery');
 import Backbone = require('backbone');
+import PDFJS = require('pdfjs');
 
 module Page {
   // public
   export interface ModelInterface { }
-  export interface CollectionInterface { }
+  export interface CollectionInterface {
+    loadPageImageDataURL(pageNum: number): JQueryPromise<string>;
+  }
   export interface Attributes {
     name?: string;
     originalPageNum?: number;
   }
-  export var createPdfPageCollection: () => CollectionInterface  = () => {
-    return new PdfPageCollection();
+  export function createPdfPageCollection(document: PDFJS.PDFDocument): CollectionInterface {
+    return new PdfPageCollection(document);
   }
 
   // private
@@ -21,16 +24,50 @@ module Page {
         originalPageNum: 0,
       };
     }
-    // TODO
-    // loadPageImage(): JQueryDeffered<...>;
+    get(attributeName: string): any;
+    get(attributeName: 'name'): string;
+    get(attributeName: 'originalPageNum'): number;
+    get(attributeName: string): any { return super.get(attributeName); }
   }
 
-  class PdfPageCollection extends Backbone.Collection<PdfPageModel, Attributes>
-    implements CollectionInterface {
-      constructor(models?: Attributes[], options?: any) {
-        this.model = PdfPageModel;
-        super(models, options);
-      }
+  class PdfPageCollection extends Backbone.Collection<PdfPageModel, Attributes> implements CollectionInterface {
+    private document: PDFJS.PDFDocument;
+
+    constructor(document: PDFJS.PDFDocument) {
+      this.document = document;
+      this.model = PdfPageModel;
+      super([], {});
+    }
+
+    loadPageImageDataURL(pageNum: number): JQueryPromise<string> {
+      var originalPageNum = this.at(pageNum).get('originalPageNum');
+      var deferred = $.Deferred<string>();
+
+      this.document.getPage(originalPageNum).then((page: PDFJS.PDFPageProxy) => {
+        var scale = 1.0;
+        var viewport = page.getViewport(scale);
+        // prepare canvas using PDF page dimensions
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        // render PDF page into canvas context
+        var renderContext = {
+          canvasContext: context,
+          viewport: viewport,
+        };
+        page.render(renderContext).then(() => {
+          // resolve with a Data URL of the PDF page
+          var dataURL: string = canvas.toDataURL();
+          deferred.resolve(dataURL);
+        }).fail(() => {
+          deferred.reject();
+        });
+      }).fail(() => {
+        deferred.reject();
+      });
+      return deferred.promise();
+    }
   }
 }
 

@@ -1,40 +1,40 @@
 /// <reference path="./DefinitelyTyped/jquery/jquery.d.ts" />
 
 declare module PDFJS {
-    var workerSrc: string;
-    var disableWorker: boolean;
-    var disableAutoFetch: boolean;
-    var disableRange: boolean;
+  var workerSrc: string;
+  var disableWorker: boolean;
+  var disableAutoFetch: boolean;
+  var disableRange: boolean;
 
-    interface GetDocumentOptions {
-        url?: string;
-        httpHeaders?: string;
-    }
+  interface GetDocumentOptions {
+    url?: string;
+    httpHeaders?: string;
+  }
 
-    function getDocument(options?: GetDocumentOptions): JQueryDeferred<PdfDocument>;
+  function getDocument(options?: GetDocumentOptions): JQueryPromise<PDFDocument>;
 
 
-    class PdfDocument {
-        numPages: number;
-        getPage(pageNum: number): JQueryDeferred<PdfPage>;
-    }
+  interface PDFDocument {
+    numPages: number;
+    getPage(pageNum: number): JQueryPromise<PDFPageProxy>;
+  }
 
-    interface RenderContext {
-        canvasContext: CanvasRenderingContext2D;
-        viewport: ViewPort;
-    }
+  interface RenderContext {
+    canvasContext: CanvasRenderingContext2D;
+    viewport: PageViewport;
+  }
 
-    interface ViewPort {
-        width: number;
-        height: number;
-    }
+  interface PageViewport {
+    width: number;
+    height: number;
+  }
 
-    class PdfPage {
-        getViewport(scale: number): ViewPort;
-        render(context: RenderContext): void;
-    }
+  interface PDFPageProxy {
+    getViewport(scale: number, rotate?: number): PageViewport;
+    render(context: RenderContext): JQueryPromise<void>;
+  }
 }
 
 declare module "pdfjs" {
-    export = PDFJS;
+  export = PDFJS;
 }
