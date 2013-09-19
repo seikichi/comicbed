@@ -7,7 +7,7 @@ require.config({
     handlebars: '../assets/vendor/handlebars/js/handlebars',
     log4javascript: '../assets/vendor/log4javascript/js/log4javascript',
 
-    pdfjs: '../assets/app/pdfjs/js/pdfjs',
+    pdfjs: '../assets/app/pdfjs/js/pdf',
   },
   shim: {
     underscore: {
@@ -25,10 +25,43 @@ require.config({
     },
     log4javascript: {
       exports: 'log4javascript'
-    }
+    },
   }
 });
 
-require(['utils/logger'], (logger: log4javascript.Log4Javascript) => {
-  logger.info('Hello, world!');
+require([
+  'jquery',
+  'models/book',
+  'utils/logger',
+], (
+  $: JQueryStatic,
+  Book: any,
+  logger: log4javascript.Log4Javascript) => {
+    // logger.info('Hello, world!');
+    $('#drop-zone').on('dragover', (jqEvent: any) => {
+      var event = <DragEvent>jqEvent.originalEvent;
+      event.stopPropagation();
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+    }).on('drop', (jqEvent: any) => {
+      var event = <DragEvent>jqEvent.originalEvent;
+      event.stopPropagation();
+      event.preventDefault();
+
+      var file = event.dataTransfer.files[0];
+      var book = Book.create();
+      book.openFile(file);
+      book.on('change:isOpen', () => {
+        var image = book.getPageImage(1);
+        image.on('change:status', () => {
+          var $img = $('<img/>');
+          $img.attr({
+            src: image.dataURL(),
+            width: image.width(),
+            height: image.height()
+          });
+          $('#cover').html($img);
+        });
+      });
+    });
 });

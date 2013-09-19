@@ -162,7 +162,7 @@ declare module Backbone {
         // collection: Model;
         length: number;
 
-        constructor(models?: _Attributes[], options?: any);
+        // constructor(models?: _Attributes[], options?: any);
         constructor(models?: _Model[], options?: any);
 
         fetch(options?: CollectionFetchOptions): JQueryXHR;

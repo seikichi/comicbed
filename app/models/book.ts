@@ -2,6 +2,7 @@ import Backbone = require('backbone');
 import PDFJS = require('pdfjs');
 
 import Page = require('models/page');
+import logger = require('utils/logger');
 
 var HTMLImage = Image;
 
@@ -87,7 +88,7 @@ module Book {
     }
 
     constructor() {
-      // Note: (this.pages == null) <=> !this.get('isOpen')
+      // Note: (this.pages === null) <=> !this.get('isOpen')
       this.pages = null;
       super();
     }
@@ -96,15 +97,37 @@ module Book {
       // TODO(seikichi):
       // - openFile を短時間に連打したら面倒なことになりそう
       // - 「今開いてる処理」は常に1つになるように deferred か何かで頑張る？
-      var fileReader = new FileReader();
-      fileReader.onload = (event: any) => {
-        var buffer = event.target.result;
-        var uint8Array = new Uint8Array(buffer);
-        PDFJS.getDocument({data: uint8Array}).then((document: PDFJS.PDFDocument) => {
-          this.pages = Page.createPdfPageCollection(document);
-          this.set({isOpen: true});
-        });
-      };
+      if (file.type === 'application/pdf') {
+        // TODO (seikichi):
+        // - pdfjs の promise は fail がなさそう
+        // - pdfjs の workerSrc どうしよ (release ...)
+        PDFJS.workerSrc = 'assets/app/pdfjs/js/pdf.worker.js';
+        // PDFJS.disableWorker = true;
+        // PDFJS.disableAutoFetch = true;
+        // PDFJS.disableRange = false;
+
+        var fileReader = new FileReader();
+        fileReader.onload = (event: any) => {
+          console.log(event);
+          var buffer: ArrayBuffer = event.target.result;
+          var uint8Array = new Uint8Array(buffer);
+
+          PDFJS.getDocument({data: uint8Array}).then((document: PDFJS.PDFDocument) => {
+            this.pages = Page.createPdfPageCollection(document);
+            // TODO(seikichi): currentPage を保存 or 外部指定できるようにする
+            this.set({
+              isOpen: true,
+              currentPageNum: 1,
+              totalPageNum: document.numPages,
+              filename: file.name,
+            });
+            console.log('Yay:', document.numPages);
+          });
+        };
+        fileReader.readAsArrayBuffer(file);
+      } else {
+        logger.warn('At present, this viewer can only read pdf files');
+      }
     }
 
     close(): void {
@@ -134,9 +157,11 @@ module Book {
           });
         };
         imageElement.src = dataURL;
-      }).fail(() => {
-        image.set({status: Image.Status.error});
       });
+      // TODO(seikichi): fix
+      //   .fail(() => {
+      //   image.set({status: Image.Status.error});
+      // });
       return image;
     }
   }
