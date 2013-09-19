@@ -108,11 +108,17 @@ module.exports = function(grunt) {
     watch: {
       typescript: {
         files: '<%= typescript.base.src %>',
-        tasks: ['typescript']
+        tasks: ['typescript'],
+        options: {
+          livereload: true
+        }
       },
       templates: {
         files: 'app/templates/**/*.html',
-        tasks: ['handlebars']
+        tasks: ['handlebars'],
+        options: {
+          livereload: true
+        }
       }
     },
     // install
