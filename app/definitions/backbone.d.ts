@@ -23,7 +23,7 @@ declare module Backbone {
     }
 
     interface RouterOptions {
-        routes: any;
+      routes: {[route: string]: string;};
     }
 
     interface Silenceable {
@@ -39,7 +39,7 @@ declare module Backbone {
     }
 
     interface Parseable {
-        parse?: any;
+        parse?: boolean;
     }
 
     interface PersistenceOptions {
@@ -67,115 +67,128 @@ declare module Backbone {
     }
 
     class Events {
-        on(eventName: any, callback?: (...args: any[]) => void , context?: any): any;
-        off(eventName?: string, callback?: (...args: any[]) => void , context?: any): any;
-        trigger(eventName: string, ...args: any[]): any;
-        bind(eventName: string, callback: (...args: any[]) => void , context?: any): any;
-        unbind(eventName?: string, callback?: (...args: any[]) => void , context?: any): any;
+        on(eventName: string, callback?: (...args: any[]) => void , context?: any): Events;
+        off(eventName?: string, callback?: (...args: any[]) => void , context?: any): Events;
+        trigger(eventName: string, ...args: any[]): Events;
+        bind(eventName: string, callback: (...args: any[]) => void , context?: any): Events;
+        unbind(eventName?: string, callback?: (...args: any[]) => void , context?: any): Events;
 
-        once(events: string, callback: (...args: any[]) => void , context?: any): any;
-        listenTo(object: any, events: string, callback: (...args: any[]) => void ): any;
-        listenToOnce(object: any, events: string, callback: (...args: any[]) => void ): any;
-        stopListening(object?: any, events?: string, callback?: (...args: any[]) => void ): any;
+        once(events: string, callback: (...args: any[]) => void , context?: any): Events;
+        listenTo(object: any, events: string, callback: (...args: any[]) => void ): Events;
+        listenToOnce(object: any, events: string, callback: (...args: any[]) => void ): Events;
+        stopListening(object?: any, events?: string, callback?: (...args: any[]) => void ): Events;
     }
 
     class ModelBase extends Events {
-        url: any;
-        parse(response: any, options?: any): any;
-        toJSON(options?: any): any;
-        sync(...arg: any[]): JQueryXHR;
+        // url: any;
+        // parse(response: any, options?: any): any;
+        // toJSON(options?: any): any;
+        // sync(...arg: any[]): JQueryXHR;
     }
 
-    interface OptionalDefaults {
-        defaults?(): any;
-    }
+    // interface OptionalDefaults<_Attributes> {
+    //     defaults?(): _Attributes;
+    // }
 
-    class Model extends ModelBase implements OptionalDefaults {
+    class Model<_Attributes> {
 
         static extend(properties: any, classProperties?: any): any; // do not use, prefer TypeScript's extend functionality
 
-        attributes: any;
-        changed: any[];
-        cid: string;
-        id: any;
-        idAttribute: string;
-        validationError: any;
-        urlRoot: any;
+        url(): string;
+        parse(response: any, options?: any): any;
+        toJSON(): _Attributes;
+        sync(...arg: any[]): JQueryXHR;
 
-        constructor(attributes?: any, options?: any);
-        initialize(attributes?: any): any;
+        defaults(): _Attributes;
+
+        // attributes: _Attributes;
+        // changed: _Attributes
+        // cid: string;
+        // id: any;
+        idAttribute: string;
+        validationError: string;
+        urlRoot(): string;
+
+        constructor(attributes?: _Attributes, options?: any);
+        initialize(attributes?: _Attributes): void;
 
         fetch(options?: ModelFetchOptions): JQueryXHR;
 
         get(attributeName: string): any;
-        set(attributeName: string, value: any, options?: ModelSetOptions): any;
-        set(obj: any, options?: ModelSetOptions): any;
+        set(attributeName: string, value: any, options?: ModelSetOptions): Model<_Attributes>;
+        set(obj: _Attributes, options?: ModelSetOptions): Model<_Attributes>;
 
-        change(): any;
-        changedAttributes(attributes?: any): any[];
-        clear(options?: Silenceable): any;
-        clone(): Model;
-        destroy(options?: ModelDestroyOptions): any;
-        escape(attribute: string): any;
+        // change(): any;
+        changedAttributes(attributes?: _Attributes): any;
+        clear(options?: Silenceable): Model<_Attributes>;
+        clone(): Model<_Attributes>;
+        destroy(options?: ModelDestroyOptions): Model<_Attributes>;
+        escape(attribute: string): string;
         has(attribute: string): boolean;
         hasChanged(attribute?: string): boolean;
         isNew(): boolean;
         isValid(): boolean;
-        previous(attribute: string): any;
-        previousAttributes(): any[];
-        save(attributes?: any, options?: ModelSaveOptions): any;
-        unset(attribute: string, options?: Silenceable): any;
-        validate(attributes: any, options?: any): any;
+        previous(attribute: string): _Attributes;
+        previousAttributes(): _Attributes;
+        save(attributes?: _Attributes, options?: ModelSaveOptions): JQueryXHR;
+        unset(attribute: string, options?: Silenceable): Model<_Attributes>;
+        validate(attributes: _Attributes, options?: any): string;
 
-        _validate(attrs: any, options: any): boolean;
+        // _validate(attrs: any, options: any): boolean;
 
         // mixins from underscore
 
         keys(): string[];
         values(): any[];
-        pairs(): any[];
-        invert(): any;
+        pairs(): any[][];
+        invert(): {[value: string]: string;};
         pick(keys: string[]): any;
         pick(...keys: string[]): any;
         omit(keys: string[]): any;
         omit(...keys: string[]): any;
     }
 
-    class Collection<_Model extends Model> extends ModelBase {
+    class Collection<_Model extends Model<_Attributes>, _Attributes> {
 
         static extend(properties: any, classProperties?: any): any; // do not use, prefer TypeScript's extend functionality
 
-        model: any;
+        url(): string;
+        parse(response: any, options?: any): any;
+        toJSON(): _Attributes[];
+        sync(...arg: any[]): JQueryXHR;
+
+        model: { new(attributes?: _Attributes, options?: any): _Model; };
         models: _Model[];
-        collection: Model;
+        // collection: Model;
         length: number;
 
-        constructor(models?: any, options?: any);
+        constructor(models?: _Attributes[], options?: any);
+        constructor(models?: _Model[], options?: any);
 
         fetch(options?: CollectionFetchOptions): JQueryXHR;
 
-        comparator(element: _Model): any;
-        comparator(compare: _Model, to?: _Model): any;
+        // comparator(element: _Model): any;
+        comparator(compare: _Model, to?: _Model): number;
 
-        add(model: _Model, options?: AddOptions): any;
-        add(models: _Model[], options?: AddOptions): any;
+        add(model: _Model, options?: AddOptions): Collection<_Model, _Attributes>;
+        add(models: _Model[], options?: AddOptions): Collection<_Model, _Attributes>;
         at(index: number): _Model;
         get(id: any): _Model;
-        create(attributes: any, options?: ModelSaveOptions): _Model;
+        create(attributes: _Attributes, options?: ModelSaveOptions): _Model;
         pluck(attribute: string): any[];
-        push(model: _Model, options?: AddOptions): any;
-        pop(options?: Silenceable): any;
-        remove(model: _Model, options?: Silenceable): any;
-        remove(models: _Model[], options?: Silenceable): any;
-        reset(models?: _Model[], options?: Silenceable): any;
-        shift(options?: Silenceable): any;
-        sort(options?: Silenceable): any;
-        unshift(model: _Model, options?: AddOptions): any;
-        where(properies: any): _Model[];
+        push(model: _Model, options?: AddOptions): _Model;
+        pop(options?: Silenceable): _Model;
+        remove(model: _Model, options?: Silenceable): Collection<_Model, _Attributes>;
+        remove(models: _Model[], options?: Silenceable): Collection<_Model, _Attributes>;
+        reset(models?: _Model[], options?: Silenceable): Collection<_Model, _Attributes>;
+        shift(options?: Silenceable): _Model;
+        sort(options?: Silenceable): Collection<_Model, _Attributes>;
+        unshift(model: _Model, options?: AddOptions): _Model;
+        where(properies: _Attributes): _Model[];
 
-        _prepareModel(attrs?: any, options?: any): any;
-        _removeReference(model: _Model): void;
-        _onModelEvent(event: string, model: _Model, collection: Collection<Model>, options: any): void;
+        // _prepareModel(attrs?: any, options?: any): any;
+        // _removeReference(model: _Model): void;
+        // _onModelEvent(event: string, model: _Model, collection: Collection<Model>, options: any): void;
 
         // mixins from underscore
 
@@ -279,8 +292,8 @@ declare module Backbone {
     }
 
     interface ViewOptions {
-        model?: Backbone.Model;
-        collection?: Backbone.Collection<Model>;
+        model?: Backbone.Model<any>;
+        collection?: Backbone.Collection<Model<{}>, {}>;
         el?: any;
         $el?: JQuery;
         id?: string;
@@ -300,8 +313,8 @@ declare module Backbone {
         constructor(options?: ViewOptions);
 
         $(selector: string): JQuery;
-        model: Model;
-        collection: Collection<Model>;
+        model: Model<{}>;
+        collection: Collection<Model<{}>, {}>;
         make(tagName: string, attrs?: any, opts?: any): View;
         setElement(element: HTMLElement, delegate?: boolean): any;
         setElement(element: JQuery, delegate?: boolean): any;
@@ -314,18 +327,18 @@ declare module Backbone {
         el: any;
         $el: JQuery;
         attributes: any;
-        $(selector: any): JQuery;
+        // $(selector: any): JQuery;
         render(): View;
         remove(): View;
         make(tagName: any, attributes?: any, content?: any): any;
         delegateEvents(events?: any): any;
         undelegateEvents(): any;
 
-        _ensureElement(): void;
+        // _ensureElement(): void;
     }
 
     // SYNC
-    function sync(method: any, model: any, options?: JQueryAjaxSettings): any;
+    function sync(method: string, model: any, options?: JQueryAjaxSettings): any;
     var emulateHTTP: boolean;
     var emulateJSONBackbone: boolean;
 
