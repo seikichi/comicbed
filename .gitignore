@@ -1,9 +1,12 @@
 *~
 \#*
+
 dist/
 node_modules/
 bower_components/
-*.js
+
+app/*.js
+app/*/*.js
 !Gruntfile.js
 
 Thumb.db
