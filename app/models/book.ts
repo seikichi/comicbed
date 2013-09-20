@@ -4,8 +4,11 @@ import PDFJS = require('pdfjs');
 
 import Page = require('models/page');
 import logger = require('utils/logger');
+import path = require('utils/path');
 
 var HTMLImage = Image;
+
+export = Book;
 
 module Book {
   // public
@@ -27,14 +30,14 @@ module Book {
 
     close(): void;
     openFile(file: File): void;
+    openURL(url: string): void;
+
     // // TODO(seikichi): implements
-    // openFile() {}
-    // openURL() {}
     // goTo(pageNum: number) {}
     // toPrevPage() {}
     // goNextPage() {}
 
-    on(eventName: string, callback?: (...args: any[]) => void , context?: any): any;
+    on(eventName: string, callback?: () => void): void;
   }
   export function create(): ModelInterface {
     return new BookModel();
@@ -58,7 +61,7 @@ module Book {
       // methods
       toJSON(): Attributes;
 
-      on(eventName: string, callback?: (...args: any[]) => void , context?: any): any;
+      on(eventName: string, callback: () => void): void;
     }
   }
 
@@ -98,8 +101,30 @@ module Book {
       super();
     }
 
+    openURL(url: string) : void {
+      if (this.isOpen()) {
+        this.close();
+      }
+      if (path.extname(url) === 'pdf') {
+        PDFJS.getDocument({url: url}).then((document: PDFJS.PDFDocumentProxy) => {
+          this.pages = Page.createPdfPageCollection(document);
+          this.set({
+            isOpen: true,
+            currentPageNum: 1,
+            totalPageNum: document.numPages,
+            filename: path.basename(url),
+          });
+        });
+      } else {
+        logger.warn('At present, this viewer can only read pdf files');
+      }
+    }
+
     openFile(file: File): void {
       // TODO(seikichi): openFile を短時間に連打したら面倒なことになりそうなのどうにかする
+      if (this.isOpen()) {
+        this.close();
+      }
       if (file.type === 'application/pdf') {
         var fileReader = new FileReader();
         fileReader.onload = (event: any) => {
@@ -116,7 +141,6 @@ module Book {
               totalPageNum: document.numPages,
               filename: file.name,
             });
-            console.log('Yay:', document.numPages);
           });
         };
         fileReader.readAsArrayBuffer(file);
@@ -166,4 +190,4 @@ module Book {
   }
 }
 
-export = Book;
+
