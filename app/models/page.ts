@@ -62,7 +62,7 @@ module Page {
       var originalPageNum = page.get('originalPageNum');
       var canvas = document.createElement('canvas');
 
-      this.document.getPage(originalPageNum).then((page: PDFJS.PDFPageProxy) => {
+      this.document.getPage(-1 *originalPageNum).then((page: PDFJS.PDFPageProxy) => {
         // prepare canvas using PDF page dimensions
         var scale = 1.0;
         var viewport = page.getViewport(scale);
@@ -80,10 +80,13 @@ module Page {
         var dataURL: string = canvas.toDataURL();
         deferred.resolve(dataURL);
       });
-      // TODO (seikichi): fix me!
-      //   .fail(() => {
-      //   deferred.reject();
-      // });
+
+      // set timeout
+      var timeout = 20 * 1000;
+      setTimeout(() => {
+        console.log(deferred.state());
+        deferred.reject();
+      }, timeout);
       return deferred.promise();
     }
   }

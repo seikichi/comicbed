@@ -1,3 +1,4 @@
+import $ = require('jquery');
 import Backbone = require('backbone');
 import PDFJS = require('pdfjs');
 
@@ -147,6 +148,7 @@ module Book {
         return image;
       }
       this.pages.getPageImageDataURL(pageNum).then((dataURL: string) => {
+        var deferred = $.Deferred();
         var imageElement = new HTMLImage();
         imageElement.onload = () => {
           image.set({
@@ -155,13 +157,16 @@ module Book {
             height: imageElement.height,
             status: Image.Status.success,
           });
+          deferred.resolve();
         };
+        imageElement.onerror = () => {
+          deferred.reject();
+        }
         imageElement.src = dataURL;
+        return deferred.promise();
+      }).fail(() => {
+        image.set({status: Image.Status.error});
       });
-      // TODO(seikichi): fix
-      //   .fail(() => {
-      //   image.set({status: Image.Status.error});
-      // });
       return image;
     }
   }
