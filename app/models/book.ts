@@ -27,12 +27,14 @@ module Book {
 
     close(): void;
     openFile(file: File): void;
-    // // TODO(seikichi)
+    // // TODO(seikichi): implements
     // openFile() {}
     // openURL() {}
     // goTo(pageNum: number) {}
     // toPrevPage() {}
     // goNextPage() {}
+
+    on(eventName: string, callback?: (...args: any[]) => void , context?: any): any;
   }
   export function create(): ModelInterface {
     return new BookModel();
@@ -55,6 +57,8 @@ module Book {
       height(): number;
       // methods
       toJSON(): Attributes;
+
+      on(eventName: string, callback?: (...args: any[]) => void , context?: any): any;
     }
   }
 
@@ -95,18 +99,8 @@ module Book {
     }
 
     openFile(file: File): void {
-      // TODO(seikichi):
-      // - openFile を短時間に連打したら面倒なことになりそう
-      // - 「今開いてる処理」は常に1つになるように deferred か何かで頑張る？
+      // TODO(seikichi): openFile を短時間に連打したら面倒なことになりそうなのどうにかする
       if (file.type === 'application/pdf') {
-        // TODO (seikichi):
-        // - pdfjs の promise は fail がなさそう
-        // - pdfjs の workerSrc どうしよ (release ...)
-        PDFJS.workerSrc = 'assets/app/pdfjs/js/pdf.worker.js';
-        // PDFJS.disableWorker = true;
-        // PDFJS.disableAutoFetch = true;
-        // PDFJS.disableRange = false;
-
         var fileReader = new FileReader();
         fileReader.onload = (event: any) => {
           console.log(event);
@@ -115,7 +109,7 @@ module Book {
 
           PDFJS.getDocument({data: uint8Array}).then((document: PDFJS.PDFDocumentProxy) => {
             this.pages = Page.createPdfPageCollection(document);
-            // TODO(seikichi): currentPage を保存 or 外部指定できるようにする
+            // TODO(seikichi): そのうち currentPage を保存 (localStorage?) or 外部指定できるようにする
             this.set({
               isOpen: true,
               currentPageNum: 1,

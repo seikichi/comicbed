@@ -89,9 +89,8 @@ module.exports = function(grunt) {
     requirejs: {
       compile: {
         options: {
-          mainConfigFile: "app/main.js",
-          out: "dist/app/main.js",
-          name: "main",
+          mainConfigFile: "app/config.js",
+          out: "dist/app/config.js",
           wrap: false
         }
       }

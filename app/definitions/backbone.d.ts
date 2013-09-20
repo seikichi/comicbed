@@ -90,7 +90,7 @@ declare module Backbone {
     //     defaults?(): _Attributes;
     // }
 
-    class Model<_Attributes> {
+    class Model<_Attributes> extends Events {
 
         static extend(properties: any, classProperties?: any): any; // do not use, prefer TypeScript's extend functionality
 
@@ -148,7 +148,7 @@ declare module Backbone {
         omit(...keys: string[]): any;
     }
 
-    class Collection<_Model extends Model<_Attributes>, _Attributes> {
+  class Collection<_Model extends Model<_Attributes>, _Attributes> {
 
         static extend(properties: any, classProperties?: any): any; // do not use, prefer TypeScript's extend functionality
 
