@@ -6,6 +6,7 @@ require.config({
     text: '../assets/vendor/text/js/text',
     handlebars: '../assets/vendor/handlebars/js/handlebars',
     log4javascript: '../assets/vendor/log4javascript/js/log4javascript',
+    sprintf: '../assets/vendor/sprintf/js/sprintf',
 
     pdfjs: '../assets/app/pdfjs/js/pdf',
   },
@@ -26,6 +27,9 @@ require.config({
     log4javascript: {
       exports: 'log4javascript'
     },
+    sprintf: {
+      exports: 'sprintf'
+    }
   }
 });
 

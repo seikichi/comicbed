@@ -18,7 +18,7 @@ declare module PDFJS {
     isRejected: boolean;
     resolve(value: T): void;
     reject(reason: string): void;
-    then<U>(onResolve: (value :T) => U, onReject?: (reason: string) => void): Promise<U>;
+    then<U>(onResolve: (value :T) => U, onReject?: (reason: any) => U): Promise<U>;
   }
 
   interface RenderTask extends Promise<void> {

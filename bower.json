@@ -14,7 +14,8 @@
     "text": "*",
     "requirejs": "*",
     "handlebars": "*",
-    "log4javascript": "*"
+    "log4javascript": "*",
+    "sprintf": "*"
   },
   "exportsOverride": {
     "underscore": {
@@ -37,6 +38,9 @@
     },
     "log4javascript": {
       "js": "log4javascript.js"
+    },
+    "sprintf": {
+      "js": "src/sprintf.js"
     }
   }
 }

@@ -2,6 +2,7 @@ import $ = require('jquery');
 import _ = require('underscore');
 import Backbone = require('backbone');
 import PDFJS = require('pdfjs');
+import sprintf = require('sprintf');
 
 module Page {
   // public
@@ -38,9 +39,13 @@ module Page {
     constructor(document: PDFJS.PDFDocumentProxy) {
       this.document = document;
       this.model = PdfPageModel;
+      // cunstruct a format string for sprintf function
+      var numOfDigits = 1 + Math.floor(Math.log(this.document.numPages) / Math.log(10));
+      var pageNameformat = sprintf('page-%%0%dd', numOfDigits);
+      // create models
       var models = _.map(_.range(this.document.numPages), (num): PdfPageModel => {
         return new PdfPageModel({
-          name: 'no page title', // TODO(seikichi): fix me!
+          name: sprintf(pageNameformat, num + 1),
           originalPageNum: num + 1
         });
       });
