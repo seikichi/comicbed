@@ -112,7 +112,7 @@ module Book {
           var buffer: ArrayBuffer = event.target.result;
           var uint8Array = new Uint8Array(buffer);
 
-          PDFJS.getDocument({data: uint8Array}).then((document: PDFJS.PDFDocument) => {
+          PDFJS.getDocument({data: uint8Array}).then((document: PDFJS.PDFDocumentProxy) => {
             this.pages = Page.createPdfPageCollection(document);
             // TODO(seikichi): currentPage を保存 or 外部指定できるようにする
             this.set({

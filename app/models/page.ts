@@ -13,7 +13,7 @@ module Page {
     name?: string;
     originalPageNum?: number;
   }
-  export function createPdfPageCollection(document: PDFJS.PDFDocument): CollectionInterface {
+  export function createPdfPageCollection(document: PDFJS.PDFDocumentProxy): CollectionInterface {
     return new PdfPageCollection(document);
   }
 
@@ -33,9 +33,9 @@ module Page {
   }
 
   class PdfPageCollection extends Backbone.Collection<PdfPageModel, Attributes> implements CollectionInterface {
-    private document: PDFJS.PDFDocument;
+    private document: PDFJS.PDFDocumentProxy;
 
-    constructor(document: PDFJS.PDFDocument) {
+    constructor(document: PDFJS.PDFDocumentProxy) {
       this.document = document;
       this.model = PdfPageModel;
       var models = _.map(_.range(this.document.numPages), (num): PdfPageModel => {

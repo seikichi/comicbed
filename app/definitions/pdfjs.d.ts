@@ -13,12 +13,23 @@ declare module PDFJS {
     password?: string;
   }
 
-  function getDocument(options?: GetDocumentOptions): JQueryPromise<PDFDocument>;
+  interface Promise<T> {
+    isResolved: boolean;
+    isRejected: boolean;
+    resolve(value: T): void;
+    reject(reason: string): void;
+    then<U>(onResolve: (value :T) => U, onReject?: (reason: string) => void): Promise<U>;
+  }
 
+  interface RenderTask extends Promise<void> {
+    cancel(): void;
+  }
 
-  interface PDFDocument {
+  function getDocument(options?: GetDocumentOptions): Promise<PDFDocumentProxy>;
+
+  interface PDFDocumentProxy {
     numPages: number;
-    getPage(pageNum: number): JQueryPromise<PDFPageProxy>;
+    getPage(pageNum: number): Promise<PDFPageProxy>;
   }
 
   interface RenderContext {
@@ -32,8 +43,9 @@ declare module PDFJS {
   }
 
   interface PDFPageProxy {
+    pageNumber: number;
     getViewport(scale: number, rotate?: number): PageViewport;
-    render(context: RenderContext): JQueryPromise<void>;
+    render(context: RenderContext): RenderContext;
   }
 }
 
