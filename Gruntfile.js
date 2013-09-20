@@ -91,6 +91,7 @@ module.exports = function(grunt) {
         options: {
           mainConfigFile: "app/config.js",
           out: "dist/app/config.js",
+          name: 'config',
           wrap: false
         }
       }

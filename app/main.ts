@@ -4,15 +4,13 @@ import Book = require('models/book');
 import logger = require('utils/logger');
 
 function main() {
-  $(() => {
-    // setting PDFJS variables
-    // TODO (seikichi): pdfjs の workerSrc どうしよ (in release build ...)
-    PDFJS.workerSrc = 'assets/app/pdfjs/js/pdf.worker.js';
-    // PDFJS.disableWorker = true;
-    PDFJS.disableAutoFetch = true;
-    PDFJS.disableRange = false;
+  // setting PDFJS variables
+  PDFJS.workerSrc = 'assets/app/pdfjs/js/pdf.worker.js';
+  // PDFJS.disableWorker = true;
+  PDFJS.disableAutoFetch = true;
+  PDFJS.disableRange = false;
 
-    // logger.info('Hello, world!');
+  $(() => {
     $('#drop-zone').on({
       dragover: (jqEvent: any) => {
         var event = <DragEvent>jqEvent.originalEvent;
