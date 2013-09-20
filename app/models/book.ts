@@ -32,10 +32,9 @@ module Book {
     openFile(file: File): void;
     openURL(url: string): void;
 
-    // // TODO(seikichi): implements
-    // goTo(pageNum: number) {}
-    // toPrevPage() {}
-    // goNextPage() {}
+    goTo(pageNum: number): void;
+    goPrevPage(): void;
+    goNextPage(): void;
 
     on(eventName: string, callback?: () => void): void;
   }
@@ -147,6 +146,23 @@ module Book {
       } else {
         logger.warn('At present, this viewer can only read pdf files');
       }
+    }
+
+    goTo(pageNum: number): void {
+      if (pageNum <= 0 || this.totalPageNum() < pageNum) { return; }
+      this.set({currentPageNum: pageNum});
+    }
+
+    goPrevPage(): void {
+      var newPageNum = this.currentPageNum() - 1;
+      if (newPageNum <= 0 || this.totalPageNum() < newPageNum) { return; }
+      this.set({currentPageNum: newPageNum});
+    }
+
+    goNextPage(): void {
+      var newPageNum = this.currentPageNum() + 1;
+      if (newPageNum <= 0 || this.totalPageNum() < newPageNum) { return; }
+      this.set({currentPageNum: newPageNum});
     }
 
     close(): void {
