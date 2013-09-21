@@ -1,7 +1,19 @@
-#drop-zone {
-    border: 2px dashed rgb(187, 187, 187);
-    border-radius: 5px 5px 5px 5px;
-    padding: 25px;
-    text-align: center;
-    color: rgb(187, 187, 187);
+html,
+body {
+    width: 100%;
+    height:100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+#flowerpot {
+    width: 100%;
+    height: 100%;
+}
+
+#image-viewer {
+    width: 100%;
+    height: 100%;
+    background-color: orange;
 }

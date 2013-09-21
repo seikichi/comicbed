@@ -15,6 +15,7 @@ declare module "storage" {
 declare module "templates" {
   var JST: {
     flowerpot: (data: {[key:string]: any;}) => string;
+    imageview: (data: {[key:string]: any;}) => string;
   };
   export = JST;
 }

@@ -10,7 +10,7 @@ module Setting {
   }
   export enum ViewMode { OnePage, TwoPage, AutoSpread, }
   export enum PageDirection { LeftToRight, RightToLeft, }
-  function create(options: {[key:string]:string;} = {}): ModelInterface {
+  export function create(options: {[key:string]:string;} = {}): ModelInterface {
     return new SettingModel();
   }
 
