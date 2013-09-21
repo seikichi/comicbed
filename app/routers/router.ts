@@ -1,16 +1,21 @@
+import _ = require('underscore');
 import Backbone = require('backbone');
+import querystring = require('utils/querystring');
 
-export class FlowerpotRouter extends Backbone.Router {
+class FlowerpotRouter extends Backbone.Router {
   private routes: {[route:string]: string};
 
   constructor() {
     this.routes = {
-      '': '',
-      '?*queryString': '',
+      '(?*querystring)': 'index',
     };
     super();
   }
+
+  private index(query: string) {
+    if (_.isEmpty(query)) { query = ''; }
+    console.log('querystring:', querystring.parse(query));
+  }
 }
 
-
-
+export = FlowerpotRouter;
