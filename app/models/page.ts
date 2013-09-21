@@ -64,7 +64,7 @@ module Page {
 
       this.document.getPage(originalPageNum).then((page: PDFJS.PDFPageProxy) => {
         // prepare canvas using PDF page dimensions
-        var scale = 1.0;
+        var scale = 2.0;  // TODO(seikichi): fix me!
         var viewport = page.getViewport(scale);
         var context = canvas.getContext('2d');
         canvas.height = viewport.height;

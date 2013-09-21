@@ -37,7 +37,7 @@ class FlowerpotView extends CompositeView {
       setting: this.setting,
     }));
 
-    this.listenTo(this.book, 'change', this.render);
+    this.listenTo(this.book, 'change:status', this.render);
   }
 
   presenter(): string {
