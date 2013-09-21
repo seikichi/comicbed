@@ -6,12 +6,21 @@ import Setting = require('models/setting');
 
 export = ImageView;
 
+enum Status {
+  Loading,
+  Error,
+  ShowOnePage,
+  ShowTwoPages,
+}
+
 class ImageView extends BaseView {
   private events: {[event:string]:string;};
 
   private template: (data: {[key:string]: any;}) => string;
   private book: Book.ModelInterface;
   private setting: Setting.ModelInterface;
+
+  private status: Status;
 
   // models to render
   private currentPageImage: Book.Image.ModelInterface;
@@ -25,29 +34,86 @@ class ImageView extends BaseView {
 
     this.currentPageImage = null;
     this.nextPageImage = null;
+    this.status = Status.Loading;
 
     super({});
   }
 
   initialize() {
-    // TODO (seikichi): fix
-    if (this.book.isOpen()) {
-      var currentPageNum = this.book.currentPageNum();
-      this.currentPageImage = this.book.getPageImage(currentPageNum);
+    this.preparePageImages();
+  }
+
+  preparePageImages(): void {
+    // wait until page is opened
+    if (!this.book.isOpen()) {
+      this.listenToOnce(this.book, 'change:isOpen', this.preparePageImages);
+    }
+    // load first page
+    var currentPageNum = this.book.currentPageNum();
+    this.currentPageImage = this.book.getPageImage(currentPageNum);
+    this.processCurrentPageImage();
+  }
+
+  processCurrentPageImage() {
+    if (this.currentPageImage.status() === Book.Image.Status.error) {
+      // TODO(seikichi): do error handling
+      return;
+    } else if (this.currentPageImage.status() === Book.Image.Status.loading) {
+      this.listenToOnce(this.currentPageImage, 'change', this.processCurrentPageImage);
+      return;
+    }
+
+    if (this.setting.viewMode() === Setting.ViewMode.OnePage
+        || (this.setting.viewMode() === Setting.ViewMode.AutoSpread
+            && this.setting.isSpreadPage(this.currentPageImage))
+        || (this.book.currentPageNum() + 1 > this.book.totalPageNum())) {
+      this.status = Status.ShowOnePage;
       this.listenTo(this.currentPageImage, 'change', this.render);
+      this.render();
     } else {
-      this.listenToOnce(this.book, 'change:isOpen', () => {
-        var currentPageNum = this.book.currentPageNum();
-        this.currentPageImage = this.book.getPageImage(currentPageNum);
-        this.listenTo(this.currentPageImage, 'change', this.render);
-      });
+      this.nextPageImage = this.book.getPageImage(this.book.currentPageNum() + 1);
+      this.processNextPageImage();
+    }
+  }
+
+  processNextPageImage() {
+    if (this.nextPageImage.status() === Book.Image.Status.error) {
+      // TODO(seikichi): do error handling
+      return;
+    } else if (this.nextPageImage.status() === Book.Image.Status.loading) {
+      this.listenToOnce(this.nextPageImage, 'change', this.processNextPageImage);
+      return;
+    }
+
+    if (this.setting.viewMode() === Setting.ViewMode.TwoPages
+        || (this.setting.viewMode() === Setting.ViewMode.AutoSpread
+            && !this.setting.isSpreadPage(this.nextPageImage))) {
+      this.status = Status.ShowTwoPages;
+      this.listenTo(this.currentPageImage, 'change', this.render);
+      this.listenTo(this.nextPageImage, 'change', this.render);
+      this.render();
+    } else if (this.setting.viewMode() === Setting.ViewMode.AutoSpread) {
+      this.status = Status.ShowOnePage;
+      this.listenTo(this.currentPageImage, 'change', this.render);
+      this.render();
+    } else {
+      console.log('WAAAAAAAAAA');  // TODO(seikichi):
     }
   }
 
   presenter(): string {
-    var data: {[key:string]:any;} = {};
+    var data: {[key:string]:any;} = {
+      loading: this.status === Status.Loading,
+      error: this.status === Status.Error,
+      onepage: this.status === Status.ShowOnePage,
+      twopages: this.status === Status.ShowTwoPages,
+    };
+
     if (!_.isNull(this.currentPageImage)) {
       data['currentPageImage'] = this.currentPageImage.toJSON();
+    }
+    if (!_.isNull(this.nextPageImage)) {
+      data['nextPageImage'] = this.nextPageImage.toJSON();
     }
     return this.template(data);
   }

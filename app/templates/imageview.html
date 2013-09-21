@@ -1,2 +1,6 @@
+{{#if onepage}}
 <img src="{{currentPageImage.dataURL}}" />
-
+{{/if}}
+{{#if twopages}}
+<img src="{{currentPageImage.dataURL}}"/><img src="{{nextPageImage.dataURL}}"/>
+{{/if}}
