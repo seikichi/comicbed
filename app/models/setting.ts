@@ -28,7 +28,7 @@ module Setting {
   class SettingModel extends Backbone.Model<Attribuets> implements ModelInterface {
     defaults(): Attribuets {
       return {
-        viewMode: ViewMode.TwoPages,
+        viewMode: ViewMode.OnePage,
         pageDirection: PageDirection.RightToLeft,
       };
     }

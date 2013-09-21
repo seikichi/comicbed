@@ -10,10 +10,16 @@ body {
 #flowerpot {
     width: 100%;
     height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
 }
 
 #image-viewer {
     width: 100%;
     height: 100%;
-    background-color: orange;
+    background-color: rgb(100, 100, 100);
+    margin: 0;
+    padding: 0;
+    border: 0;
 }

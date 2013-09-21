@@ -26,6 +26,7 @@ class ImageView extends BaseView {
   private currentPageImage: Book.Image.ModelInterface;
   private nextPageImage: Book.Image.ModelInterface;
 
+
   constructor(options: ImageView.Options) {
     this.events = {};
     this.template = options.template;
@@ -41,9 +42,37 @@ class ImageView extends BaseView {
 
   initialize() {
     this.preparePageImages();
+    // TODO(seikichi): resize を this.events に上手く設定したいのだけど...
+    $(window).resize(() => { this.fit() });
   }
 
-  preparePageImages(): void {
+  private fit() {
+    if (this.status === Status.ShowOnePage) {
+      this.fitOnePage();
+    } else if (this.status === Status.ShowTwoPages) {
+      this.fitTwoPage();
+    }
+  }
+
+  private fitOnePage() {
+    var $img = this.$('#page');
+    var width = this.$el.width();
+    var height = this.$el.height();
+    var imageWidth = this.currentPageImage.width();
+    var imageHeight = this.currentPageImage.height();
+
+    var scale = Math.min(width / imageWidth, height / imageHeight);
+    $img.width(scale * imageWidth).height(scale * imageHeight).css({
+      position: 'relative',
+      top: (height - $img.height()) / 2.0,
+      left: (width - $img.width()) / 2.0,
+    });
+  }
+
+  private fitTwoPage() {
+  }
+
+  private preparePageImages(): void {
     // wait until page is opened
     if (!this.book.isOpen()) {
       this.listenToOnce(this.book, 'change:isOpen', this.preparePageImages);
@@ -54,7 +83,7 @@ class ImageView extends BaseView {
     this.processCurrentPageImage();
   }
 
-  processCurrentPageImage() {
+  private processCurrentPageImage() {
     if (this.currentPageImage.status() === Book.Image.Status.error) {
       // TODO(seikichi): do error handling
       return;
@@ -76,7 +105,7 @@ class ImageView extends BaseView {
     }
   }
 
-  processNextPageImage() {
+  private processNextPageImage() {
     if (this.nextPageImage.status() === Book.Image.Status.error) {
       // TODO(seikichi): do error handling
       return;
@@ -116,6 +145,12 @@ class ImageView extends BaseView {
       data['nextPageImage'] = this.nextPageImage.toJSON();
     }
     return this.template(data);
+  }
+
+  render() {
+    super.render();
+    this.fit();
+    return this;
   }
 }
 
