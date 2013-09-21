@@ -14,13 +14,13 @@ module Setting {
   export function create(options: {[key:string]:string;} = {}): ModelInterface {
     var attributes: Attributes = {};
     if ('viewMode' in options) {
-      attributes['viewMode'] = ViewMode[options['viewMode']];
+      attributes.viewMode = ViewMode[options['viewMode']];
     }
     if ('pageDirection' in options) {
-      attributes['pageDirection'] = ViewMode[options['pageDirection']];
+      attributes.pageDirection = PageDirection[options['pageDirection']];
     }
     if ('page' in options) {
-      attributes['page'] = parseInt(options['page'], 10);
+      attributes.page = parseInt(options['page'], 10);
     }
     return new SettingModel(attributes);
   }

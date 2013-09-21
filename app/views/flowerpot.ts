@@ -23,9 +23,7 @@ class FlowerpotView extends CompositeView {
     this.setting = Setting.create(options);
     this.book = Book.create(this.setting);
     this.queryOptions = options;
-
-    super({el: '#flowerpot'});
-    this.listenTo(this.book, 'change', this.render);
+    super();
   }
 
   initialize() {
@@ -38,6 +36,8 @@ class FlowerpotView extends CompositeView {
       book: this.book,
       setting: this.setting,
     }));
+
+    this.listenTo(this.book, 'change', this.render);
   }
 
   presenter(): string {
