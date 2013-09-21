@@ -14,11 +14,47 @@ module Page {
     name?: string;
     originalPageNum?: number;
   }
-  export function createPdfPageCollection(document: PDFJS.PDFDocumentProxy): CollectionInterface {
+  export function createPdfPageCollection(document: PDFJS.PDFDocumentProxy)
+  : CollectionInterface {
     return new PdfPageCollection(document);
   }
 
   // private
+  class ImageCacheModel extends Backbone.Model<Attributes> implements ModelInterface {
+    defaults() {
+      return {
+        name: 'no page title',
+        originalPageNum: 0,
+        dataURL: '',
+      };
+    }
+    constructor(attributes?: Attributes, options?: any) { super(attributes, options); }
+    get(attributeName: string): any;
+    get(attributeName: 'name'): string;
+    get(attributeName: 'originalPageNum'): number;
+    get(attributeName: 'dataURL'): string;
+    get(attributeName: string): any { return super.get(attributeName); }
+  }
+
+  class ImageCacheCollection extends
+  Backbone.Collection<ImageCacheModel, Attributes> implements CollectionInterface {
+    private _pages: CollectionInterface;
+    private _maxCacheSize: number;
+
+    constructor(pages: CollectionInterface) {
+      this.model = ImageCacheModel;
+      this._pages = pages;
+      this._maxCacheSize = 10;
+
+      super([], {});
+    }
+
+    getPageImageDataURL(pageNum: number): JQueryPromise<string> {
+      var deferred = $.Deferred<string>();
+      return deferred.resolve('').promise();
+    }
+  }
+
   class PdfPageModel extends Backbone.Model<Attributes> implements ModelInterface {
     defaults() {
       return {
