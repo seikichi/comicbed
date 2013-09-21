@@ -16,16 +16,23 @@ class FlowerpotView extends CompositeView {
   private template: (data: {[key:string]: any;}) => string;
   private book: Book.ModelInterface;
   private setting: Setting.ModelInterface;
+  private queryOptions: {[field:string]:string;};
 
   constructor(options: {[field:string]:string;}) {
     this.template = templates.flowerpot;
     this.book = Book.create();
     this.setting = Setting.create();
+    this.queryOptions = options;
 
     super({el: '#flowerpot'});
+    this.listenTo(this.book, 'change', this.render);
   }
 
   initialize() {
+    if ('url' in this.queryOptions) {
+      this.book.openURL(this.queryOptions['url']);
+    }
+
     this.assign('#image-viewer', new ImageView({
       template: templates.imageview,
       book: this.book,
