@@ -1,42 +1,50 @@
 import Backbone = require('backbone');
 
-import Book = require('models/book');
-
 export = Setting;
 
 module Setting {
   // public
   export interface ModelInterface {
-    // getter
     viewMode(): ViewMode;
     pageDirection(): PageDirection;
-
-    isSpreadPage(image: Book.Image.ModelInterface): boolean;
+    page(): number;
   }
-  export enum ViewMode { OnePage, TwoPages, AutoSpread, }
-  export enum PageDirection { LeftToRight, RightToLeft, }
+  export enum ViewMode { OnePage, TwoPage, AutoSpread, }
+  export enum PageDirection { L2R, R2L, }
   export function create(options: {[key:string]:string;} = {}): ModelInterface {
-    return new SettingModel();
+    var attributes: Attributes = {};
+    if ('viewMode' in options) {
+      attributes['viewMode'] = ViewMode[options['viewMode']];
+    }
+    if ('pageDirection' in options) {
+      attributes['pageDirection'] = ViewMode[options['pageDirection']];
+    }
+    if ('page' in options) {
+      attributes['pageDirection'] = parseInt(ViewMode[options['page']], 10);
+    }
+    return new SettingModel(attributes);
   }
 
   // private
-  interface Attribuets {
+  interface Attributes {
     viewMode?: ViewMode;
     pageDirection?: PageDirection;
+    page?: number;
   }
 
-  class SettingModel extends Backbone.Model<Attribuets> implements ModelInterface {
-    defaults(): Attribuets {
+  class SettingModel extends Backbone.Model<Attributes> implements ModelInterface {
+    defaults(): Attributes {
       return {
-        viewMode: ViewMode.TwoPages,
-        pageDirection: PageDirection.RightToLeft,
+        viewMode: ViewMode.OnePage,
+        pageDirection: PageDirection.R2L,
+        page: 1,
       };
+    }
+    constructor(attributes?: Attributes) {
+      super(attributes);
     }
     viewMode() { return <ViewMode>this.get('viewMode'); }
     pageDirection() { return <PageDirection>this.get('pageDirection'); }
-
-    isSpreadPage(image: Book.Image.ModelInterface): boolean {
-      return image.width() > image.height();
-    }
+    page() { return <number>this.get('page'); }
   }
 }

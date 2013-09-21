@@ -14,14 +14,14 @@ export = FlowerpotView;
 
 class FlowerpotView extends CompositeView {
   private template: (data: {[key:string]: any;}) => string;
-  private book: Book.ModelInterface;
   private setting: Setting.ModelInterface;
+  private book: Book.ModelInterface;
   private queryOptions: {[field:string]:string;};
 
   constructor(options: {[field:string]:string;}) {
     this.template = templates.flowerpot;
-    this.book = Book.create();
-    this.setting = Setting.create();
+    this.setting = Setting.create(options);
+    this.book = Book.create(this.setting);
     this.queryOptions = options;
 
     super({el: '#flowerpot'});
