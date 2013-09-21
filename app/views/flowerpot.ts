@@ -8,6 +8,7 @@ import Setting = require('models/setting');
 
 // subviews
 import ContentView = require('views/content');
+import KeyEventHandler = require('views/key');
 
 // exports FlowerpotView
 export = FlowerpotView;
@@ -17,12 +18,14 @@ class FlowerpotView extends CompositeView {
   private setting: Setting.ModelInterface;
   private book: Book.ModelInterface;
   private queryOptions: {[field:string]:string;};
+  private _keyEventHandler: KeyEventHandler;
 
   constructor(options: {[field:string]:string;}) {
     this.template = templates.flowerpot;
     this.setting = Setting.create(options);
     this.book = Book.create(this.setting);
     this.queryOptions = options;
+    this._keyEventHandler = new KeyEventHandler(this.book);
     super();
   }
 

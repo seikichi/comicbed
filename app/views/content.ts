@@ -30,12 +30,24 @@ class ContentView extends BaseView {
     }
     // TODO(seikichi): events を上手く使いたいのだけど...
     $(window).resize(() => { this.fit() });
+
+    this.listenTo(this.book, 'change:currentPageNum', () => {
+      this.loadContent();
+    });
+    this.loadContent();
+  }
+
+  loadContent() {
     // コンテンツの読み込み
+    if (!_.isNull(this.content)) {
+      this.stopListening(this.content);
+    }
     this.content = this.book.getCurrentContents();
     this.listenTo(this.content, 'change', () => {
       this.render();
       this.fit();
     });
+    this.render();
   }
 
   presenter() {
