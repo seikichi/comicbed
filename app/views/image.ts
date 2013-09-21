@@ -70,6 +70,43 @@ class ImageView extends BaseView {
   }
 
   private fitTwoPage() {
+    var $left = this.$('#left-page');
+    var $right = this.$('#right-page');
+    var containerWidth = this.$el.width();
+    var containerHeight = this.$el.height();
+
+    // TODO (seikichi): fix (page direction ...)
+    var left_height = this.currentPageImage.height();
+    var left_width = this.currentPageImage.width();
+    var right_height = this.nextPageImage.height();
+    var right_width = this.nextPageImage.width();
+
+    var left_scale = 1.0;
+    var right_scale = left_height / right_height;
+
+    var width = (left_scale * left_width) + (right_scale * right_width);
+    var height = left_height;
+
+    var scale = Math.min(containerWidth / width, containerHeight / height);
+
+    $left
+      .width(left_width * left_scale * scale)
+      .height(left_height * left_scale * scale);
+    $right
+      .width(right_width * right_scale * scale)
+      .height(right_height * right_scale * scale);
+
+    // TODO (seikichi): fix absolute (?)
+    $left.css({
+      position: 'absolute',
+      top: (containerHeight - $left.height()) / 2,
+      left: (containerWidth - $left.width() - $right.width()) / 2
+    });
+    $right.css({
+      position: 'absolute',
+      top: (containerHeight - $left.height()) / 2,
+      left: $left.width() + (containerWidth - $left.width() - $right.width()) / 2
+    });
   }
 
   private preparePageImages(): void {
