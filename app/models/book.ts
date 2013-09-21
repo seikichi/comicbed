@@ -112,6 +112,7 @@ module Book {
 
   class ContentsModel extends Backbone.Model<DisplayedContents.Attributes> implements DisplayedContents.ModelInterface {
     imagesCollection: ImageCollection;
+
     defaults() {
       return {status: DisplayedContents.Status.Loading};
     }
@@ -131,6 +132,7 @@ module Book {
   class BookModel extends Backbone.Model<Attributes> implements ModelInterface {
     private _setting: Setting.ModelInterface;
     private _pages: Page.CollectionInterface;
+    private _contents: ContentsModel;
 
     defaults(): Attributes {
       return {
@@ -145,6 +147,7 @@ module Book {
       // Note: (this.pages === null) <=> !this.get('isOpen')
       this._setting = setting;
       this._pages = null;
+      this._contents = null;
       super();
     }
 
@@ -202,14 +205,18 @@ module Book {
     }
 
     goPrevPage(): void {
-      var newPageNum = this.currentPageNum() - 1;
-      if (newPageNum <= 0 || this.totalPageNum() < newPageNum) { return; }
+      var diff = 1;
+      if (this._contents.images().length === 2) { diff = 2; }
+      var newPageNum = Math.max(1, this.currentPageNum() - diff);
+      if (this.currentPageNum() === newPageNum) { return; }
       this.set({currentPageNum: newPageNum});
     }
 
     goNextPage(): void {
-      var newPageNum = this.currentPageNum() + 1;
-      if (newPageNum <= 0 || this.totalPageNum() < newPageNum) { return; }
+      var diff = 1;
+      if (this._contents.images().length === 2) { diff = 2; }
+      var newPageNum = Math.min(this.currentPageNum() + diff, this.totalPageNum());
+      if (this.currentPageNum() === newPageNum) { return; }
       this.set({currentPageNum: newPageNum});
     }
 
@@ -230,21 +237,21 @@ module Book {
       // - 1ページ取得 (deferred)
       // - setting.displayMode に応じて頑張る (おいおい)
       var success = false;
-      var contents = new ContentsModel();
+      this._contents = new ContentsModel();
       if (this.status() !== Status.Opened) {
-        contents.set({status: DisplayedContents.Status.Error});
-        return contents;
+        this._contents.set({status: DisplayedContents.Status.Error});
+        return this._contents;
       }
       this._pages.getPageImageDataURL(this.currentPageNum()).then((dataURL: string) => {
         return this.calculateImageSize(dataURL);
       }).then((image: ImageModel) => {
-        contents.imagesCollection.push(image);
+        this._contents.imagesCollection.push(image);
 
         var currentPageNum = this.currentPageNum();
         if (this._setting.viewMode() === Setting.ViewMode.OnePage
             || (currentPageNum + 1 > this.totalPageNum())) {
           success = true;
-          contents.set({status: DisplayedContents.Status.Loaded});
+          this._contents.set({status: DisplayedContents.Status.Loaded});
           return $.Deferred().reject().promise();
         } else {
           return this._pages.getPageImageDataURL(currentPageNum + 1);
@@ -255,18 +262,18 @@ module Book {
         success = true;
         if (this._setting.viewMode() === Setting.ViewMode.AutoSpread
             && image.width > image.height) {  // TODO(seikichi)
-          contents.set({status: DisplayedContents.Status.Loaded});
+          this._contents.set({status: DisplayedContents.Status.Loaded});
         } else {
-          contents.imagesCollection.push(image);
-          contents.set({status: DisplayedContents.Status.Loaded});
+          this._contents.imagesCollection.push(image);
+          this._contents.set({status: DisplayedContents.Status.Loaded});
         }
       }).fail(() => {
         if (!success) {
           console.log('Error~~~~~~');
-          contents.set({status: DisplayedContents.Status.Error});
+          this._contents.set({status: DisplayedContents.Status.Error});
         }
       });
-      return contents;
+      return this._contents;
     }
 
     private calculateImageSize(dataURL: string): JQueryPromise<ImageModel> {
