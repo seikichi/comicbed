@@ -20,7 +20,7 @@ module Setting {
       attributes['pageDirection'] = ViewMode[options['pageDirection']];
     }
     if ('page' in options) {
-      attributes['pageDirection'] = parseInt(ViewMode[options['page']], 10);
+      attributes['page'] = parseInt(options['page'], 10);
     }
     return new SettingModel(attributes);
   }
@@ -36,7 +36,7 @@ module Setting {
     defaults(): Attributes {
       return {
         viewMode: ViewMode.OnePage,
-        pageDirection: PageDirection.R2L,
+        pageDirection: PageDirection.L2R,
         page: 1,
       };
     }

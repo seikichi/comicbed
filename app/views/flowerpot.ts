@@ -7,7 +7,7 @@ import Book = require('models/book');
 import Setting = require('models/setting');
 
 // subviews
-import ImageView = require('views/image');
+import ContentView = require('views/content');
 
 // exports FlowerpotView
 export = FlowerpotView;
@@ -33,8 +33,8 @@ class FlowerpotView extends CompositeView {
       this.book.openURL(this.queryOptions['url']);
     }
 
-    this.assign('#image-viewer', new ImageView({
-      template: templates.imageview,
+    this.assign('#content', new ContentView({
+      template: templates.content,
       book: this.book,
       setting: this.setting,
     }));

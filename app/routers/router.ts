@@ -4,6 +4,8 @@ import querystring = require('utils/querystring');
 import BaseView = require('views/base');
 import FlowerpotView = require('views/flowerpot');
 
+export = FlowerpotRouter;
+
 class FlowerpotRouter extends Backbone.Router {
   private routes: {[route:string]: string};
   private currentView: BaseView;
@@ -24,5 +26,3 @@ class FlowerpotRouter extends Backbone.Router {
     this.currentView.render();
   }
 }
-
-export = FlowerpotRouter;

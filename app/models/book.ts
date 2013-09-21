@@ -32,6 +32,8 @@ module Book {
     totalPageNum(): number;
     filename(): string;
     status(): Status;
+    setting(): Setting.ModelInterface;
+
     // methods
     toJSON(): Attributes;
     getCurrentContents(): DisplayedContents.ModelInterface;
@@ -79,6 +81,7 @@ module Book {
     }
     export interface ModelInterface {
       status(): Status;
+      images(): Image.CollectionInterface;
       toJSON(): {[attribute:string]:any;};
     }
   }
@@ -108,25 +111,26 @@ module Book {
   }
 
   class ContentsModel extends Backbone.Model<DisplayedContents.Attributes> implements DisplayedContents.ModelInterface {
-    images: ImageCollection;
+    imagesCollection: ImageCollection;
     defaults() {
       return {status: DisplayedContents.Status.Loading};
     }
     constructor(attributes?: DisplayedContents.Attributes, options?: any) {
-      this.images = new ImageCollection();
+      this.imagesCollection = new ImageCollection();
       super(attributes, options);
     }
     toJSON() {
       return _.extend(super.toJSON(), {
-        images: this.images.toJSON()
+        images: this.imagesCollection.toJSON()
       });
     }
     status() { return <DisplayedContents.Status>this.get('status'); }
+    images() { return <Image.CollectionInterface>(this.imagesCollection); }
   }
 
   class BookModel extends Backbone.Model<Attributes> implements ModelInterface {
-    private setting: Setting.ModelInterface;
-    private pages: Page.CollectionInterface;
+    private _setting: Setting.ModelInterface;
+    private _pages: Page.CollectionInterface;
 
     defaults(): Attributes {
       return {
@@ -139,8 +143,8 @@ module Book {
 
     constructor(setting: Setting.ModelInterface) {
       // Note: (this.pages === null) <=> !this.get('isOpen')
-      this.setting = setting;
-      this.pages = null;
+      this._setting = setting;
+      this._pages = null;
       super();
     }
 
@@ -151,9 +155,9 @@ module Book {
       if (path.extname(url) === 'pdf') {
         this.set({status: Status.Opening});
         PDFJS.getDocument({url: url}).then((document: PDFJS.PDFDocumentProxy) => {
-          this.pages = Page.createPdfPageCollection(document);
+          this._pages = Page.createPdfPageCollection(document);
           this.set({
-            currentPageNum: this.setting.page(),
+            currentPageNum: this._setting.page(),
             totalPageNum: document.numPages,
             filename: path.basename(url),
             status: Status.Opened,
@@ -177,7 +181,7 @@ module Book {
           var uint8Array = new Uint8Array(buffer);
 
           PDFJS.getDocument({data: uint8Array}).then((document: PDFJS.PDFDocumentProxy) => {
-            this.pages = Page.createPdfPageCollection(document);
+            this._pages = Page.createPdfPageCollection(document);
             this.set({
               isOpen: true,
               currentPageNum: 1,
@@ -211,52 +215,53 @@ module Book {
 
     close(): void {
       this.set({status: Status.Closed});
-      this.pages = null;
+      this._pages = null;
     }
 
     currentPageNum() { return <number>this.get('currentPageNum'); }
     totalPageNum() { return <number>this.get('totalPageNum'); }
     filename() { return <string>this.get('filename'); }
     status() { return <Status>this.get('status'); }
+    setting() { return this._setting; }
 
     getCurrentContents(): DisplayedContents.ModelInterface {
       // Note: 処理の流れ
       // - ContentsModel を new して return
       // - 1ページ取得 (deferred)
       // - setting.displayMode に応じて頑張る (おいおい)
-      var succeed = false;
+      var success = false;
       var contents = new ContentsModel();
       if (this.status() !== Status.Opened) {
         contents.set({status: DisplayedContents.Status.Error});
         return contents;
       }
-      this.pages.getPageImageDataURL(this.currentPageNum()).then((dataURL: string) => {
+      this._pages.getPageImageDataURL(this.currentPageNum()).then((dataURL: string) => {
         return this.calculateImageSize(dataURL);
       }).then((image: ImageModel) => {
-        contents.images.push(image);
+        contents.imagesCollection.push(image);
 
         var currentPageNum = this.currentPageNum();
-        if (this.setting.viewMode() === Setting.ViewMode.OnePage
+        if (this._setting.viewMode() === Setting.ViewMode.OnePage
             || (currentPageNum + 1 > this.totalPageNum())) {
-          succeed = true;
+          success = true;
           contents.set({status: DisplayedContents.Status.Loaded});
           return $.Deferred().reject().promise();
         } else {
-          return this.pages.getPageImageDataURL(currentPageNum + 1);
+          return this._pages.getPageImageDataURL(currentPageNum + 1);
         }
       }).then((dataURL: string) => {
         return this.calculateImageSize(dataURL);
       }).then((image: ImageModel) => {
-        succeed = true;
-        if (this.setting.viewMode() === Setting.ViewMode.AutoSpread
+        success = true;
+        if (this._setting.viewMode() === Setting.ViewMode.AutoSpread
             && image.width > image.height) {  // TODO(seikichi)
           contents.set({status: DisplayedContents.Status.Loaded});
         } else {
-          contents.images.push(image);
+          contents.imagesCollection.push(image);
           contents.set({status: DisplayedContents.Status.Loaded});
         }
       }).fail(() => {
-        if (!succeed) {
+        if (!success) {
           console.log('Error~~~~~~');
           contents.set({status: DisplayedContents.Status.Error});
         }
@@ -280,35 +285,6 @@ module Book {
       imageElement.src = dataURL;
       return deferred.promise();
     }
-
-    // getPageImage(pageNum: number): Image.ModelInterface  {
-    //   var image = new ImageModel();
-    //   if (this.status() !== Status.Opened) {
-    //     image.set({status: Image.Status.error})
-    //     return image;
-    //   }
-    //   this.pages.getPageImageDataURL(pageNum).then((dataURL: string) => {
-    //     var deferred = $.Deferred();
-    //     var imageElement = new HTMLImage();
-    //     imageElement.onload = () => {
-    //       image.set({
-    //         dataURL: dataURL,
-    //         width: imageElement.width,
-    //         height: imageElement.height,
-    //         status: Image.Status.success,
-    //       });
-    //       deferred.resolve();
-    //     };
-    //     imageElement.onerror = () => {
-    //       deferred.reject();
-    //     }
-    //     imageElement.src = dataURL;
-    //     return deferred.promise();
-    //   }).fail(() => {
-    //     image.set({status: Image.Status.error});
-    //   });
-    //   return image;
-    // }
   }
 }
 
