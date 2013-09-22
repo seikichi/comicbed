@@ -126,6 +126,7 @@ module Page {
       var cache = this.findWhere({originalPageNum: originalPageNum});
       if (!_.isUndefined(cache)) {
         console.log('cache exists');
+        this.prefetch();
         return $.Deferred<string>().resolve(cache.dataURL()).promise();
       }
 
@@ -189,20 +190,37 @@ module Page {
       });
       super(models, {});
     }
-
+    
     getPageImageDataURL(pageNum: number): JQueryPromise<string> {
       var deferred = $.Deferred<string>();
-      var page = this.at(pageNum - 1);
-      if (_.isUndefined(page)) {
+      var pageModel = this.at(pageNum - 1);
+      if (_.isUndefined(pageModel)) {
         deferred.reject();
         return deferred;
       }
-      var originalPageNum = page.get('originalPageNum');
+
+      var originalPageNum = pageModel.get('originalPageNum');
       var canvas = document.createElement('canvas');
+      var success = false;
+
+      var _page: PDFJS.PDFPageProxy;
 
       this.document.getPage(originalPageNum).then((page: PDFJS.PDFPageProxy) => {
+        _page = page;
+        _.each(_.keys(page.objs.objs), (key: string) => {
+          if (key.indexOf('img_') === 0) {
+            var data: HTMLImageElement = page.objs.getData(key);
+            if (!_.isNull(data)) {
+              console.log('!!!!!!!! image found in page.objs.objs !!!!!!!!!');
+              success = true;
+              var dataURL = data.src;
+              deferred.resolve(dataURL);
+            }
+          }
+        });
+
         // prepare canvas using PDF page dimensions
-        var scale = 2.0;  // TODO(seikichi): fix me!
+        var scale = 0.0;  // TODO(seikichi): fix me!
         var viewport = page.getViewport(scale);
         var context = canvas.getContext('2d');
         canvas.height = viewport.height;
@@ -214,7 +232,20 @@ module Page {
         };
         return page.render(renderContext);
       }).then(() => {
+        if (success) { return; }
         // resolve with a Data URL of the PDF page
+        _.each(_.keys(_page.objs.objs), (key: string) => {
+          if (key.indexOf('img_') === 0) {
+            var data: HTMLImageElement = _page.objs.getData(key);
+            if (!_.isNull(data)) {
+              console.log('!!!!!!!! image found in page.objs.objs !!!!!!!!!');
+              success = true;
+              var dataURL = data.src;
+              deferred.resolve(dataURL);
+            }
+          }
+        });
+        if (success) { return; }
         var dataURL: string = canvas.toDataURL();
         deferred.resolve(dataURL);
       });
