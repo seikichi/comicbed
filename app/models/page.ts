@@ -47,6 +47,8 @@ module Page {
   Backbone.Collection<ImageCacheModel, Attributes> implements CollectionInterface {
     private _pages: CollectionInterface;
     private _maxCacheSize: number;
+    private _maxPrefetchSize: number;
+    private _lastRequiredPage: number;
 
     private _deferred: JQueryDeferred<string>;
     private _loadingPageNum: number;
@@ -55,7 +57,9 @@ module Page {
       this.model = ImageCacheModel;
       this._pages = pages;
       this._maxCacheSize = 20;
+      this._maxPrefetchSize = 12;
       this._deferred = null;
+      this._lastRequiredPage = 1;
       super();
     }
 
@@ -74,7 +78,44 @@ module Page {
       console.log('cache update done:', this.models);
     }
 
+    private prefetch(): void {
+      // [_lastRequiredPage, _lastRequiredPage + _maxPrefetchSize)
+      // の区間を前から見ていく
+      console.log('!!!prefetch function called');
+      if (this._deferred.state() === 'pending') {
+        console.log('!!! this._deferred is pending');
+        return;
+      }
+      for (var p = this._lastRequiredPage;
+           p < this._lastRequiredPage + this._maxPrefetchSize; ++p) {
+        console.log('!!! page =', p);
+        var page = this._pages.at(p - 1);
+        if (_.isUndefined(page)) { continue; }
+        var originalPageNum = page.originalPageNum();
+        var cache = this.findWhere({originalPageNum: originalPageNum});
+        if (!_.isUndefined(cache)) {
+          console.log('!!! page ', p, ' is already cached');
+          continue;
+        }
+
+        console.log('!!! load page ', p);
+        this._loadingPageNum = originalPageNum;
+        this._deferred = $.Deferred<string>();
+        this._pages.getPageImageDataURL(p).then((dataURL: string) => {
+        console.log('!!! prefetch _pages.getPageCanvas succeeds');
+          this.addImageCache(new ImageCacheModel({
+            originalPageNum: originalPageNum,
+            dataURL: dataURL,
+          }));
+          this._deferred.resolve(dataURL);
+          this.prefetch();
+        });
+        break;
+      }
+    }
+
     getPageImageDataURL(pageNum: number): JQueryPromise<string> {
+      this._lastRequiredPage = pageNum;
       var page = this._pages.at(pageNum - 1);
       if (_.isUndefined(page)) {
         return $.Deferred<string>().reject().promise();
@@ -108,6 +149,7 @@ module Page {
           dataURL: dataURL,
         }));
         this._deferred.resolve(dataURL);
+        this.prefetch();
       });
       return this._deferred.promise();
     }
