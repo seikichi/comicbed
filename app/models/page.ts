@@ -6,8 +6,11 @@ import sprintf = require('sprintf');
 
 module Page {
   // public
-  export interface ModelInterface { }
+  export interface ModelInterface {
+    originalPageNum(): number;
+  }
   export interface CollectionInterface {
+    at(index: number): ModelInterface;
     getPageImageDataURL(pageNum: number): JQueryPromise<string>;
   }
   export interface Attributes {
@@ -16,7 +19,7 @@ module Page {
   }
   export function createPdfPageCollection(document: PDFJS.PDFDocumentProxy)
   : CollectionInterface {
-    return new PdfPageCollection(document);
+    return new ImageCacheCollection(new PdfPageCollection(document));
   }
 
   // private
@@ -34,6 +37,10 @@ module Page {
     get(attributeName: 'originalPageNum'): number;
     get(attributeName: 'dataURL'): string;
     get(attributeName: string): any { return super.get(attributeName); }
+
+    name(): string { return this.get('name'); }
+    originalPageNum(): number { return this.get('originalPageNum'); }
+    dataURL(): string { return this.get('dataURL'); }
   }
 
   class ImageCacheCollection extends
@@ -41,17 +48,68 @@ module Page {
     private _pages: CollectionInterface;
     private _maxCacheSize: number;
 
+    private _deferred: JQueryDeferred<string>;
+    private _loadingPageNum: number;
+
     constructor(pages: CollectionInterface) {
       this.model = ImageCacheModel;
       this._pages = pages;
-      this._maxCacheSize = 10;
+      this._maxCacheSize = 20;
+      this._deferred = null;
+      super();
+    }
 
-      super([], {});
+    private addImageCache(cache: ImageCacheModel): void {
+      console.log('addImageCache:', this.models);
+      var oldCache = this.findWhere({originalPageNum: cache.originalPageNum()});
+      if (!_.isUndefined(oldCache)) {
+        console.log('old cache found: remove');
+        this.remove(oldCache);
+      }
+      // adds cache to front
+      this.unshift(cache);
+      while (this.length > this._maxCacheSize) {
+        this.pop();
+      }
+      console.log('cache update done:', this.models);
     }
 
     getPageImageDataURL(pageNum: number): JQueryPromise<string> {
-      var deferred = $.Deferred<string>();
-      return deferred.resolve('').promise();
+      var page = this._pages.at(pageNum - 1);
+      if (_.isUndefined(page)) {
+        return $.Deferred<string>().reject().promise();
+      }
+      var originalPageNum = page.originalPageNum();
+      console.log(sprintf('getPageCanvas: originalPageNum = %d, pageNum = %d', originalPageNum, pageNum));
+
+      var cache = this.findWhere({originalPageNum: originalPageNum});
+      if (!_.isUndefined(cache)) {
+        console.log('cache exists');
+        return $.Deferred<string>().resolve(cache.dataURL()).promise();
+      }
+
+      if (!_.isNull(this._deferred)) {
+        console.log('find current deferred');
+        if (this._loadingPageNum === originalPageNum) {
+          console.log('current deferred is loading the objective page');
+          return this._deferred.promise();
+        } else if (this._deferred.state() === 'pending') {
+          console.log('current deferred is loading the another page (pending), reject');
+          this._deferred.reject();
+        }
+      }
+
+      this._loadingPageNum = originalPageNum;
+      this._deferred = $.Deferred<string>();
+      this._pages.getPageImageDataURL(pageNum).then((dataURL: string) => {
+        console.log('_pages.getPageCanvas succeeds');
+        this.addImageCache(new ImageCacheModel({
+          originalPageNum: originalPageNum,
+          dataURL: dataURL,
+        }));
+        this._deferred.resolve(dataURL);
+      });
+      return this._deferred.promise();
     }
   }
 
@@ -67,6 +125,8 @@ module Page {
     get(attributeName: 'name'): string;
     get(attributeName: 'originalPageNum'): number;
     get(attributeName: string): any { return super.get(attributeName); }
+
+    originalPageNum(): number { return this.get('originalPageNum'); }
   }
 
   class PdfPageCollection extends Backbone.Collection<PdfPageModel, Attributes> implements CollectionInterface {
