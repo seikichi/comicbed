@@ -42,10 +42,21 @@ declare module PDFJS {
     height: number;
   }
 
+  interface PDFObjects {
+    objs: {[objId:string]:any;};
+    get(objId: string, callback?: (data: any) => void): any;
+    hasData(objId: string): boolean;
+    getData(objId: string): any;
+  }
+
   interface PDFPageProxy {
     pageNumber: number;
+    objs: PDFObjects;
+    pageInfo: { pageIndex: number; rotate: number; }
+    view: number[];
     getViewport(scale: number, rotate?: number): PageViewport;
     render(context: RenderContext): RenderContext;
+    destroy(): void;
   }
 }
 
