@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '0.8.522';
-PDFJS.build = 'c270d7e';
+PDFJS.version = '0.8.535';
+PDFJS.build = '7001a50';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4331,13 +4331,9 @@ var WorkerTransport = (function WorkerTransportClosure() {
         // In the developer build load worker_loader which in turn loads all the
         // other files and resolves the promise. In production only the
         // pdf.worker.js file is needed.
-//#if !PRODUCTION
-        Util.loadScript(PDFJS.workerSrc);
-//#else
-//      Util.loadScript(PDFJS.workerSrc, function() {
-//        PDFJS.fakeWorkerFilesLoadedPromise.resolve();
-//      });
-//#endif
+        Util.loadScript(PDFJS.workerSrc, function() {
+          PDFJS.fakeWorkerFilesLoadedPromise.resolve();
+        });
       }
       return PDFJS.fakeWorkerFilesLoadedPromise;
     },
@@ -6793,7 +6789,6 @@ var FontLoader = {
     var styleSheet = styleElement.sheet;
     styleSheet.insertRule(rule, styleSheet.cssRules.length);
   },
-//#if !(MOZCENTRAL)
   get loadTestFont() {
     // This is a CFF font with 1 glyph for '.' that fills its entire width and
     // height.
@@ -7006,22 +7001,6 @@ var FontLoader = {
       });
       /** Hack end */
   }
-//#else
-//bind: function fontLoaderBind(fonts, callback) {
-//  assert(!isWorker, 'bind() shall be called from main thread');
-//
-//  for (var i = 0, ii = fonts.length; i < ii; i++) {
-//    var font = fonts[i];
-//    if (font.attached)
-//      continue;
-//
-//    font.attached = true;
-//    font.bindDOM()
-//  }
-//
-//  setTimeout(callback);
-//}
-//#endif
 };
 
 var FontFace = (function FontFaceClosure() {
@@ -7087,4 +7066,5 @@ if (!PDFJS.workerSrc && typeof document !== 'undefined') {
     return pdfjsSrc && pdfjsSrc.replace(/\.js$/i, '.worker.js');
   })();
 }
+
 
