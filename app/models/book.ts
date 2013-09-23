@@ -159,7 +159,8 @@ module Book {
       var diff = 1;
       if (this.readingDirection() === ReadingDirection.Backward
           && this._contents.length === 2) { diff = 2; }
-      var newPageNum = Math.max(0, this.currentPageNum() - diff);
+      if (this.currentPageNum() - diff <= 0) { return; }
+      var newPageNum = Math.max(1, this.currentPageNum() - diff);
       if (this.currentPageNum() === newPageNum) { return; }
       logger.info('goPrevPage: ' + this.currentPageNum() + ' => ' + newPageNum);
       this.set({
@@ -173,6 +174,7 @@ module Book {
       var diff = 1;
       if (this.readingDirection() === ReadingDirection.Forward
           && this._contents.length === 2) { diff = 2; }
+      if (this.currentPageNum() + diff > this.totalPageNum()) { return; }
       var newPageNum = Math.min(this.currentPageNum() + diff, this.totalPageNum());
       if (this.currentPageNum() === newPageNum) { return; }
       logger.info('goNextPage: ' + this.currentPageNum() + ' => ' + newPageNum);
