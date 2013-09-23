@@ -1,5 +1,7 @@
 import _ = require('underscore');
+import logger = require('utils/logger');
 import Backbone = require('backbone');
+
 import querystring = require('utils/querystring');
 import BaseView = require('views/base');
 import FlowerpotView = require('views/flowerpot');
@@ -22,6 +24,7 @@ class FlowerpotRouter extends Backbone.Router {
 
   private index(query: string) {
     if (_.isEmpty(query)) { query = ''; }
+    logger.info('FlowerpotRouter.index called: query =', query);
     if (!_.isNull(this.currentView)) { this.currentView.close(); }
     var querydict = querystring.parse(query);
     this.currentView = new FlowerpotView(querydict);

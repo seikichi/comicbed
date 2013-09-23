@@ -2,128 +2,105 @@ import _ = require('underscore');
 
 import BaseView = require('views/base');
 import Book = require('models/book');
+import Page = require('models/page');
 import Setting = require('models/setting');
 
 export = ContentView;
 
 class ContentView extends BaseView {
-  private events: {[event:string]:string;};
-
-  private template: (data: {[key:string]: any;}) => string;
-  private book: Book.ModelInterface;
-  private content: Book.DisplayedContents.ModelInterface;
+  private _book: Book.ModelInterface;
+  private _contents: Page.Content.CollectionInterface;
 
   constructor(options: ContentView.Options) {
-    this.events = {};
-
-    this.template = options.template;
-    this.book = options.book;
-    this.content = null;
-
+    this._book = options.book;
+    this._contents = this._book.contents();
     super({});
   }
 
   initialize() {
-    if (this.book.status() !== Book.Status.Opened) {
-      this.listenToOnce(this.book, 'change', this.initialize);
-      return;
-    }
-    // TODO(seikichi): events を上手く使いたいのだけど...
     $(window).resize(() => { this.fit() });
-
-    this.listenTo(this.book, 'change:currentPageNum', () => {
-      this.loadContent();
-    });
-    this.loadContent();
-  }
-
-  loadContent() {
-    // コンテンツの読み込み
-    if (!_.isNull(this.content)) {
-      this.stopListening(this.content);
-    }
-    this.content = this.book.getCurrentContents();
-    this.listenTo(this.content, 'change', () => {
+    this.listenTo(this._contents, 'all', () => {
       this.render();
       this.fit();
     });
-    this.render();
-  }
-
-  presenter() {
-    // TODO(seikichi): dummy 用に interface 継承して何か作る?
-    if (_.isNull(this.content)) {
-      return '';
-    }
-    return this.template(this.content.toJSON());
   }
 
   private fit() {
-    if (_.isNull(this.content)) { return; }
-    if (this.content.images().length === 1) {
+    if (this._contents.length === 1) {
       this.fitOnePage();
-    } else if (this.content.images().length === 2) {
+    } else if (this._contents.length === 2) {
       this.fitTwoPage();
     }
   }
 
+  render() {
+    this.$el.empty();
+    var fragment = document.createDocumentFragment();
+    for (var i = 0; i < this._contents.length; ++i) {
+      var c = this._contents.at(i);
+      fragment.appendChild(c.element());
+    }
+    this.$el[0].appendChild(fragment);
+    return this;
+  }
+
   private fitOnePage() {
-    var image = this.content.images().at(0);
-    var $img = this.$('#page-0');
+    var element = this._contents.at(0).element();
     var width = this.$el.width();
     var height = this.$el.height();
-    var imageWidth = image.width();
-    var imageHeight = image.height();
+    var elementWidth = element.width;
+    var elementHeight = element.height;
 
-    var scale = Math.min(width / imageWidth, height / imageHeight);
-    $img.width(scale * imageWidth).height(scale * imageHeight).css({
+    var scale = Math.min(width / elementWidth, height / elementHeight);
+
+    var newWidth = scale * elementWidth;
+    var newHeight = scale * elementHeight;
+    $(element).width(newWidth).height(newHeight).css({
       position: 'relative',
-      top: (height - $img.height()) / 2.0,
-      left: (width - $img.width()) / 2.0,
+      top: (height - newHeight) / 2.0,
+      left: (width - newWidth) / 2.0,
     });
   }
 
   private fitTwoPage() {
-    var left_image: Book.Image.ModelInterface;
-    var right_image: Book.Image.ModelInterface;
+    var leftElement: Page.Content.Element;
+    var rightElement: Page.Content.Element;
     var $left: JQuery;
     var $right: JQuery;
 
     // TODO(seikichi): fix me!
-    if (this.book.setting().pageDirection() === Setting.PageDirection.L2R) {
-      left_image = this.content.images().at(0);
-      right_image = this.content.images().at(1);
-      $left = this.$('#page-0');
-      $right = this.$('#page-1');
+    if (this._book.setting().pageDirection() === Setting.PageDirection.L2R) {
+      leftElement = this._contents.at(0).element();
+      rightElement = this._contents.at(1).element();
     } else {
-      left_image = this.content.images().at(1);
-      right_image = this.content.images().at(0);
-      $left = this.$('#page-1');
-      $right = this.$('#page-0');
+      leftElement = this._contents.at(1).element();
+      rightElement = this._contents.at(0).element();
     }
+    $left = $(leftElement);
+    $right = $(rightElement);
 
     var containerWidth = this.$el.width();
     var containerHeight = this.$el.height();
 
-    var left_height = left_image.height();
-    var left_width = left_image.width();
-    var right_height = right_image.height();
-    var right_width = right_image.width();
+    var leftHeight = leftElement.height;
+    var leftWidth = leftElement.width;
+    var rightHeight = rightElement.height;
+    var rightWidth = rightElement.width;
 
-    var left_scale = 1.0;
-    var right_scale = left_height / right_height;
+    var leftScale = 1.0
+    var rightScale = leftHeight / rightHeight;
 
-    var width = (left_scale * left_width) + (right_scale * right_width);
-    var height = left_height;
+    var width = (leftScale * leftWidth) + (rightScale * rightWidth);
+    var height = leftHeight;
 
     var scale = Math.min(containerWidth / width, containerHeight / height);
 
     $left
-      .width(left_width * left_scale * scale)
-      .height(left_height * left_scale * scale);
+      .width(leftWidth * leftScale * scale)
+      .height(leftHeight * leftScale * scale);
     $right
-      .width(right_width * right_scale * scale)
-      .height(right_height * right_scale * scale);
+      .width(rightWidth * rightScale * scale)
+      .height(rightHeight * rightScale * scale);
 
     // TODO (seikichi): fix absolute (?)
     $left.css({
@@ -141,7 +118,6 @@ class ContentView extends BaseView {
 
 module ContentView {
   export interface Options {
-    template: (data: {[key:string]: any;}) => string;
     book: Book.ModelInterface;
   }
 }

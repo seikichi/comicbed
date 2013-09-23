@@ -1,6 +1,5 @@
 import $ = require('jquery');
 import PDFJS = require('pdfjs');
-import Book = require('models/book');
 import logger = require('utils/logger');
 import Router = require('routers/router');
 
@@ -14,9 +13,8 @@ function main() {
   PDFJS.disableRange = false;
 
   $(() => {
+    logger.info('Flowerpot starts');
     var router = new Router();
     Backbone.history.start();
   });
 }
-
-

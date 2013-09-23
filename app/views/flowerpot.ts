@@ -34,12 +34,7 @@ class FlowerpotView extends CompositeView {
       this.book.openURL(this.queryOptions['url']);
     }
 
-    this.assign('#content', new ContentView({
-      template: templates.content,
-      book: this.book,
-      setting: this.setting,
-    }));
-
+    this.assign('#content', new ContentView({book: this.book}));
     this.listenTo(this.book, 'change:status', this.render);
   }
 

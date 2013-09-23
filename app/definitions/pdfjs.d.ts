@@ -1,10 +1,17 @@
 /// <reference path="./DefinitelyTyped/jquery/jquery.d.ts" />
 
 declare module PDFJS {
+  var version: string;
+  var build: string;
+
   var workerSrc: string;
   var disableWorker: boolean;
   var disableAutoFetch: boolean;
   var disableRange: boolean;
+  var maxImageSize: number;
+  var disableFontFace: boolean;
+  var enableStats: boolean;
+  var pdfBug: boolean;
 
   interface GetDocumentOptions {
     url?: string;

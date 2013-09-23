@@ -13,17 +13,15 @@ var HTMLImage = Image;
 
 module Book {
   // public
-  export enum Status {
-    Opened,
-    Opening,
-    Closed,
-    Error,
-  }
+  export enum Status { Closed, Opened, Opening, Error, }
+  export enum ReadingDirection { Forward = +1, Backward = -1 }
   export interface Attributes {
     currentPageNum?: number;
     totalPageNum?: number;
     filename?: string;
     status?: Status;
+    currentReadingDirection?: number;
+    readingDirection?: ReadingDirection;
   }
 
   export interface ModelInterface {
@@ -32,139 +30,84 @@ module Book {
     totalPageNum(): number;
     filename(): string;
     status(): Status;
+    readingDirection(): ReadingDirection;
+
     setting(): Setting.ModelInterface;
+    toJSON(): Attributes;
 
     // methods
-    toJSON(): Attributes;
-    getCurrentContents(): DisplayedContents.ModelInterface;
-
+    // resize(width: number, height: number): void;
+    contents(): Page.Content.CollectionInterface;
     close(): void;
-    openFile(file: File): void;
-    openURL(url: string): void;
+    openURL(url: string) : void;
+    openFile(file: File) : void;
 
+    // navigate
     goTo(pageNum: number): void;
     goPrevPage(): void;
     goNextPage(): void;
 
-    on(eventName: string, callback?: () => void): void;
+    // events
+    on(eventName: string, callback?: () => void, context?: any): void;
+    // once(eventName: string, callback?: () => void, context?: any): void;
   }
+
+  // export function createFromURL(ur: string): ModelInterface {
+  //   return undefined;
+  // }
+
   export function create(setting: Setting.ModelInterface): ModelInterface {
     return new BookModel(setting);
   }
 
-  export module Image {
-    export interface Attributes {
-      dataURL?: string;
-      width?: number;
-      height?: number;
-    }
-    export interface ModelInterface {
-      // getter
-      dataURL(): string;
-      width(): number;
-      height(): number;
-
-      toJSON(): Attributes;
-    }
-    export interface CollectionInterface {
-      length: number;
-      at(index: number): ModelInterface
-      toJSON(): Attributes[];
-    }
-  }
-
-  export module DisplayedContents {
-    export enum Status { Loaded, Loading, Error, }
-    export interface Attributes {
-      status?: Status;
-      images?: Image.CollectionInterface;
-    }
-    export interface ModelInterface {
-      status(): Status;
-      images(): Image.CollectionInterface;
-      toJSON(): {[attribute:string]:any;};
-    }
-  }
-
-  // private
-  class ImageModel extends Backbone.Model<Image.Attributes> implements Image.ModelInterface {
-    defaults() {
-      return {
-        dataURL: '',
-        width: 0,
-        height: 0,
-      };
-    }
-    constructor(attributes?: Image.Attributes, options?: any) {
-      super(attributes, options);
-    }
-    dataURL() { return <string>this.get('dataURL'); }
-    width() { return <number>this.get('width'); }
-    height() { return <number>this.get('height'); }
-  }
-
-  class ImageCollection extends Backbone.Collection<ImageModel, Image.Attributes> implements Image.CollectionInterface {
-    constructor() {
-      this.model = ImageModel;
-      super();
-    }
-  }
-
-  class ContentsModel extends Backbone.Model<DisplayedContents.Attributes> implements DisplayedContents.ModelInterface {
-    imagesCollection: ImageCollection;
-
-    defaults() {
-      return {status: DisplayedContents.Status.Loading};
-    }
-    constructor(attributes?: DisplayedContents.Attributes, options?: any) {
-      this.imagesCollection = new ImageCollection();
-      super(attributes, options);
-    }
-    toJSON() {
-      return _.extend(super.toJSON(), {
-        images: this.imagesCollection.toJSON()
-      });
-    }
-    status() { return <DisplayedContents.Status>this.get('status'); }
-    images() { return <Image.CollectionInterface>(this.imagesCollection); }
-  }
-
   class BookModel extends Backbone.Model<Attributes> implements ModelInterface {
-    private _setting: Setting.ModelInterface;
-    private _pages: Page.CollectionInterface;
-    private _contents: ContentsModel;
-
+    // properties
     defaults(): Attributes {
       return {
         currentPageNum: 1,
         totalPageNum: 1,
         filename: 'no title',
         status: Status.Closed,
+        readingDirection: ReadingDirection.Forward,
       };
     }
+    currentPageNum() { return <number>this.get('currentPageNum'); }
+    totalPageNum() { return <number>this.get('totalPageNum'); }
+    filename() { return <string>this.get('filename'); }
+    status() { return <Status>this.get('status'); }
+    readingDirection() { return <ReadingDirection>this.get('readingDirection'); }
+    setting() { return this._setting; }
+    contents() { return this._contents; }
+    // private members
+    private _setting: Setting.ModelInterface;
+    private _pages: Page.CollectionInterface;
+    private _contents: Page.Content.CollectionInterface;
+
 
     constructor(setting: Setting.ModelInterface) {
-      // Note: (this.pages === null) <=> !this.get('isOpen')
       this._setting = setting;
       this._pages = null;
-      this._contents = null;
+      this._contents = Page.Content.createCollection();
       super();
     }
 
     openURL(url: string) : void {
+      logger.info('Book.openURL: ' + url);
       if (this.status() !== Status.Closed) {
         this.close();
       }
       if (path.extname(url) === 'pdf') {
         this.set({status: Status.Opening});
         PDFJS.getDocument({url: url}).then((document: PDFJS.PDFDocumentProxy) => {
-          this._pages = Page.createPdfPageCollection(document);
+          logger.info('PDFDocument is loaded');
+          this._pages = Page.createPdfPageCollection(this._setting, document);
           this.set({
             currentPageNum: this._setting.page(),
             totalPageNum: document.numPages,
             filename: path.basename(url),
             status: Status.Opened,
           });
+          this.updateContents();
         });
       } else {
         logger.warn('At present, this viewer can only read pdf files');
@@ -172,7 +115,7 @@ module Book {
     }
 
     openFile(file: File): void {
-      // TODO(seikichi): openFile を短時間に連打したら面倒なことになりそうなのどうにかする
+      logger.info('Book.openFile');
       if (this.status() !== Status.Closed) {
         this.close();
       }
@@ -180,17 +123,20 @@ module Book {
       if (file.type === 'application/pdf') {
         var fileReader = new FileReader();
         fileReader.onload = (event: any) => {
+          logger.info('file is loaded: ' + file.name);
           var buffer: ArrayBuffer = event.target.result;
           var uint8Array = new Uint8Array(buffer);
 
           PDFJS.getDocument({data: uint8Array}).then((document: PDFJS.PDFDocumentProxy) => {
-            this._pages = Page.createPdfPageCollection(document);
+            logger.info('PDFDocument is loaded');
+            this._pages = Page.createPdfPageCollection(this._setting, document);
             this.set({
               isOpen: true,
               currentPageNum: 1,
               totalPageNum: document.numPages,
               filename: file.name,
             });
+            this.updateContents();
           });
         };
         fileReader.readAsArrayBuffer(file);
@@ -200,97 +146,95 @@ module Book {
     }
 
     goTo(pageNum: number): void {
+      logger.info('goTo ' + pageNum);
       if (pageNum <= 0 || this.totalPageNum() < pageNum) { return; }
-      this.set({currentPageNum: pageNum});
+      this.set({
+        currentPageNum: pageNum,
+        readingDirection: ReadingDirection.Forward,
+      });
+      this.updateContents();
     }
 
     goPrevPage(): void {
       var diff = 1;
-      if (this._contents.images().length === 2) { diff = 2; }
-      var newPageNum = Math.max(1, this.currentPageNum() - diff);
+      if (this.readingDirection() === ReadingDirection.Backward
+          && this._contents.length === 2) { diff = 2; }
+      var newPageNum = Math.max(0, this.currentPageNum() - diff);
       if (this.currentPageNum() === newPageNum) { return; }
-      this.set({currentPageNum: newPageNum});
+      logger.info('goPrevPage: ' + this.currentPageNum() + ' => ' + newPageNum);
+      this.set({
+        currentPageNum: newPageNum,
+        readingDirection: ReadingDirection.Backward,
+      });
+      this.updateContents();
     }
 
     goNextPage(): void {
       var diff = 1;
-      if (this._contents.images().length === 2) { diff = 2; }
+      if (this.readingDirection() === ReadingDirection.Forward
+          && this._contents.length === 2) { diff = 2; }
       var newPageNum = Math.min(this.currentPageNum() + diff, this.totalPageNum());
       if (this.currentPageNum() === newPageNum) { return; }
-      this.set({currentPageNum: newPageNum});
+      logger.info('goNextPage: ' + this.currentPageNum() + ' => ' + newPageNum);
+      this.set({
+        currentPageNum: newPageNum,
+        readingDirection: ReadingDirection.Forward,
+      });
+      this.updateContents();
     }
 
     close(): void {
+      logger.info('closing the book');
       this.set({status: Status.Closed});
       this._pages = null;
     }
 
-    currentPageNum() { return <number>this.get('currentPageNum'); }
-    totalPageNum() { return <number>this.get('totalPageNum'); }
-    filename() { return <string>this.get('filename'); }
-    status() { return <Status>this.get('status'); }
-    setting() { return this._setting; }
-
-    getCurrentContents(): DisplayedContents.ModelInterface {
-      // Note: 処理の流れ
-      // - ContentsModel を new して return
-      // - 1ページ取得 (deferred)
-      // - setting.displayMode に応じて頑張る (おいおい)
+    private updateContents(): void {
+      logger.info('updateContents is called');
       var success = false;
-      this._contents = new ContentsModel();
+      var newContents: Page.Content.ModelInterface[] = [];
       if (this.status() !== Status.Opened) {
-        this._contents.set({status: DisplayedContents.Status.Error});
-        return this._contents;
+        logger.info('status is not equals to Opened');
+        this._contents.reset(newContents);
+        return;
       }
-      this._pages.getPageImageDataURL(this.currentPageNum()).then((dataURL: string) => {
-        return this.calculateImageSize(dataURL);
-      }).then((image: ImageModel) => {
-        this._contents.imagesCollection.push(image);
-
-        var currentPageNum = this.currentPageNum();
+      var promise = this._pages.getPageContent(this.currentPageNum());
+      promise.then((content: Page.Content.ModelInterface) => {
+        logger.info('current page content is loaded');
+        newContents.push(content);
+        var nextPageNum = this.currentPageNum() + this.readingDirection();
         if (this._setting.viewMode() === Setting.ViewMode.OnePage
-            || (currentPageNum + 1 > this.totalPageNum())) {
+            || nextPageNum <= 0
+            || nextPageNum > this.totalPageNum()
+            || (this._setting.detectsSpreadPage()
+                && content.element().width > content.element().height)) {
           success = true;
-          this._contents.set({status: DisplayedContents.Status.Loaded});
+          this._contents.reset(newContents);
           return $.Deferred().reject().promise();
         } else {
-          return this._pages.getPageImageDataURL(currentPageNum + 1);
+          logger.info('getting next page content: page =' + nextPageNum);
+          return this._pages.getPageContent(nextPageNum);
         }
-      }).then((dataURL: string) => {
-        return this.calculateImageSize(dataURL);
-      }).then((image: ImageModel) => {
+      }).then((content: Page.Content.ModelInterface) => {
+        logger.info('next page content is loaded');
         success = true;
-        if (this._setting.viewMode() === Setting.ViewMode.AutoSpread
-            && image.width > image.height) {  // TODO(seikichi)
-          this._contents.set({status: DisplayedContents.Status.Loaded});
+        if (this._setting.detectsSpreadPage()
+            && content.element().width > content.element().height) {
+          logger.info('spread page is detected');
+          this._contents.reset(newContents);
         } else {
-          this._contents.imagesCollection.push(image);
-          this._contents.set({status: DisplayedContents.Status.Loaded});
+          if (this.readingDirection() === ReadingDirection.Forward) {
+            newContents.push(content);
+          } else {
+            newContents.unshift(content);
+          }
+          this._contents.reset(newContents);
         }
       }).fail(() => {
-        if (!success) {
-          console.log('Error~~~~~~');
-          this._contents.set({status: DisplayedContents.Status.Error});
-        }
+        if (success) { return; }
+        logger.info('an error occured in updateContent');
+        this._contents.reset([]);
       });
-      return this._contents;
-    }
-
-    private calculateImageSize(dataURL: string): JQueryPromise<ImageModel> {
-      var deferred = $.Deferred<ImageModel>();
-      var imageElement = new HTMLImage();
-      imageElement.onload = () => {
-        deferred.resolve(new ImageModel({
-          dataURL: dataURL,
-          width: imageElement.width,
-          height: imageElement.height
-        }));
-      };
-      imageElement.onerror = () => {
-        deferred.reject();
-      }
-      imageElement.src = dataURL;
-      return deferred.promise();
     }
   }
 }
