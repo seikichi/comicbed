@@ -20,10 +20,22 @@ class InputView extends BaseView {
     this.template = template;
 
     this.events = {
+      'click #drop-zone': 'onLeftClick',
+      'contextmenu': 'onRightClick',
       'drop #drop-zone': 'onDrop',
       'dragover #drop-zone': 'onDragOver',
     };
     super();
+  }
+
+  private onLeftClick() {
+    this.book.goNextPage();
+  }
+
+  private onRightClick(event: any) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.book.goPrevPage();
   }
 
   private onDragOver(jqEvent: any) {
