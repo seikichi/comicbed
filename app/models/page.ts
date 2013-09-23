@@ -60,7 +60,7 @@ module Page {
   export function createPdfPageCollection(setting: Setting.ModelInterface,
                                           document: PDFJS.PDFDocumentProxy)
   : CollectionInterface {
-    return new PdfPageCollection(setting, document);
+    return new ContentCacheCollection(new PdfPageCollection(setting, document));
   }
 
   // private
@@ -172,138 +172,141 @@ module Page {
     }
   }
 
-  // // private
-  // class ImageCacheModel extends Backbone.Model<Attributes> implements ModelInterface {
-  //   defaults() {
-  //     return {
-  //       name: 'no page title',
-  //       originalPageNum: 0,
-  //       dataURL: '',
-  //     };
-  //   }
-  //   constructor(attributes?: Attributes, options?: any) { super(attributes, options); }
-  //   get(attributeName: string): any;
-  //   get(attributeName: 'name'): string;
-  //   get(attributeName: 'originalPageNum'): number;
-  //   get(attributeName: 'dataURL'): string;
-  //   get(attributeName: string): any { return super.get(attributeName); }
+  // private
+  class ContentCacheModel extends Backbone.Model<Attributes> implements ModelInterface {
+    defaults() {
+      return {
+        name: 'no page title',
+        originalPageNum: 0,
+        content: null,
+      };
+    }
+    constructor(attributes?: Attributes, options?: any) { super(attributes, options); }
+    name(): string { return <string>this.get('name'); }
+    originalPageNum(): number { return <number>this.get('originalPageNum'); }
+    content() { return <Content.ModelInterface>this.get('content'); }
+  }
 
-  //   name(): string { return this.get('name'); }
-  //   originalPageNum(): number { return this.get('originalPageNum'); }
-  //   dataURL(): string { return this.get('dataURL'); }
-  // }
+  class ContentCacheCollection extends
+  Backbone.Collection<ContentCacheModel, Attributes> implements CollectionInterface {
+    private _pages: CollectionInterface;
+    private _maxCacheSize: number;
+    private _maxPrefetchSize: number;
+    private _lastRequiredPage: number;
 
-  // class ImageCacheCollection extends
-  // Backbone.Collection<ImageCacheModel, Attributes> implements CollectionInterface {
-  //   private _pages: CollectionInterface;
-  //   private _maxCacheSize: number;
-  //   private _maxPrefetchSize: number;
-  //   private _lastRequiredPage: number;
+    private _deferred: JQueryDeferred<Content.ModelInterface>;
+    private _loadingPageNum: number;
 
-  //   private _deferred: JQueryDeferred<string>;
-  //   private _loadingPageNum: number;
+    constructor(pages: CollectionInterface) {
+      this.model = ContentCacheModel;
+      this._pages = pages;
+      this._maxCacheSize = 20;
+      this._maxPrefetchSize = 12;
+      this._deferred = null;
+      this._lastRequiredPage = 1;
+      super();
+    }
 
-  //   constructor(pages: CollectionInterface) {
-  //     this.model = ImageCacheModel;
-  //     this._pages = pages;
-  //     this._maxCacheSize = 20;
-  //     this._maxPrefetchSize = 12;
-  //     this._deferred = null;
-  //     this._lastRequiredPage = 1;
-  //     super();
-  //   }
+    private cacheContent(content: ContentCacheModel): void {
+      logger.info('add content to cache collection: name = ' + content.name() + ', originalPageNum = ' + content.originalPageNum());
 
-  //   private addImageCache(cache: ImageCacheModel): void {
-  //     console.log('addImageCache:', this.models);
-  //     var oldCache = this.findWhere({originalPageNum: cache.originalPageNum()});
-  //     if (!_.isUndefined(oldCache)) {
-  //       console.log('old cache found: remove');
-  //       this.remove(oldCache);
-  //     }
-  //     // adds cache to front
-  //     this.unshift(cache);
-  //     while (this.length > this._maxCacheSize) {
-  //       this.pop();
-  //     }
-  //     console.log('cache update done:', this.models);
-  //   }
+      var cache = this.findWhere({originalPageNum: content.originalPageNum()});
+      if (!_.isUndefined(cache)) {
+        logger.info('the content is already cached');
+        this.remove(cache);
+        this.unshift(cache);
+      } else {
+        this.unshift(content);
+      }
+      while (this.length > this._maxCacheSize) {
+        this.pop();
+      }
+      logger.info('cache update done');
+    }
 
-  //   private prefetch(): void {
-  //     // [_lastRequiredPage, _lastRequiredPage + _maxPrefetchSize)
-  //     // の区間を前から見ていく
-  //     console.log('!!!prefetch function called');
-  //     if (this._deferred.state() === 'pending') {
-  //       console.log('!!! this._deferred is pending');
-  //       return;
-  //     }
-  //     for (var p = this._lastRequiredPage;
-  //          p < this._lastRequiredPage + this._maxPrefetchSize; ++p) {
-  //       console.log('!!! page =', p);
-  //       var page = this._pages.at(p - 1);
-  //       if (_.isUndefined(page)) { continue; }
-  //       var originalPageNum = page.originalPageNum();
-  //       var cache = this.findWhere({originalPageNum: originalPageNum});
-  //       if (!_.isUndefined(cache)) {
-  //         console.log('!!! page ', p, ' is already cached');
-  //         continue;
-  //       }
+    private prefetchPage(p: number) {
+      logger.info('ContentCacheCollection.prefetchPage is called, p = ' + p);
+      if (p < this._lastRequiredPage + this._maxPrefetchSize) { return; }
 
-  //       console.log('!!! load page ', p);
-  //       this._loadingPageNum = originalPageNum;
-  //       this._deferred = $.Deferred<string>();
-  //       this._pages.getPageImageDataURL(p).then((dataURL: string) => {
-  //       console.log('!!! prefetch _pages.getPageCanvas succeeds');
-  //         this.addImageCache(new ImageCacheModel({
-  //           originalPageNum: originalPageNum,
-  //           dataURL: dataURL,
-  //         }));
-  //         this._deferred.resolve(dataURL);
-  //         this.prefetch();
-  //       });
-  //       break;
-  //     }
-  //   }
+      if (this._deferred.state() === 'pending') {
+        logger.info('this._deferred is pending, prefetch done');
+        return;
+      }
+      var page = this._pages.at(p - 1);
+      if (_.isUndefined(page)) { return; }
+      var originalPageNum = page.originalPageNum();
+      var cache = this.findWhere({originalPageNum: originalPageNum});
+      if (!_.isUndefined(cache)) {
+        logger.info('page ' + p + ' is already cached, skip');
+        setTimeout(() => {
+          this.prefetchPage(p + 1);
+        }, 0);
+      }
 
-  //   getPageImageDataURL(pageNum: number): JQueryPromise<string> {
-  //     this._lastRequiredPage = pageNum;
-  //     var page = this._pages.at(pageNum - 1);
-  //     if (_.isUndefined(page)) {
-  //       return $.Deferred<string>().reject().promise();
-  //     }
-  //     var originalPageNum = page.originalPageNum();
-  //     console.log(sprintf('getPageCanvas: originalPageNum = %d, pageNum = %d', originalPageNum, pageNum));
+      console.log('prefetching the page, ' + p);
+      this._loadingPageNum = originalPageNum;
+      this._deferred = $.Deferred<Content.ModelInterface>();
+      this._pages.getPageContent(p).then((content: Content.ModelInterface) => {
+        logger.info('prefetching the page ' + p + ' success')
+        this.cacheContent(new ContentCacheModel({
+          naem: page.name(),
+          originalPageNum: originalPageNum,
+          content: content,
+        }));
+        this._deferred.resolve(content);
+        setTimeout(() => {
+          this.prefetchPage(p + 1);
+        }, 0);
+      });
+    }
 
-  //     var cache = this.findWhere({originalPageNum: originalPageNum});
-  //     if (!_.isUndefined(cache)) {
-  //       console.log('cache exists');
-  //       this.prefetch();
-  //       return $.Deferred<string>().resolve(cache.dataURL()).promise();
-  //     }
+    private prefetch(): void {
+      this.prefetchPage(this._lastRequiredPage);
+    }
 
-  //     if (!_.isNull(this._deferred)) {
-  //       console.log('find current deferred');
-  //       if (this._loadingPageNum === originalPageNum) {
-  //         console.log('current deferred is loading the objective page');
-  //         return this._deferred.promise();
-  //       } else if (this._deferred.state() === 'pending') {
-  //         console.log('current deferred is loading the another page (pending), reject');
-  //         this._deferred.reject();
-  //       }
-  //     }
+    getPageContent(pageNum: number): JQueryPromise<Content.ModelInterface> {
+      logger.info('ContentCacheCollection.getPageContent is called: pageNum = ' + pageNum);
+      this._lastRequiredPage = pageNum;
+      var page = this._pages.at(pageNum - 1);
+      if (_.isUndefined(page)) {
+        return $.Deferred<Content.ModelInterface>().reject().promise();
+      }
+      var originalPageNum = page.originalPageNum();
+      logger.info(sprintf('getPageCanvas: originalPageNum = %d, pageNum = %d',
+                          originalPageNum, pageNum));
+      var cache = this.findWhere({originalPageNum: originalPageNum});
+      if (!_.isUndefined(cache)) {
+        logger.info('cache exists');
+        setTimeout(() => { this.prefetch(); }, 0.0);
+        return $.Deferred<Content.ModelInterface>().resolve(cache.content()).promise();
+      }
 
-  //     this._loadingPageNum = originalPageNum;
-  //     this._deferred = $.Deferred<string>();
-  //     this._pages.getPageImageDataURL(pageNum).then((dataURL: string) => {
-  //       console.log('_pages.getPageCanvas succeeds');
-  //       this.addImageCache(new ImageCacheModel({
-  //         originalPageNum: originalPageNum,
-  //         dataURL: dataURL,
-  //       }));
-  //       this._deferred.resolve(dataURL);
-  //       this.prefetch();
-  //     });
-  //     return this._deferred.promise();
-  //   }
-  // }
+      if (!_.isNull(this._deferred)) {
+        logger.info('find current deferred');
+        if (this._loadingPageNum === originalPageNum) {
+          logger.info('current deferred is loading the objective page');
+          return this._deferred.promise();
+        } else if (this._deferred.state() === 'pending') {
+          logger.info('current deferred is loading the another page (pending), reject');
+          this._deferred.reject();
+        }
+      }
+
+      // TODO(seikichi): original な pagenum と required な pagenum の意味を勘違いしそう
+      this._loadingPageNum = originalPageNum;
+      this._deferred = $.Deferred<Content.ModelInterface>();
+      this._pages.getPageContent(pageNum).then((content: Content.ModelInterface) => {
+        console.log('ContentCacheCollection._pages.getPageContent succeeds');
+        this.cacheContent(new ContentCacheModel({
+          name: page.name(),
+          originalPageNum: originalPageNum,
+          content: content,
+        }));
+        this._deferred.resolve(content);
+        this.prefetch();
+      });
+      return this._deferred.promise();
+    }
+  }
 }
 

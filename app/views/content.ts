@@ -4,6 +4,7 @@ import BaseView = require('views/base');
 import Book = require('models/book');
 import Page = require('models/page');
 import Setting = require('models/setting');
+import logger = require('utils/logger');
 
 export = ContentView;
 
@@ -52,11 +53,17 @@ class ContentView extends BaseView {
     var elementHeight = element.height;
 
     var scale = Math.min(width / elementWidth, height / elementHeight);
-    if (Math.abs(scale - 1.0) <= 1e-5) { return; }
-
     var newWidth = scale * elementWidth;
     var newHeight = scale * elementHeight;
-    $(element).width(newWidth).height(newHeight).css({
+
+    var $element = $(element);
+    if (Math.abs(scale - 1.0) <= 1e-5 ) {
+      logger.info('the page is already resized');
+    } else {
+      $(element).width(newWidth).height(newHeight);
+    }
+
+    $(element).css({
       position: 'relative',
       top: (height - newHeight) / 2.0,
       left: (width - newWidth) / 2.0,
@@ -96,15 +103,16 @@ class ContentView extends BaseView {
 
     var scale = Math.min(containerWidth / width, containerHeight / height);
     if (Math.abs(leftScale * scale - 1.0) <= 1e-5
-        && Math.abs(rightScale * scale - 1.0) <= 1e-5) { return; }
-
-    $left
-      .width(leftWidth * leftScale * scale)
-      .height(leftHeight * leftScale * scale);
-    $right
-      .width(rightWidth * rightScale * scale)
-      .height(rightHeight * rightScale * scale);
-
+        && Math.abs(rightScale * scale - 1.0) <= 1e-5) {
+      logger.info('the page is already resized');
+    } else {
+      $left
+        .width(leftWidth * leftScale * scale)
+        .height(leftHeight * leftScale * scale);
+      $right
+        .width(rightWidth * rightScale * scale)
+        .height(rightHeight * rightScale * scale);
+    }
     // TODO (seikichi): fix absolute (?)
     $left.css({
       position: 'absolute',
