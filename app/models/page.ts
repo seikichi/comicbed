@@ -242,7 +242,7 @@ module Page {
           continue;
         }
 
-        console.log('prefetching the page, ' + p);
+        logger.info('prefetching the page, ' + p);
         this._loadingPageNum = originalPageNum;
         this._deferred = $.Deferred<Content.ModelInterface>();
         this._pages.getPageContent(p).then((content: Content.ModelInterface) => {
@@ -291,7 +291,7 @@ module Page {
       this._loadingPageNum = originalPageNum;
       this._deferred = $.Deferred<Content.ModelInterface>();
       this._pages.getPageContent(pageNum).then((content: Content.ModelInterface) => {
-        console.log('ContentCacheCollection._pages.getPageContent succeeds');
+        logger.info('ContentCacheCollection._pages.getPageContent succeeds');
         this.cacheContent(new ContentCacheModel({
           name: page.name(),
           originalPageNum: originalPageNum,
