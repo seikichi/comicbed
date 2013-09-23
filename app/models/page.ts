@@ -142,11 +142,14 @@ module Page {
               var data: HTMLImageElement = page.objs.getData(key);
               if (!_.isNull(data)) {
                 deferred.resolve(Content.createModel(data));
+                return;
               }
             }
           });
-          logger.info('image data not found: reject');
-          deferred.reject();
+          if (deferred.state() === 'pending') {
+            logger.info('image data not found: reject');
+            deferred.reject();
+          }
         });
       } else {
         pagePromise.then(renderPage(this._setting.canvasScale())).then(() => {
