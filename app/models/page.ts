@@ -133,7 +133,7 @@ module Page {
       if (this._setting.displaysOnlyImageInPdf()) {
         // scale === 0.0 because we don't use the canvas result
         // want to use page.objs
-        pagePromise.then(renderPage(0.0)).then(() => {
+        pagePromise.then(renderPage(0)).then(() => {
           // resolve with a Data URL of the ImageObject
           _.each(_.keys(page.objs.objs), (key: string) => {
             // find objects whoose name starts with 'img_'

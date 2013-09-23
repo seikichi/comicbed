@@ -31,7 +31,7 @@ module Setting {
       attributes.page = parseInt(options['page'], 10);
     }
     if ('canvasScale' in options && !_.isNaN(parseFloat(options['canvasScale']))) {
-      attributes.canvasScale = parseFloat(options['canvasScale']);
+      attributes.canvasScale = parseInt(options['canvasScale'], 10);
     }
     if ('detectsSpreadPage' in options) {
       attributes.detectsSpreadPage = true;
@@ -61,7 +61,7 @@ module Setting {
         page: 1,
         detectsSpreadPage: false,
         displaysOnlyImageInPdf: false,
-        canvasScale: 1.0,
+        canvasScale: 1,
       };
     }
     constructor(attributes?: Attributes) {
