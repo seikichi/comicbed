@@ -52,6 +52,7 @@ class ContentView extends BaseView {
     var elementHeight = element.height;
 
     var scale = Math.min(width / elementWidth, height / elementHeight);
+    if (Math.abs(scale - 1.0) <= 1e-5) { return; }
 
     var newWidth = scale * elementWidth;
     var newHeight = scale * elementHeight;
@@ -94,6 +95,8 @@ class ContentView extends BaseView {
     var height = leftHeight;
 
     var scale = Math.min(containerWidth / width, containerHeight / height);
+    if (Math.abs(leftScale * scale - 1.0) <= 1e-5
+        && Math.abs(rightScale * scale - 1.0) <= 1e-5) { return; }
 
     $left
       .width(leftWidth * leftScale * scale)
