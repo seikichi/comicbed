@@ -16,6 +16,7 @@ declare module "templates" {
   var JST: {
     flowerpot: (data: {[key:string]: any;}) => string;
     content: (data: {[key:string]: any;}) => string;
+    input: (data: {[key:string]: any;}) => string;
   };
   export = JST;
 }

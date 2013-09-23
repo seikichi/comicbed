@@ -138,10 +138,10 @@ module Book {
             logger.info('PDFDocument is loaded');
             this._pages = Page.createPdfPageCollection(this._setting, document);
             this.set({
-              isOpen: true,
               currentPageNum: 1,
               totalPageNum: document.numPages,
               filename: file.name,
+              status: Status.Opened,
             });
             this.updateContents();
           });

@@ -9,6 +9,7 @@ import logger = require('utils/logger');
 export = ContentView;
 
 class ContentView extends BaseView {
+  events: {[event:string]:string;};
   private _book: Book.ModelInterface;
   private _contents: Page.Content.CollectionInterface;
 

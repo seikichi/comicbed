@@ -9,6 +9,7 @@ import Setting = require('models/setting');
 // subviews
 import ContentView = require('views/content');
 import KeyEventHandler = require('views/key');
+import InputView = require('views/input');
 
 // exports FlowerpotView
 export = FlowerpotView;
@@ -26,6 +27,7 @@ class FlowerpotView extends CompositeView {
     this.book = Book.create(this.setting);
     this.queryOptions = options;
     this._keyEventHandler = new KeyEventHandler(this.book);
+
     super();
   }
 
@@ -36,6 +38,8 @@ class FlowerpotView extends CompositeView {
 
     this.assign('#content', new ContentView({book: this.book}));
     this.listenTo(this.book, 'change:status', this.render);
+
+    this.assign('#input', new InputView(this.book, templates.input))
   }
 
   presenter(): string {
