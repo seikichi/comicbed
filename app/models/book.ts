@@ -158,7 +158,7 @@ module Book {
     goPrevPage(): void {
       var diff = 1;
       if (this.readingDirection() === ReadingDirection.Backward
-          && this._contents.length === 2) { diff = 2; }
+          && this._setting.viewMode() === Setting.ViewMode.TwoPage) { diff = 2; }
       if (this.currentPageNum() - diff <= 0) { return; }
       var newPageNum = Math.max(1, this.currentPageNum() - diff);
       if (this.currentPageNum() === newPageNum) { return; }
@@ -173,7 +173,7 @@ module Book {
     goNextPage(): void {
       var diff = 1;
       if (this.readingDirection() === ReadingDirection.Forward
-          && this._contents.length === 2) { diff = 2; }
+          && this._setting.viewMode() === Setting.ViewMode.TwoPage) { diff = 2; }
       if (this.currentPageNum() + diff > this.totalPageNum()) { return; }
       var newPageNum = Math.min(this.currentPageNum() + diff, this.totalPageNum());
       if (this.currentPageNum() === newPageNum) { return; }
