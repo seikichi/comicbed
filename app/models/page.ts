@@ -224,44 +224,39 @@ module Page {
       logger.info('cache update done');
     }
 
-    private prefetchPage(p: number) {
-      logger.info('ContentCacheCollection.prefetchPage is called, p = ' + p);
-      if (p < this._lastRequiredPage + this._maxPrefetchSize) { return; }
-
+    private prefetch(): void {
+      logger.info('ContentCacheCollection.prefetchPage is called');
       if (this._deferred.state() === 'pending') {
         logger.info('this._deferred is pending, prefetch done');
         return;
       }
-      var page = this._pages.at(p - 1);
-      if (_.isUndefined(page)) { return; }
-      var originalPageNum = page.originalPageNum();
-      var cache = this.findWhere({originalPageNum: originalPageNum});
-      if (!_.isUndefined(cache)) {
-        logger.info('page ' + p + ' is already cached, skip');
-        setTimeout(() => {
-          this.prefetchPage(p + 1);
-        }, 0);
+
+      for (var p = this._lastRequiredPage;
+           p < this._lastRequiredPage + this._maxPrefetchSize; ++p) {
+        var page = this._pages.at(p - 1);
+        if (_.isUndefined(page)) { continue; }
+        var originalPageNum = page.originalPageNum();
+        var cache = this.findWhere({originalPageNum: originalPageNum});
+        if (!_.isUndefined(cache)) {
+          logger.info('page ' + p + ' is already cached, skip');
+          continue;
+        }
+
+        console.log('prefetching the page, ' + p);
+        this._loadingPageNum = originalPageNum;
+        this._deferred = $.Deferred<Content.ModelInterface>();
+        this._pages.getPageContent(p).then((content: Content.ModelInterface) => {
+          logger.info('prefetching the page ' + p + ' success')
+          this.cacheContent(new ContentCacheModel({
+            naem: page.name(),
+            originalPageNum: originalPageNum,
+            content: content,
+          }));
+          this._deferred.resolve(content);
+          this.prefetch();
+        });
+        break;
       }
-
-      console.log('prefetching the page, ' + p);
-      this._loadingPageNum = originalPageNum;
-      this._deferred = $.Deferred<Content.ModelInterface>();
-      this._pages.getPageContent(p).then((content: Content.ModelInterface) => {
-        logger.info('prefetching the page ' + p + ' success')
-        this.cacheContent(new ContentCacheModel({
-          naem: page.name(),
-          originalPageNum: originalPageNum,
-          content: content,
-        }));
-        this._deferred.resolve(content);
-        setTimeout(() => {
-          this.prefetchPage(p + 1);
-        }, 0);
-      });
-    }
-
-    private prefetch(): void {
-      this.prefetchPage(this._lastRequiredPage);
     }
 
     getPageContent(pageNum: number): JQueryPromise<Content.ModelInterface> {
@@ -277,7 +272,7 @@ module Page {
       var cache = this.findWhere({originalPageNum: originalPageNum});
       if (!_.isUndefined(cache)) {
         logger.info('cache exists');
-        setTimeout(() => { this.prefetch(); }, 0.0);
+        setTimeout(() => {this.prefetch(); }, 0);
         return $.Deferred<Content.ModelInterface>().resolve(cache.content()).promise();
       }
 
