@@ -36,7 +36,7 @@ module Book {
     toJSON(): Attributes;
 
     // methods
-    // resize(width: number, height: number): void;
+    resize(width: number, height: number): void;
     contents(): Page.Content.CollectionInterface;
     close(): void;
     openURL(url: string) : void;
@@ -89,6 +89,13 @@ module Book {
       this._pages = null;
       this._contents = Page.Content.createCollection();
       super();
+    }
+
+    initialize() {
+      // fxxk code: TODO(seikichi): refactor
+      (<any>this).listenTo(this._setting, 'change', () => {
+        this.updateContents();
+      });
     }
 
     openURL(url: string) : void {
@@ -144,6 +151,8 @@ module Book {
         logger.warn('At present, this viewer can only read pdf files');
       }
     }
+
+    resize(width: number, height: number): void {}
 
     goTo(pageNum: number): void {
       logger.info('goTo ' + pageNum);

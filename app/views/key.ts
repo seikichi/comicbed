@@ -5,6 +5,7 @@ import Setting = require('models/setting');
 export = KeyEventHandler
 
 enum KeyCode {
+  Space = 32,
   Left = 37,
   Up = 38,
   Right = 39,
@@ -27,6 +28,14 @@ class KeyEventHandler {
     } else if ((event.keyCode === KeyCode.Left && isL2R)
                || (event.keyCode === KeyCode.Right && !isL2R)) {
       this._book.goPrevPage();
+    }
+
+    if (event.keyCode === KeyCode.Space) {
+      if (this._book.setting().viewMode() === Setting.ViewMode.OnePage) {
+        this._book.setting().setViewMode(Setting.ViewMode.TwoPage);
+      } else {
+        this._book.setting().setViewMode(Setting.ViewMode.OnePage);
+      }
     }
   }
 }

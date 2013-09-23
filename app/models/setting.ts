@@ -9,13 +9,15 @@ module Setting {
   export enum ViewMode { OnePage, TwoPage, }
   export enum PageDirection { L2R, R2L, }
   export interface ModelInterface {
+    // getter
     viewMode(): ViewMode;
     pageDirection(): PageDirection;
     page(): number;
-
     detectsSpreadPage(): boolean;
     displaysOnlyImageInPdf(): boolean;
     canvasScale(): number;
+    // setter
+    setViewMode(mode: ViewMode): void;
   }
   export function create(options: {[key:string]:string;} = {}): ModelInterface {
     var attributes: Attributes = {};
@@ -59,7 +61,7 @@ module Setting {
         page: 1,
         detectsSpreadPage: false,
         displaysOnlyImageInPdf: false,
-        canvasScale: 1.0
+        canvasScale: 1.0,
       };
     }
     constructor(attributes?: Attributes) {
@@ -71,5 +73,6 @@ module Setting {
     detectsSpreadPage() { return <boolean>this.get('detectsSpreadPage'); }
     displaysOnlyImageInPdf() { return <boolean>this.get('displaysOnlyImageInPdf'); }
     canvasScale() { return <number>this.get('canvasScale'); }
+    setViewMode(mode: ViewMode): void { this.set('viewMode', mode); }
   }
 }
