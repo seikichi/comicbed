@@ -79,8 +79,32 @@ class HeaderContentView extends BaseView {
       'click #displays-image': () => {
         this._setting.setDisplaysOnlyImageInPdf(!this._setting.displaysOnlyImageInPdf());
       },
+      'keypress #book-url': 'onBookUrlClick',
+      'click #open-url': 'onOpenUrl',
+      'click #open-file': 'onOpenFile',
+      'change #open-file': 'onOpenFile',
     };
     super();
+  }
+
+  private onOpenFile(jqevent: any): void {
+    var event = jqevent.originalEvent;
+    var files = event.target.files;
+    if (files.length !== 0) {
+      this._book.openFile(files[0]);
+    }
+  }
+
+  private onBookUrlClick(e: any) {
+    if (e.which === 13) { // enter key
+      this.onOpenUrl();
+    }
+  }
+
+  private onOpenUrl() {
+    var url: string = this.$('#book-url').val();
+    this.$('#book-url').val('')
+    this._book.openURL(url);
   }
 
   initialize() {

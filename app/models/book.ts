@@ -103,10 +103,11 @@ module Book {
 
     openURL(url: string) : void {
       logger.info('Book.openURL: ' + url);
-      if (this.status() !== Status.Closed) {
-        this.close();
-      }
       if (path.extname(url) === 'pdf') {
+        if (this.status() !== Status.Closed) {
+          this.close();
+        }
+
         this.set({status: Status.Opening});
         PDFJS.getDocument({url: url}).then((document: PDFJS.PDFDocumentProxy) => {
           logger.info('PDFDocument is loaded');
@@ -121,16 +122,18 @@ module Book {
         });
       } else {
         logger.warn('At present, this viewer can only read pdf files');
+        alert('Sorry, this application can only read PDF files...');
       }
     }
 
     openFile(file: File): void {
       logger.info('Book.openFile');
-      if (this.status() !== Status.Closed) {
-        this.close();
-      }
-      this.set({status: Status.Opening});
       if (file.type === 'application/pdf') {
+        if (this.status() !== Status.Closed) {
+          this.close();
+        }
+        this.set({status: Status.Opening});
+
         var fileReader = new FileReader();
         fileReader.onload = (event: any) => {
           logger.info('file is loaded: ' + file.name);
@@ -152,6 +155,7 @@ module Book {
         fileReader.readAsArrayBuffer(file);
       } else {
         logger.warn('At present, this viewer can only read pdf files');
+        alert('Sorry, this application can only read PDF files...');
       }
     }
 
