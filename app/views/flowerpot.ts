@@ -10,6 +10,7 @@ import Setting = require('models/setting');
 import ContentView = require('views/content');
 import KeyEventHandler = require('views/key');
 import InputView = require('views/input');
+import FooterView = require('views/footer');
 
 // exports FlowerpotView
 export = FlowerpotView;
@@ -39,7 +40,8 @@ class FlowerpotView extends CompositeView {
     this.assign('#content', new ContentView({book: this.book}));
     this.listenTo(this.book, 'change:status', this.render);
 
-    this.assign('#input', new InputView(this.book, templates.input))
+    this.assign('#input', new InputView(this.book, templates.input));
+    this.assign('#footer', new FooterView(this.book, templates.footer));
   }
 
   presenter(): string {

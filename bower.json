@@ -45,7 +45,7 @@
     },
     "jquery-ui": {
       "js": "ui/jquery-ui.js",
-      "css": "themes/base/jquery-ui.css"
+      "css": "themes/base/*"
     }
   }
 }

@@ -5,6 +5,10 @@ declare module "backbone" {
     export = Backbone;
 }
 
+declare module "jqueryui" {
+  export = $;
+}
+
 declare module "storage" {
     class LocalStorage {
         constructor(name: string);
@@ -17,6 +21,7 @@ declare module "templates" {
     flowerpot: (data: {[key:string]: any;}) => string;
     content: (data: {[key:string]: any;}) => string;
     input: (data: {[key:string]: any;}) => string;
+    footer: (data: {[key:string]: any;}) => string;
   };
   export = JST;
 }

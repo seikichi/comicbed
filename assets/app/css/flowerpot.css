@@ -48,3 +48,28 @@ body > div {
     padding: 0;
     border: 0;
 }
+
+#footer-active-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 25%;
+    width: 100%;
+}
+
+#footer-content-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: auto;
+    background-color: rgb(0, 0, 0);
+    opacity: 0.5;
+    color: white;
+    width: 100%;
+}
+
+#footer-content {
+    width: auto;
+    padding: 20px;
+    color: white;
+}
