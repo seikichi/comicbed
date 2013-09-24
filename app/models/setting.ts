@@ -23,6 +23,8 @@ module Setting {
     setDetectsSpreadPage(value: boolean): void;
     setDisplaysOnlyImageInPdf(value: boolean): void;
     setCanvasScale(scale: number): void;
+
+    toJSON(): {[attrib:string]:any;};
   }
   export function create(options: {[key:string]:string;} = {}): ModelInterface {
     var attributes: Attributes = {};

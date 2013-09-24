@@ -60,11 +60,13 @@ class HeaderContentView extends BaseView {
   private _book: Book.ModelInterface;
   private _template: (data: {[attr:string]:any;}) => string;
   private _$slider: JQuery;
+  private _setting: Setting.ModelInterface;
 
   constructor(book: Book.ModelInterface,
               template: (data: {[attr:string]:any;}) => string) {
     this._book = book;
     this._template = template;
+    this._setting = book.setting();
     super();
   }
 
@@ -73,9 +75,13 @@ class HeaderContentView extends BaseView {
   }
 
   presenter() {
-    return this._template(_.extend(this._book.toJSON(), {
+    return this._template(_.extend(this._setting.toJSON(), {
       protocol: location.protocol,
       host: location.host,
+      onePage: this._setting.viewMode() === Setting.ViewMode.OnePage,
+      twoPage: this._setting.viewMode() === Setting.ViewMode.TwoPage,
+      L2R: this._setting.pageDirection() === Setting.PageDirection.L2R,
+      R2L: this._setting.pageDirection() === Setting.PageDirection.R2L,
     }));
   }
 
