@@ -37,12 +37,15 @@ class ContentView extends BaseView {
 
   render() {
     this.$el.empty();
+    var names: string[] = [];
     var fragment = document.createDocumentFragment();
     for (var i = 0; i < this._contents.length; ++i) {
       var c = this._contents.at(i);
       fragment.appendChild(c.element());
+      names.push(c.name());
     }
     this.$el[0].appendChild(fragment);
+    document.title = names.join(', ');
     return this;
   }
 

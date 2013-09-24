@@ -22,6 +22,7 @@ declare module "templates" {
     content: (data: {[key:string]: any;}) => string;
     input: (data: {[key:string]: any;}) => string;
     footer: (data: {[key:string]: any;}) => string;
+    footercontent: (data: {[key:string]: any;}) => string;
   };
   export = JST;
 }

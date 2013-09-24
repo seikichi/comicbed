@@ -16,6 +16,7 @@ module Page {
       height: number;
     }
     export interface ModelInterface {
+      name(): string;
       element(): Element;
     }
     export interface CollectionInterface {
@@ -23,16 +24,17 @@ module Page {
       at(index: number): ModelInterface;
       reset(models: ModelInterface[]): CollectionInterface;
     }
-    export function createModel(element: Element): ModelInterface {
-      return new Model({element: element});
+    export function createModel(element: Element, name: string): ModelInterface {
+      return new Model({element: element, name: name});
     }
     export function createCollection(): CollectionInterface {
       return new Collection();
     }
 
-    interface Attributes { element?: Element; }
+    interface Attributes { element?: Element; name?: string; }
     class Model extends Backbone.Model<Attributes> implements ModelInterface {
       constructor(attributes?: Attributes, options?: any) { super(attributes, options); }
+      name() { return <string>this.get('name'); }
       element() { return <Element>this.get('element'); }
     }
     class Collection extends
@@ -141,7 +143,7 @@ module Page {
               logger.info('image data found in the PDF page object');
               var data: HTMLImageElement = page.objs.getData(key);
               if (!_.isNull(data)) {
-                deferred.resolve(Content.createModel(data));
+                deferred.resolve(Content.createModel(data, pageModel.name()));
                 return;
               }
             }
@@ -158,7 +160,7 @@ module Page {
           var image = new Image();
           image.onload = () => {
             logger.info('image is loaded');
-            deferred.resolve(Content.createModel(image));
+            deferred.resolve(Content.createModel(image, pageModel.name()));
           };
           image.onerror = () => {
             logger.info('error occurs in loading image: reject');

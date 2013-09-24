@@ -17,7 +17,12 @@ module Setting {
     displaysOnlyImageInPdf(): boolean;
     canvasScale(): number;
     // setter
+    // TODO (seikichi): refactor these codes by using Typescirpt's property
     setViewMode(mode: ViewMode): void;
+    setPageDirection(direction: PageDirection): void;
+    setDetectsSpreadPage(value: boolean): void;
+    setDisplaysOnlyImageInPdf(value: boolean): void;
+    setCanvasScale(scale: number): void;
   }
   export function create(options: {[key:string]:string;} = {}): ModelInterface {
     var attributes: Attributes = {};
@@ -73,6 +78,11 @@ module Setting {
     detectsSpreadPage() { return <boolean>this.get('detectsSpreadPage'); }
     displaysOnlyImageInPdf() { return <boolean>this.get('displaysOnlyImageInPdf'); }
     canvasScale() { return <number>this.get('canvasScale'); }
+
     setViewMode(mode: ViewMode): void { this.set('viewMode', mode); }
+    setPageDirection(direction: PageDirection): void { this.set('pageDirection', direction); }
+    setDetectsSpreadPage(value: boolean): void { this.set('detectsSpreadPage', value); }
+    setDisplaysOnlyImageInPdf(value: boolean): void { this.set('displaysOnlyImageInPdf', value); }
+    setCanvasScale(scale: number): void { this.set('canvasScale', scale); }
   }
 }

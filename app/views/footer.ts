@@ -1,18 +1,18 @@
 import _ = require('underscore');
 import BaseView = require('views/base');
+import CompositeView = require('views/composite');
 import Book = require('models/book');
 import Setting = require('models/setting');
 import JQueryUI = require('jqueryui');
 import logger = require('utils/logger');
+import templates = require('templates');
 
 export = FooterView;
 
-class FooterView extends BaseView {
+class FooterView extends CompositeView {
   private _book: Book.ModelInterface;
   private _template: (data: {[attr:string]:any;}) => string;
   events: {[event:string]:string;};
-
-  private _$slider: JQuery;
 
   constructor(book: Book.ModelInterface,
               template: (data: {[attr:string]:any;}) => string) {
@@ -26,15 +26,53 @@ class FooterView extends BaseView {
   }
 
   initialize() {
-    this.listenTo(this._book, 'change', this.onBookChange);
+    this.assign('#footer-content', new FooterContentView(this._book, templates.footercontent));
   }
 
-  private onBookChange() {
-    var value = this._book.currentPageNum();
-    if (this._book.setting().pageDirection() === Setting.PageDirection.R2L) {
-      value = this._book.totalPageNum() - value + 1;
-    }
-    this._$slider.slider({value: value});
+  show() {
+    logger.info('mouse enters the footer are: footer show');
+    this.$('#footer-content-area').slideDown();
+  }
+  hide() {
+    logger.info('mouse leaves the footer are: footer hide');
+    this.$('#footer-content-area').slideUp();
+  }
+
+  presenter() {
+    return this._template({});
+  }
+
+  render() {
+    super.render();
+    setTimeout(() => { this.hide(); }, 2000);
+    return this;
+  }
+}
+
+class FooterContentView extends BaseView {
+  private _book: Book.ModelInterface;
+  private _template: (data: {[attr:string]:any;}) => string;
+  private _$slider: JQuery;
+
+  constructor(book: Book.ModelInterface,
+              template: (data: {[attr:string]:any;}) => string) {
+    this._book = book;
+    this._template = template;
+    super();
+  }
+
+  initialize() {
+    this.listenTo(this._book, 'change', this.render);
+  }
+
+  presenter() {
+    return this._template(this._book.toJSON());
+  }
+
+  render() {
+    super.render();
+    this.createSlider();
+    return this;
   }
 
   private createSlider() {
@@ -61,25 +99,4 @@ class FooterView extends BaseView {
     logger.info('move to page: ' + value);
     this._book.goTo(value);
   }
-
-  show() {
-    logger.info('mouse enters the footer are: footer show');
-    this.$('#footer-content-area').slideDown();
-  }
-  hide() {
-    logger.info('mouse leaves the footer are: footer hide');
-    this.$('#footer-content-area').slideUp();
-  }
-
-  presenter() {
-    return this._template({});
-  }
-
-  render() {
-    super.render();
-    this.createSlider();
-    setTimeout(() => { this.hide(); }, 2000);
-    return this;
-  }
 }
-
