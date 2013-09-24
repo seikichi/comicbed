@@ -15,7 +15,8 @@
     "requirejs": "*",
     "handlebars": "*",
     "log4javascript": "*",
-    "sprintf": "*"
+    "sprintf": "*",
+    "jquery-ui": "*"
   },
   "exportsOverride": {
     "underscore": {
@@ -41,6 +42,10 @@
     },
     "sprintf": {
       "js": "src/sprintf.js"
+    },
+    "jquery-ui": {
+      "js": "ui/jquery-ui.js",
+      "css": "themes/base/jquery-ui.css"
     }
   }
 }

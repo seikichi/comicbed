@@ -7,6 +7,7 @@ require.config({
     handlebars: '../assets/vendor/handlebars/js/handlebars',
     log4javascript: '../assets/vendor/log4javascript/js/log4javascript',
     sprintf: '../assets/vendor/sprintf/js/sprintf',
+    jqueryui: '../assets/vendor/jquery-ui/js/jquery-ui.js',
 
     pdfjs: '../assets/app/pdfjs/js/pdf',
   },
@@ -29,7 +30,10 @@ require.config({
     },
     sprintf: {
       exports: 'sprintf'
-    }
+    },
+    jqueryui: {
+      deps: ['jquery'],
+    },
   }
 });
 
