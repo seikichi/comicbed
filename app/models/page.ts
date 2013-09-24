@@ -54,6 +54,8 @@ module Page {
     length: number;
     at(index: number): ModelInterface;
     getPageContent(pageNum: number): JQueryPromise<Content.ModelInterface>;
+    // TODO (refactor): seikichi
+    clearCache(): void;
   }
   export interface Attributes {
     name?: string;
@@ -96,6 +98,8 @@ module Page {
       });
       super(models);
     }
+
+    clearCache(): void {}
 
     getPageContent(pageNum: number): JQueryPromise<Content.ModelInterface> {
       logger.info('PdfPageCollection.getPageElement: pageNum = ' + pageNum);
@@ -207,6 +211,10 @@ module Page {
       this._deferred = null;
       this._lastRequiredPage = 1;
       super();
+    }
+
+    clearCache(): void {
+      this.reset([]);
     }
 
     private cacheContent(content: ContentCacheModel): void {

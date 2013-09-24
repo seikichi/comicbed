@@ -61,17 +61,30 @@ class HeaderContentView extends BaseView {
   private _template: (data: {[attr:string]:any;}) => string;
   private _$slider: JQuery;
   private _setting: Setting.ModelInterface;
+  events: {[event:string]: any;};
 
   constructor(book: Book.ModelInterface,
               template: (data: {[attr:string]:any;}) => string) {
     this._book = book;
     this._template = template;
     this._setting = book.setting();
+    this.events = {
+      'click #one-page': () => { this._setting.setViewMode(Setting.ViewMode.OnePage); },
+      'click #two-page': () => { this._setting.setViewMode(Setting.ViewMode.TwoPage); },
+      'click #l2r': () => { this._setting.setPageDirection(Setting.PageDirection.L2R); },
+      'click #r2l': () => { this._setting.setPageDirection(Setting.PageDirection.R2L); },
+      'click #detects-spread-page': () => {
+        this._setting.setDetectsSpreadPage(!this._setting.detectsSpreadPage());
+      },
+      'click #displays-image': () => {
+        this._setting.setDisplaysOnlyImageInPdf(!this._setting.displaysOnlyImageInPdf());
+      },
+    };
     super();
   }
 
   initialize() {
-    this.listenTo(this._book, 'change', this.render);
+    this.listenTo(this._setting, 'change', this.render);
   }
 
   presenter() {
@@ -87,6 +100,16 @@ class HeaderContentView extends BaseView {
 
   render() {
     super.render();
+    // TODO(seikichi):
+    $('#canvas-scale-slider').slider({
+      min: 1,
+      max: 5,
+      value: this._setting.canvasScale(),
+      change: (event: any, ui: any) => {
+        var scale: number = ui.value;
+        this._setting.setCanvasScale(scale);
+      },
+    });
     return this;
   }
 }

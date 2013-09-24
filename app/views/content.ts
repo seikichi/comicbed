@@ -21,10 +21,7 @@ class ContentView extends BaseView {
 
   initialize() {
     $(window).resize(() => { this.fit() });
-    this.listenTo(this._contents, 'all', () => {
-      this.render();
-      this.fit();
-    });
+    this.listenTo(this._contents, 'all', this.render);
   }
 
   private fit() {
@@ -46,6 +43,7 @@ class ContentView extends BaseView {
     }
     this.$el[0].appendChild(fragment);
     document.title = names.join(', ');
+    this.fit();
     return this;
   }
 

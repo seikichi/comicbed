@@ -1,24 +1,31 @@
-<button id="open-file">Open File</button>
-<button id="open-url">Open Url</button>
-<input type="text" id="book-url" placeholder="{{protocol}}//{{host}}"/>
+<div>
+  <button id="open-file">Open File</button>
+  <button id="open-url">Open Url</button>
+  <input type="text" id="book-url" placeholder="{{protocol}}//{{host}}"/>
+</div>
 <div class="radio">
   Display:
-  <input type="radio" id="one-page" name="radio" {{#if onePage}}checked{{/if}}/>
+  <input type="radio" id="one-page" {{#if onePage}}checked{{/if}} />
   <label for="one-page">1 Page</label>
-  <input type="radio" id="two-page" name="radio" {{#if twoPage}}checked{{/if}}/>
+  <input type="radio" id="two-page" {{#if twoPage}}checked{{/if}} />
   <label for="two-page">2 Page</label>
 </div>
 <div class="radio">
   Page Direction:
-  <input type="radio" id="l2r" name="radio" {{#if L2R}}checked{{/if}}/><label for="l2r">Left to Right</label>
-  <input type="radio" id="r2l" name="radio" {{#if R2L}}checked{{/if}}/><label for="r2l">Right to Left</label>
+  <input type="radio" id="l2r" {{#if L2R}}checked{{/if}} /><label for="l2r">Left to Right</label>
+  <input type="radio" id="r2l" {{#if R2L}}checked{{/if}} /><label for="r2l">Right to Left</label>
 </div>
-<label for="detects-spread-page">Detects Spread Page: </label>
-<input type="checkbox" id="detects-spread-page" {{#if detectsSpreadPage}}checked{{/if}}/>
 <div>
-  Canvas Scale: <input type="text" id="canvas-scale" value="{{canvasScale}}">
+  <label for="detects-spread-page">Detects Spread Page: </label>
+  <input type="checkbox" id="detects-spread-page" {{#if detectsSpreadPage}}checked{{/if}} />
 </div>
-<label for="displays-image">Displays Image Only in PDF Files: </label>
-<input type="checkbox" id="displays-image" {{#if displaysOnlyImageInPdf}}checked{{/if}}/>
-
+<div>
+  <label for="displays-image">Displays Image Only in PDF Files: </label>
+  <input type="checkbox" id="displays-image" {{#if displaysOnlyImageInPdf}}checked{{/if}} />
+</div>
+{{#unless displaysOnlyImageInPdf}}
+<div>
+  Canvas Scale: {{canvasScale}} <div style="margin:10px; width:25%" id="canvas-scale-slider"></div>
+</div>
+{{/unless}}
 
