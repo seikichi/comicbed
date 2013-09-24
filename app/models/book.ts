@@ -156,10 +156,11 @@ module Book {
 
     goTo(pageNum: number): void {
       logger.info('goTo ' + pageNum);
+      if (pageNum === this.currentPageNum()) { return; }
       if (pageNum <= 0 || this.totalPageNum() < pageNum) { return; }
       this.set({
         currentPageNum: pageNum,
-        readingDirection: ReadingDirection.Forward,
+        readingDirection: this.readingDirection(),
       });
       this.updateContents();
     }
