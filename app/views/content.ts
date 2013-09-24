@@ -65,7 +65,7 @@ class ContentView extends BaseView {
     }
 
     $(element).css({
-      position: 'relative',
+      position: 'absolute',
       top: (height - newHeight) / 2.0,
       left: (width - newWidth) / 2.0,
     });
