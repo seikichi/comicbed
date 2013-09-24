@@ -11,6 +11,7 @@ import ContentView = require('views/content');
 import KeyEventHandler = require('views/key');
 import InputView = require('views/input');
 import FooterView = require('views/footer');
+import HeaderView = require('views/header');
 
 // exports FlowerpotView
 export = FlowerpotView;
@@ -41,6 +42,7 @@ class FlowerpotView extends CompositeView {
     this.listenTo(this.book, 'change:status', this.render);
 
     this.assign('#input', new InputView(this.book, templates.input));
+    this.assign('#header', new HeaderView(this.book, templates.header));
     this.assign('#footer', new FooterView(this.book, templates.footer));
   }
 

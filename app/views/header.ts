@@ -7,41 +7,42 @@ import JQueryUI = require('jqueryui');
 import logger = require('utils/logger');
 import templates = require('templates');
 
-export = FooterView;
+export = HeaderView;
 
-class FooterView extends CompositeView {
+// TODO (seikichi): footer のコピペだったり色々クズコードなので何とかする
+
+class HeaderView extends CompositeView {
   private _book: Book.ModelInterface;
   private _template: (data: {[attr:string]:any;}) => string;
-  events: {[event:string]:string;};
   private _mouseover: boolean;
-
+  events: {[event:string]:string;};
 
   constructor(book: Book.ModelInterface,
               template: (data: {[attr:string]:any;}) => string) {
     this._book = book;
     this._template = template;
     this.events = {
-      'mouseenter #footer-active-area': 'show',
-      'mouseleave #footer-active-area': 'hide',
+      'mouseenter #header-active-area': 'show',
+      'mouseleave #header-active-area': 'hide',
     };
     this._mouseover = false;
     super();
   }
 
   initialize() {
-    this.assign('#footer-content', new FooterContentView(this._book, templates.footercontent));
+    this.assign('#header-content', new HeaderContentView(this._book, templates.headercontent));
   }
 
   show() {
     this._mouseover = true;
-    logger.info('mouse enters the footer are: footer show');
-    this.$('#footer-content-area').slideDown();
+    logger.info('mouse enters the header area: header show');
+    this.$('#header-content-area').slideDown();
   }
   hide() {
     this._mouseover = false;
-    logger.info('mouse leaves the footer are: footer hide');
-    // this.$('#footer-content-area').slideUp();
-    setTimeout(() => { if (!this._mouseover) { this.$('#footer-content-area').slideUp(); } }, 1000);
+    logger.info('mouse leaves the header area: header hide');
+    // this.$('#header-content-area').slideUp();
+    setTimeout(() => { if (!this._mouseover) { this.$('#header-content-area').slideUp(); } }, 1000);
   }
 
   presenter() {
@@ -55,7 +56,7 @@ class FooterView extends CompositeView {
   }
 }
 
-class FooterContentView extends BaseView {
+class HeaderContentView extends BaseView {
   private _book: Book.ModelInterface;
   private _template: (data: {[attr:string]:any;}) => string;
   private _$slider: JQuery;
@@ -72,37 +73,16 @@ class FooterContentView extends BaseView {
   }
 
   presenter() {
-    return this._template(this._book.toJSON());
+    return this._template(_.extend(this._book.toJSON(), {
+      protocol: location.protocol,
+      host: location.host,
+    }));
   }
 
   render() {
     super.render();
-    this.createSlider();
     return this;
   }
-
-  private createSlider() {
-    var value = this._book.currentPageNum();
-    if (this._book.setting().pageDirection() === Setting.PageDirection.R2L) {
-      value = this._book.totalPageNum() - value + 1;
-    }
-    this._$slider = this.$('.slider');
-    this._$slider.slider({
-      min: 1,
-      max: this._book.totalPageNum(),
-      step: 1,
-      value: value,
-      change: (event: any, ui: any) => {
-        this.onSliderChange(ui.value);
-      }
-    });
-  }
-
-  private onSliderChange(value: number) {
-    if (this._book.setting().pageDirection() === Setting.PageDirection.R2L) {
-      value = this._book.totalPageNum() - value + 1;
-    }
-    logger.info('move to page: ' + value);
-    this._book.goTo(value);
-  }
 }
+
+

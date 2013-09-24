@@ -62,14 +62,38 @@ body > div {
     bottom: 0;
     left: 0;
     height: auto;
-    background-color: rgb(0, 0, 0);
-    opacity: 0.5;
+    background-color: rgba(0, 0, 0, 0.5);
     color: white;
     width: 100%;
 }
 
+#header {
+    z-index: +1;
+}
+
+#header-active-area {
+    z-index: +1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25%;
+    width: 100%;
+}
+
+#header-content-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    width: 100%;
+}
+
+#header-content,
 #footer-content {
     width: auto;
     padding: 20px;
     color: white;
 }
+
