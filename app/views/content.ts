@@ -42,7 +42,7 @@ class ContentView extends BaseView {
       names.push(c.name());
     }
     this.$el[0].appendChild(fragment);
-    document.title = names.join(', ');
+    document.title = this._book.filename() + ': ' + names.join(', ');
     this.fit();
     return this;
   }
