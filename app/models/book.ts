@@ -94,7 +94,9 @@ module Book {
     initialize() {
       // fxxk code: TODO(seikichi): refactor
       (<any>this).listenTo(this._setting, 'change:canvasScale change:displaysOnlyImageInPdf', () => {
-        this._pages.clearCache();
+        if (!_.isNull(this._pages)) {
+          this._pages.clearCache();
+        }
       });
       (<any>this).listenTo(this._setting, 'change', () => {
         this.updateContents();
