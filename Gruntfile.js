@@ -13,6 +13,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks("grunt-contrib-requirejs");
   grunt.loadNpmTasks("grunt-contrib-uglify");
   grunt.loadNpmTasks("grunt-typescript");
+  grunt.loadNpmTasks("grunt-preprocess");
   // tasks
   grunt.registerTask('setup', ['bower']);
   grunt.registerTask('default', [
@@ -25,6 +26,7 @@ module.exports = function(grunt) {
     'typescript',
     'handlebars',
     'copy',
+    'preprocess',
     'uglify',
     'requirejs',
     'connect:release'
@@ -49,6 +51,15 @@ module.exports = function(grunt) {
         }
       }
     },
+    preprocess: {
+      release: {
+        src: ['dist/index.html', 'app/utils/logger.js'],
+        options: {
+          inline: true,
+          context: {}
+        }
+      }
+    },
     copy: {
       release: {
         files: [
@@ -67,7 +78,8 @@ module.exports = function(grunt) {
           module: 'amd',
           base_path: '',
           sourcemap: true,
-          noImplicitAny: true
+          noImplicitAny: true,
+          comments: true
         }
       }
     },
