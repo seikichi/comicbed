@@ -167,7 +167,7 @@ module Book {
           this._pages = pages;
           this.set({
             currentPageNum: 1,
-            totalPageNum: pages.length,
+            totalPageNum: pages.totalPageNum(),
             filename: file.name,
             status: Status.Opened,
           });

@@ -57,6 +57,7 @@ module Page {
     getPageContent(pageNum: number): JQueryPromise<Content.ModelInterface>;
     // TODO (refactor): seikichi
     clearCache(): void;
+    totalPageNum(): number;
   }
   export interface Attributes {
     name?: string;
@@ -75,7 +76,7 @@ module Page {
     var pages = new ZipPageCollection(file, setting);
     (<any>pages).on('reset', () => {
       if (pages.opened) {
-        deferred.resolve(pages);
+        deferred.resolve(new ContentCacheCollection(pages));
       } else {
         deferred.reject();
       }
@@ -116,6 +117,7 @@ module Page {
     }
 
     clearCache(): void {}
+    totalPageNum(): number { return this.length; }
 
     getPageContent(pageNum: number): JQueryPromise<Content.ModelInterface> {
       logger.info('PdfPageCollection.getPageElement: pageNum = ' + pageNum);
@@ -272,6 +274,8 @@ module Page {
       this.reset([]);
     }
 
+    totalPageNum(): number { return this._pages.totalPageNum(); }
+
     private cacheContent(content: ContentCacheModel): void {
       logger.info('add content to cache collection: name = ' + content.name() + ', originalPageNum = ' + content.originalPageNum());
 
@@ -417,6 +421,7 @@ module Page {
     }
 
     clearCache(): void {}
+    totalPageNum(): number { return this.length; }
 
     getPageContent(pageNum: number): JQueryPromise<Content.ModelInterface> {
       logger.info('ZipPageCollection.getPageElement: pageNum = ' + pageNum);
