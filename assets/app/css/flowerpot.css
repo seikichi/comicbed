@@ -5,6 +5,8 @@ body {
     margin: 0;
     padding: 0;
     border: 0;
+    /* TODO(seikichi): examine about this css option */
+    overflow: hidden;
 }
 
 /* TODO(seikichi): fix me! */
