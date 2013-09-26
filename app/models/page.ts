@@ -5,6 +5,7 @@ import PDFJS = require('pdfjs');
 import sprintf = require('sprintf');
 import Setting = require('models/setting');
 import logger = require('utils/logger');
+import jz = require('jsziptools');
 
 export = Page;
 
@@ -65,6 +66,21 @@ module Page {
                                           document: PDFJS.PDFDocumentProxy)
   : CollectionInterface {
     return new ContentCacheCollection(new PdfPageCollection(setting, document));
+  }
+
+  export function createZipPageCollectionFromFile(file: File,
+                                                  setting: Setting.ModelInterface)
+  : JQueryPromise<CollectionInterface> {
+    var deferred = $.Deferred<CollectionInterface>();
+    var pages = new ZipPageCollection(file, setting);
+    (<any>pages).on('reset', () => {
+      if (pages.opened) {
+        deferred.resolve(pages);
+      } else {
+        deferred.reject();
+      }
+    });
+    return deferred.promise();
   }
 
   // private
@@ -350,6 +366,91 @@ module Page {
         this.prefetch();
       });
       return this._deferred.promise();
+    }
+  }
+
+  // zip
+  class ZipPageModel extends Backbone.Model<Attributes> implements ModelInterface {
+    defaults() {
+      return {name: 'no page title', originalPageNum: 0};
+    }
+    constructor(attributes?: Attributes, options?: any) { super(attributes, options); }
+    name(): string { return <string>this.get('name'); }
+    originalPageNum(): number { return <number>this.get('originalPageNum'); }
+  }
+
+  class ZipPageCollection extends
+  Backbone.Collection<ZipPageModel, Attributes> implements CollectionInterface {
+    private _file: File;
+    private _setting: Setting.ModelInterface;
+    private _reader: jz.zip.ZipArchiveReader;
+
+    // TODO(seikichi): fix
+    public opened: boolean;
+
+    constructor(file: File, setting: Setting.ModelInterface) {
+      this._file = file;
+      this._setting = setting;
+      this.model = ZipPageModel;
+      this.opened = false;
+      super([]);
+    }
+
+    initialize() {
+      logger.info('unpacking zip file');
+      jz.zip.unpack(this._file).then((reader) => {
+        logger.info('zip archive reader initialized');
+        this.opened = true;
+        this._reader = reader;
+        var filenames = reader.getFileNames();
+        logger.info('this zip file contains ' + filenames.length + ' files.');
+        this.reset(_.map(filenames, (filename, index) => {
+          return new ZipPageModel({
+            name: filename,
+            originalPageNum: index + 1,
+          });
+        }));
+      }).fail((reason: any) => {
+        logger.info('unpacking zip file is failed', reason);
+        this.reset([]);
+      });
+    }
+
+    clearCache(): void {}
+
+    getPageContent(pageNum: number): JQueryPromise<Content.ModelInterface> {
+      logger.info('ZipPageCollection.getPageElement: pageNum = ' + pageNum);
+      var deferred = $.Deferred<Content.ModelInterface>();
+
+      var pageModel = this.at(pageNum - 1);
+      if (_.isUndefined(pageModel)) {
+        logger.info('rejected: wrong page number');
+        deferred.reject();
+        return deferred.promise();
+      }
+
+      // TODO
+      // - filename の拡張子調べてダメならreject
+      // - png か jpeg なら dataURI で read してimg生成Yay!
+
+      var filename = pageModel.name();
+      this._reader.getFileAsDataURL(filename).then((dataURL: string) => {
+        logger.info('file (blob) is extracted: filename =', filename);
+        var image = new Image();
+        image.onload = () => {
+          logger.info('image is loaded');
+          deferred.resolve(Content.createModel(image, pageModel.name()));
+        };
+        image.onerror = () => {
+          logger.info('error occurs in loading image: reject');
+          deferred.reject();
+        };
+        image.src = dataURL;
+      }).fail((reason: any) => {
+        logger.info('rejected: ', reason);
+        deferred.reject();
+      });
+      return deferred.promise();
     }
   }
 }

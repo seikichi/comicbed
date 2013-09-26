@@ -155,8 +155,26 @@ module Book {
           });
         };
         fileReader.readAsArrayBuffer(file);
+      } else if (file.type === 'application/zip') {
+        if (this.status() !== Status.Closed) {
+          this.close();
+        }
+        // TODO (seikichi): page の initialize が済むタイミングうんたらを考えろ (眠い)
+        this.set({status: Status.Opening});
+        var zipPagesPromise = Page.createZipPageCollectionFromFile(file, this._setting);
+        zipPagesPromise.then((pages: Page.CollectionInterface) => {
+          logger.info('Zip archve is loaded');
+          this._pages = pages;
+          this.set({
+            currentPageNum: 1,
+            totalPageNum: pages.length,
+            filename: file.name,
+            status: Status.Opened,
+          });
+          this.updateContents();
+        });
       } else {
-        logger.warn('At present, this viewer can only read pdf files');
+        logger.warn('At present, this viewer can only read pdf or zip files');
         alert('Sorry, this application can only read PDF files...');
       }
     }

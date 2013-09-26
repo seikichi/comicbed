@@ -8,7 +8,7 @@ require.config({
     log4javascript: '../assets/vendor/log4javascript/js/log4javascript',
     sprintf: '../assets/vendor/sprintf/js/sprintf',
     jqueryui: '../assets/vendor/jquery-ui/js/jquery-ui',
-    jsziptools: '../assets/vendor/jsziptools/js/jsziptools/jsziptools.min',
+    jsziptools: '../assets/vendor/jsziptools/js/jsziptools.min',
 
     pdfjs: '../assets/app/pdfjs/js/pdf',
   },

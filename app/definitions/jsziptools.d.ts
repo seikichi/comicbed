@@ -20,5 +20,6 @@ declare module jz {
     function unpack(param: File): utils.Promise<ZipArchiveReader>;
     function unpack(param: ArrayBuffer): utils.Promise<ZipArchiveReader>;
     function unpack(param: { buffer: ArrayBuffer; encoding: string;}): utils.Promise<ZipArchiveReader>;
+    function unpack(param: { file: File; encoding: string;}): utils.Promise<ZipArchiveReader>;
   }
 }
