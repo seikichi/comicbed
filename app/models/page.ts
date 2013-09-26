@@ -140,6 +140,7 @@ module Page {
         // scale === 0.0 because we don't use the canvas result
         // want to use page.objs
         pagePromise.then(renderPage(0)).then(() => {
+          var success = false;
           // resolve with a Data URL of the ImageObject
           _.each(_.keys(page.objs.objs), (key: string) => {
             // find objects whoose name starts with 'img_'
@@ -147,13 +148,51 @@ module Page {
               logger.info('image data found in the PDF page object');
               var data: HTMLImageElement = page.objs.getData(key);
               if (!_.isNull(data)) {
-                deferred.resolve(Content.createModel(data, pageModel.name()));
+                if ('data' in data) {
+                  logger.info('`data` in data, this XObject is not JpegStream, start to render canvas:');
+                  logger.info(sprintf('data.widht = %d, data.height = %d', data.width, data.height));
+                  var imageCanvas = document.createElement('canvas');
+                  var imageContext = imageCanvas.getContext('2d');
+                  var width = data.width;
+                  var height = data.height;
+                  imageCanvas.width = width;
+                  imageCanvas.height = height;
+                  var tmpImageData = imageContext.createImageData(width, height);
+                  var pixelData = (<any>data).data;
+                  var tmpImageDataPixels = tmpImageData.data;
+                  if ('set' in <any>tmpImageDataPixels) {
+                    (<any>tmpImageDataPixels).set(pixelData);
+                  } else {
+                    for (var i = 0, length = tmpImageDataPixels.length; i < length; i++) {
+                      tmpImageDataPixels[i] = pixelData[i];
+                    }
+                  }
+                  imageContext.putImageData(tmpImageData, 0, 0);
+                  var dataURL = imageCanvas.toDataURL();
+                  var image: HTMLImageElement = new Image();
+                  image.onload = () => {
+                    logger.info('image is loaded');
+                    deferred.resolve(Content.createModel(image, pageModel.name()));
+                  };
+                  image.onerror = () => {
+                    logger.info('error occurs in loading image: reject');
+                    deferred.reject();
+                  };
+                  image.src = dataURL;
+                } else {
+                  deferred.resolve(Content.createModel(data, pageModel.name()));
+                }
+
+                // TODO(seikichi): fix
+                (<any>page).pendingDestroy = true;
+                (<any>page)._tryDestroy();
+                success = true;
                 return;
               }
             }
           });
-          if (deferred.state() === 'pending') {
-            logger.info('image data not found: reject');
+          if (!success) {
+            logger.warn('image data not found: reject');
             deferred.reject();
           }
         });

@@ -4503,7 +4503,7 @@ var WorkerTransport = (function WorkerTransportClosure() {
             var MAX_IMAGE_SIZE_TO_STORE = 8000000;
             if ('data' in imageData &&
                 imageData.data.length > MAX_IMAGE_SIZE_TO_STORE) {
-              pageProxy.cleanupAfterRender = true;
+              // pageProxy.cleanupAfterRender = true;
             }
             break;
           default:
