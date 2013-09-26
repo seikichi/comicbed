@@ -55,8 +55,8 @@ class ContentView extends BaseView {
     var elementHeight = element.height;
 
     var scale = Math.min(width / elementWidth, height / elementHeight);
-    var newWidth = scale * elementWidth;
-    var newHeight = scale * elementHeight;
+    var newWidth = Math.floor(scale * elementWidth);
+    var newHeight = Math.floor(scale * elementHeight);
 
     var $element = $(element);
     if (Math.abs(scale - 1.0) <= 1e-5 ) {
@@ -67,8 +67,8 @@ class ContentView extends BaseView {
 
     $(element).css({
       position: 'absolute',
-      top: (height - newHeight) / 2.0,
-      left: (width - newWidth) / 2.0,
+      top: Math.floor((height - newHeight) / 2.0),
+      left: Math.floor((width - newWidth) / 2.0),
     });
   }
 
@@ -109,22 +109,22 @@ class ContentView extends BaseView {
       logger.info('the page is already resized');
     } else {
       $left
-        .width(leftWidth * leftScale * scale)
-        .height(leftHeight * leftScale * scale);
+        .width(Math.floor(leftWidth * leftScale * scale))
+        .height(Math.floor(leftHeight * leftScale * scale));
       $right
-        .width(rightWidth * rightScale * scale)
-        .height(rightHeight * rightScale * scale);
+        .width(Math.floor(rightWidth * rightScale * scale))
+        .height(Math.floor(rightHeight * rightScale * scale));
     }
     // TODO (seikichi): fix absolute (?)
     $left.css({
       position: 'absolute',
-      top: (containerHeight - $left.height()) / 2,
-      left: (containerWidth - $left.width() - $right.width()) / 2
+      top: Math.floor((containerHeight - $left.height()) / 2),
+      left: Math.floor((containerWidth - $left.width() - $right.width()) / 2)
     });
     $right.css({
       position: 'absolute',
-      top: (containerHeight - $left.height()) / 2,
-      left: $left.width() + (containerWidth - $left.width() - $right.width()) / 2
+      top: Math.floor((containerHeight - $left.height()) / 2),
+      left: Math.floor($left.width() + (containerWidth - $left.width() - $right.width()) / 2)
     });
   }
 }

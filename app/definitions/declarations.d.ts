@@ -9,6 +9,10 @@ declare module "jqueryui" {
   export = $;
 }
 
+declare module "jsziptools" {
+  export = jz;
+}
+
 declare module "storage" {
     class LocalStorage {
         constructor(name: string);

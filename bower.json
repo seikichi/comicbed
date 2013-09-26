@@ -16,6 +16,7 @@
     "handlebars": "*",
     "log4javascript": "*",
     "sprintf": "*",
+    "jsziptools": "*",
     "jquery-ui": "*"
   },
   "exportsOverride": {
@@ -42,6 +43,9 @@
     },
     "sprintf": {
       "js": "src/sprintf.js"
+    },
+    "jsziptools": {
+      "js": "dist/*.js"
     },
     "jquery-ui": {
       "js": "ui/jquery-ui.js",
