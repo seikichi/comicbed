@@ -11,6 +11,7 @@ require.config({
     jsziptools: '../assets/vendor/jsziptools/js/jsziptools.min',
 
     pdfjs: '../assets/app/pdfjs/js/pdf',
+    unrarlib: '../assets/app/unrarlib/js/unrarlib',
   },
   shim: {
     underscore: {
@@ -38,6 +39,9 @@ require.config({
     },
     jsziptools: {
       exports: 'jz'
+    },
+    unrarlib: {
+      exports: 'Module'
     }
   }
 });

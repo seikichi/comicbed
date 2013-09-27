@@ -1,6 +1,23 @@
 /// <reference path="./DefinitelyTyped/jquery/jquery.d.ts"/>
 /// <reference path="./backbone.d.ts"/>
 
+declare module "unrarlib" {
+  var Module: {
+    cwrap: (name: string, retType: string, argTypes: string[]) => (...data: any[]) => any;
+    FS_createDataFile(parent: string,
+                      name: string,
+                      data: ArrayBuffer,
+                      canRead: boolean,
+                      canWrite: boolean): void;
+    FS_deleteFile(path: string): void;
+    getValue(ptr: number, type: string): number;
+    Pointer_stringify(ptr: number): string;
+
+    HEAPU8: Uint8Array;
+  };
+  export = Module;
+}
+
 declare module "backbone" {
     export = Backbone;
 }

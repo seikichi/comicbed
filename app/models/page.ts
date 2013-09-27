@@ -6,6 +6,8 @@ import sprintf = require('sprintf');
 import Setting = require('models/setting');
 import logger = require('utils/logger');
 import jz = require('jsziptools');
+import UnRar = require('utils/unrar');
+import strings = require('utils/strings');
 
 export = Page;
 
@@ -57,6 +59,7 @@ module Page {
     getPageContent(pageNum: number): JQueryPromise<Content.ModelInterface>;
     // TODO (refactor): seikichi
     clearCache(): void;
+    close(): void;
     totalPageNum(): number;
   }
   export interface Attributes {
@@ -82,6 +85,11 @@ module Page {
       }
     });
     return deferred.promise();
+  }
+
+  export function createRarPageCollection(data: ArrayBuffer) : CollectionInterface {
+    var pages = new ContentCacheCollection(new RarPageCollection(data));
+    return pages;
   }
 
   // private
@@ -117,6 +125,7 @@ module Page {
     }
 
     clearCache(): void {}
+    close(): void {}
     totalPageNum(): number { return this.length; }
 
     getPageContent(pageNum: number): JQueryPromise<Content.ModelInterface> {
@@ -274,6 +283,8 @@ module Page {
       this.reset([]);
     }
 
+    close(): void { this._pages.close(); }
+
     totalPageNum(): number { return this._pages.totalPageNum(); }
 
     private cacheContent(content: ContentCacheModel): void {
@@ -422,6 +433,7 @@ module Page {
 
     clearCache(): void {}
     totalPageNum(): number { return this.length; }
+    close(): void {}
 
     getPageContent(pageNum: number): JQueryPromise<Content.ModelInterface> {
       logger.info('ZipPageCollection.getPageElement: pageNum = ' + pageNum);
@@ -455,6 +467,88 @@ module Page {
         logger.info('rejected: ', reason);
         deferred.reject();
       });
+      return deferred.promise();
+    }
+  }
+
+  // rar
+  class RarPageModel extends Backbone.Model<Attributes> implements ModelInterface {
+    defaults() {
+      return {name: 'no page title', originalPageNum: 0};
+    }
+    constructor(attributes?: Attributes, options?: any) { super(attributes, options); }
+    name(): string { return <string>this.get('name'); }
+    originalPageNum(): number { return <number>this.get('originalPageNum'); }
+  }
+
+  class RarPageCollection extends
+  Backbone.Collection<RarPageModel, Attributes> implements CollectionInterface {
+    private _data: ArrayBuffer;
+    private _unrar: UnRar;
+
+    constructor(data: ArrayBuffer) {
+      this._data = data;
+      this.model = ZipPageModel;
+      this._unrar = new UnRar(this._data);
+      var models: RarPageModel[] = [];
+      var fileNames = this._unrar.getFileNames();
+      for (var i = 0, len = fileNames.length; i < len; ++i) {
+        models.push(new RarPageModel({
+          name: fileNames[i],
+          originalPageNum: i + 1,
+        }));
+      }
+      super(models);
+    }
+
+    clearCache(): void {}
+    totalPageNum(): number { return this.length; }
+    close(): void { this._unrar.close(); }
+
+    getPageContent(pageNum: number): JQueryPromise<Content.ModelInterface> {
+      logger.info('RarPageCollection.getPageElement: pageNum = ' + pageNum);
+      var deferred = $.Deferred<Content.ModelInterface>();
+
+      var pageModel = this.at(pageNum - 1);
+      if (_.isUndefined(pageModel)) {
+        logger.info('rejected: wrong page number');
+        deferred.reject();
+        return deferred.promise();
+      }
+
+      var filename = pageModel.name();
+      var format = '';
+      if (strings.endsWith(filename, '.png')) {
+        format = 'png';
+      } else if (strings.endsWith(filename, '.jpg') || strings.endsWith(filename, '.jpeg')) {
+        format = 'jpeg';
+      } else {
+        deferred.reject();
+      }
+
+      var data = this._unrar.getFileContent(filename);
+      if (_.isNull(data)) {
+        deferred.reject();
+      } else {
+        var str = '';
+        var length = data.length;
+        for (var n = 0; n < length; ++n) {
+          str += String.fromCharCode(data[n]);
+        }
+        var base64Data: string = window.btoa(str);
+        var dataURL = 'data:image/' + format + ';base64,' + base64Data;
+
+        var image = new Image();
+        image.onload = () => {
+          logger.info('image is loaded');
+          deferred.resolve(Content.createModel(image, pageModel.name()));
+        };
+        image.onerror = () => {
+          logger.info('error occurs in loading image: reject');
+          deferred.reject();
+        };
+        image.src = dataURL;
+      }
       return deferred.promise();
     }
   }

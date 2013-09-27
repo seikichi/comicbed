@@ -173,9 +173,32 @@ module Book {
           });
           this.updateContents();
         });
+      } else if (file.type === 'application/x-rar-compressed' ||
+                 file.type === 'application/x-rar') {
+        if (this.status() !== Status.Closed) {
+          this.close();
+        }
+        this.set({status: Status.Opening});
+
+        var fileReader = new FileReader();
+        fileReader.onload = (event: any) => {
+          logger.info('file is loaded: ' + file.name);
+          var buffer: ArrayBuffer = event.target.result;
+
+          this._pages = Page.createRarPageCollection(buffer);
+          this.set({
+            currentPageNum: 1,
+            totalPageNum: this._pages.totalPageNum(),
+            filename: file.name,
+            status: Status.Opened,
+          });
+          this.updateContents();
+        }
+        fileReader.readAsArrayBuffer(file);
       } else {
-        logger.warn('At present, this viewer can only read pdf or zip files');
-        alert('Sorry, this application can only read PDF files...');
+        console.log(file.type);
+        logger.warn('At present, this viewer can only read pdf, zip or rar files');
+        alert('Sorry, this application can only read PDF, ZIP or RAR files...');
       }
     }
 
@@ -227,6 +250,7 @@ module Book {
     close(): void {
       logger.info('closing the book');
       this.set({status: Status.Closed});
+      if (!_.isNull(this._pages)) { this._pages.close(); }
       this._pages = null;
     }
 
