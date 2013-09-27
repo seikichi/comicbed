@@ -40,9 +40,9 @@ require.config({
     jsziptools: {
       exports: 'jz'
     },
-    unrarlib: {
-      exports: 'Module'
-    }
+    // unrarlib: {
+    //   exports: 'Module'
+    // }
   }
 });
 

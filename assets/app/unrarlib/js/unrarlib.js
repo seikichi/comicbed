@@ -15,6 +15,7 @@
 // after the generated code, you will need to define   var Module = {};
 // before the code. Then that object will be used in the code, and you
 // can continue to use Module afterwards as well.
+(function (window, undefined) {
 var Module;
 if (!Module) Module = eval('(function() { try { return Module || {} } catch(e) { return {} } })()');
 // Sometimes an existing Module object exists with properties
@@ -3061,3 +3062,5 @@ if (Module['noInitialRun']) {
 run();
 // {{POST_RUN_ADDITIONS}}
 // {{MODULE_ADDITIONS}}
+  define("unrarlib", [], function () { return Module; } );
+})(window);
