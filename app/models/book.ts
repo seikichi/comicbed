@@ -129,7 +129,7 @@ module Book {
     }
 
     openFile(file: File): void {
-      logger.info('Book.openFile');
+      logger.info('Book.openFile: ' + file.type);
       if (file.type === 'application/pdf') {
         if (this.status() !== Status.Closed) {
           this.close();
@@ -174,7 +174,8 @@ module Book {
           this.updateContents();
         });
       } else if (file.type === 'application/x-rar-compressed' ||
-                 file.type === 'application/x-rar') {
+                 file.type === 'application/x-rar' ||
+                 file.type === 'application/rar') {
         if (this.status() !== Status.Closed) {
           this.close();
         }
@@ -297,7 +298,7 @@ module Book {
         }
       }).fail(() => {
         if (success) { return; }
-        logger.info('an error occured in updateContent');
+        logger.error('an error occured in updateContent');
         this._contents.reset([]);
       });
     }
