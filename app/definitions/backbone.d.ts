@@ -168,7 +168,8 @@ declare module Backbone {
         fetch(options?: CollectionFetchOptions): JQueryXHR;
 
         // comparator(element: _Model): any;
-        comparator(compare: _Model, to?: _Model): number;
+        // comparator(compare: _Model, to?: _Model): number;
+        comparator(compare: _Model, to: _Model): number;
 
         add(model: _Model, options?: AddOptions): Collection<_Model, _Attributes>;
         add(models: _Model[], options?: AddOptions): Collection<_Model, _Attributes>;

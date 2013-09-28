@@ -92,6 +92,31 @@ module Page {
     return pages;
   }
 
+  // sort
+  function naturalCompare(a: string, b: string): number {
+    var x: any[] = [], y: any[] = [];
+    var strcmp = (a: string, b: string): number => {
+      return a > b ? 1 : a < b ? -1 : 0;
+    };
+
+    a.replace(/(\d+)|(\D+)/g, ($0: string, ...args: any[]) => {
+      x.push([parseInt(args[0]) || 0, args[1]]);
+      return '';
+    });
+    b.replace(/(\d+)|(\D+)/g, ($0: string, ...args: any[]) => {
+      y.push([parseInt(args[0]) || 0, args[1]]);
+      return '';
+    });
+
+    while(x || y) {
+      var xx = x.shift();
+      var yy = y.shift();
+      var nn = (xx[0] - yy[0]) || strcmp(xx[1], yy[1]);
+      if(nn) { return nn; }
+    }
+    return 0;
+  }
+
   // private
   class PdfPageModel extends Backbone.Model<Attributes> implements ModelInterface {
     defaults() {
@@ -411,6 +436,10 @@ module Page {
       super([]);
     }
 
+    comparator(compare: RarPageModel, to: RarPageModel) {
+      return naturalCompare(compare.name(), to.name());
+    }
+
     initialize() {
       logger.info('unpacking zip file');
       jz.zip.unpack(this._file).then((reader) => {
@@ -488,7 +517,7 @@ module Page {
 
     constructor(data: ArrayBuffer) {
       this._data = data;
-      this.model = ZipPageModel;
+      this.model = RarPageModel;
       this._unrar = new UnRar(this._data);
       var models: RarPageModel[] = [];
       var fileNames = this._unrar.getFileNames();
@@ -499,6 +528,10 @@ module Page {
         }));
       }
       super(models);
+    }
+
+    comparator(compare: RarPageModel, to: RarPageModel) {
+      return naturalCompare(compare.name(), to.name());
     }
 
     clearCache(): void {}
