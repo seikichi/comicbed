@@ -18,6 +18,10 @@ declare module "unrarlib" {
   export = Module;
 }
 
+declare module "spin" {
+  export = Spinner;
+}
+
 declare module "backbone" {
     export = Backbone;
 }

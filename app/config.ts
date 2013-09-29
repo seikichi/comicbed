@@ -9,6 +9,7 @@ require.config({
     sprintf: '../assets/vendor/sprintf/js/sprintf',
     jqueryui: '../assets/vendor/jquery-ui/js/jquery-ui',
     jsziptools: '../assets/vendor/jsziptools/js/jsziptools.min',
+    spin: '../assets/vendor/spin.js/js/spin',
 
     pdfjs: '../assets/app/pdfjs/js/pdf',
     unrarlib: '../assets/app/unrarlib/js/unrarlib',

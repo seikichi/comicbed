@@ -5,6 +5,7 @@ import Book = require('models/book');
 import Page = require('models/page');
 import Setting = require('models/setting');
 import logger = require('utils/logger');
+import Spinner = require('spin');
 
 export = ContentView;
 
@@ -34,16 +35,28 @@ class ContentView extends BaseView {
 
   render() {
     this.$el.empty();
-    var names: string[] = [];
-    var fragment = document.createDocumentFragment();
-    for (var i = 0; i < this._contents.length; ++i) {
-      var c = this._contents.at(i);
-      fragment.appendChild(c.element());
-      names.push(c.name());
+    if (this._contents.length === 0
+        && this._book.status() === Book.Status.Opening) {
+      var options: SpinnerOptions = {};
+      var spinner = new Spinner(options).spin();
+      this.$el.append(spinner.el);
+      // TODO(seikichi): fix1!!!1111!!!
+      this.$('.spinner').css({
+        top: $('body').height() / 2,
+        left: $('body').width() / 2,
+      });
+    } else {
+      var names: string[] = [];
+      var fragment = document.createDocumentFragment();
+      for (var i = 0; i < this._contents.length; ++i) {
+        var c = this._contents.at(i);
+        fragment.appendChild(c.element());
+        names.push(c.name());
+      }
+      this.$el[0].appendChild(fragment);
+      document.title = this._book.filename() + ': ' + names.join(', ');
+      this.fit();
     }
-    this.$el[0].appendChild(fragment);
-    document.title = this._book.filename() + ': ' + names.join(', ');
-    this.fit();
     return this;
   }
 

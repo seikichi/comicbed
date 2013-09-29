@@ -17,7 +17,8 @@
     "log4javascript": "*",
     "sprintf": "*",
     "jsziptools": "*",
-    "jquery-ui": "*"
+    "jquery-ui": "*",
+    "spin.js": "*"
   },
   "exportsOverride": {
     "underscore": {
@@ -50,6 +51,9 @@
     "jquery-ui": {
       "js": "ui/jquery-ui.js",
       "css": "themes/base/*"
+    },
+    "spin.js": {
+      "js": "dist/spin.js"
     }
   }
 }

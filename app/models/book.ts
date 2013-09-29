@@ -252,6 +252,7 @@ module Book {
       logger.info('closing the book');
       this.set({status: Status.Closed});
       if (!_.isNull(this._pages)) { this._pages.close(); }
+      this._contents.reset([]);
       this._pages = null;
     }
 
