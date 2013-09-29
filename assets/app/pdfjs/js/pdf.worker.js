@@ -3137,6 +3137,7 @@ var NetworkManager = (function NetworkManagerClosure() {
         var rangeStr = args.begin + '-' + (args.end - 1);
         xhr.setRequestHeader('Range', 'bytes=' + rangeStr);
         pendingRequest.expectedStatus = 206;
+        pendingRequest.begin = args.begin;  // NOTE (seikichi): added
       } else {
         pendingRequest.expectedStatus = 200;
       }
@@ -3215,9 +3216,11 @@ var NetworkManager = (function NetworkManagerClosure() {
 
       var chunk = getArrayBuffer(xhr);
       if (xhrStatus === PARTIAL_CONTENT_RESPONSE) {
-        var rangeHeader = xhr.getResponseHeader('Content-Range');
-        var matches = /bytes (\d+)-(\d+)\/(\d+)/.exec(rangeHeader);
-        var begin = parseInt(matches[1], 10);
+        // var rangeHeader = xhr.getResponseHeader('Content-Range');
+        // var matches = /bytes (\d+)-(\d+)\/(\d+)/.exec(rangeHeader);
+        // var begin = parseInt(matches[1], 10);
+        // NOTE(seikichi): modified
+        var begin = pendingRequest.begin;
         pendingRequest.onDone({
           begin: begin,
           chunk: chunk
@@ -34144,7 +34147,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
 
           var fullRequestXhr = networkManager.getRequestXhr(fullRequestXhrId);
           if (fullRequestXhr.getResponseHeader('Accept-Ranges') !== 'bytes') {
-            return;
+            // return;
           }
 
           var contentEncoding =
