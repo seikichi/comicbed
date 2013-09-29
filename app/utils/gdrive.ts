@@ -20,10 +20,10 @@ module GoogleDrive {
       && !_.isNull(gapi.auth.getToken());
   }
 
-  export function authorize(): JQueryPromise<void> {
+  export function authorize(immediate: boolean = true): JQueryPromise<void> {
     var deferred = $.Deferred();
     gapi.auth.authorize({
-      client_id: clientId, scope: [scope], immediate: true
+      client_id: clientId, scope: [scope], immediate: immediate
     }, (authResult: GoogleApiOAuth2TokenObject) => {
       if (authResult && !authResult.error) {
         gapi.client.load('drive', 'v2', () => {

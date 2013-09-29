@@ -93,7 +93,9 @@ class HeaderContentView extends BaseView {
   initialize() {
     this.listenTo(this._setting, 'change', this.render);
     setTimeout(() => {
-      this.authorize();
+      GoogleDrive.authorize(true).then(() => {
+        this.render();
+      });
     }, 1000);
   }
 
@@ -104,7 +106,7 @@ class HeaderContentView extends BaseView {
   }
 
   private authorize(): void {
-    GoogleDrive.authorize().then(() => {
+    GoogleDrive.authorize(false).then(() => {
       this.render();
     });
   }
