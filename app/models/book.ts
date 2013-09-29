@@ -39,7 +39,7 @@ module Book {
     resize(width: number, height: number): void;
     contents(): Page.Content.CollectionInterface;
     close(): void;
-    openURL(url: string) : void;
+    openURL(url: string, headers?: {[key:string]:string;}, mimeType?: string) : void;
     openFile(file: File) : void;
 
     // navigate
@@ -103,15 +103,15 @@ module Book {
       });
     }
 
-    openURL(url: string) : void {
+    openURL(url: string, headers: {[key:string]:string;} = {}, mimeType: string = '') : void {
       logger.info('Book.openURL: ' + url);
-      if (path.extname(url) === 'pdf') {
+      if (path.extname(url) === 'pdf' || mimeType === 'application/pdf') {
         if (this.status() !== Status.Closed) {
           this.close();
         }
 
         this.set({status: Status.Opening});
-        PDFJS.getDocument({url: url}).then((document: PDFJS.PDFDocumentProxy) => {
+        PDFJS.getDocument({url: url, httpHeaders: headers}).then((document: PDFJS.PDFDocumentProxy) => {
           logger.info('PDFDocument is loaded');
           this._pages = Page.createPdfPageCollection(this._setting, document);
           this.set({

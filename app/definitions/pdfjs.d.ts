@@ -16,7 +16,7 @@ declare module PDFJS {
   interface GetDocumentOptions {
     url?: string;
     data?: ArrayBuffer;
-    httpHeaders?: string;
+    httpHeaders?: {[key:string]:string;};
     password?: string;
   }
 

@@ -5,6 +5,15 @@
   <button id="open-url">Open Url</button>
   <input type="text" id="book-url" placeholder="{{protocol}}//{{host}}"/>
 </div>
+<div>
+  Google Drive:
+  <button id="authorize-button" {{#if authorized}}style="display: none"{{/if}}>
+    Authorize
+  </button>
+  <button id="picker-button" {{#unless authorized}}style="display: none"{{/unless}}>
+    Select
+  </button>
+</div>
 <div class="radio">
   Display:
   <input type="radio" id="one-page" {{#if onePage}}checked{{/if}} />

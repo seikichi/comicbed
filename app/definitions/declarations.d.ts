@@ -18,6 +18,14 @@ declare module "unrarlib" {
   export = Module;
 }
 
+declare module "gapi" {
+  export = gapi;
+}
+
+declare module "gclient" {
+  export = gapi;
+}
+
 declare module "spin" {
   export = Spinner;
 }

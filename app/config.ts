@@ -13,6 +13,9 @@ require.config({
 
     pdfjs: '../assets/app/pdfjs/js/pdf',
     unrarlib: '../assets/app/unrarlib/js/unrarlib',
+
+    gapi: 'https://apis.google.com/js/api',
+    gclient: 'https://apis.google.com/js/client',
   },
   shim: {
     underscore: {
@@ -43,7 +46,13 @@ require.config({
     },
     // unrarlib: {
     //   exports: 'Module'
-    // }
+    // },
+    gapi: {
+      exports: 'gapi'
+    },
+    gclient: {
+      exports: 'gapi'
+    }
   }
 });
 

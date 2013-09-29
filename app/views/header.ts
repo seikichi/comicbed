@@ -6,6 +6,7 @@ import Setting = require('models/setting');
 import JQueryUI = require('jqueryui');
 import logger = require('utils/logger');
 import templates = require('templates');
+import GoogleDrive = require('utils/gdrive');
 
 export = HeaderView;
 
@@ -83,8 +84,29 @@ class HeaderContentView extends BaseView {
       'click #open-url': 'onOpenUrl',
       'click #open-file': 'onOpenFile',
       'change #open-file': 'onOpenFile',
+      'click #authorize-button': 'authorize',
+      'click #picker-button': 'pick',
     };
     super();
+  }
+
+  initialize() {
+    this.listenTo(this._setting, 'change', this.render);
+    setTimeout(() => {
+      this.authorize();
+    }, 1000);
+  }
+
+  private pick(): void {
+    GoogleDrive.pickFileURL((data) => {
+      this._book.openURL(data.url, data.httpHeaders, data.mimeType);
+    });
+  }
+
+  private authorize(): void {
+    GoogleDrive.authorize().then(() => {
+      this.render();
+    });
   }
 
   private onOpenFile(jqevent: any): void {
@@ -107,10 +129,6 @@ class HeaderContentView extends BaseView {
     this._book.openURL(url);
   }
 
-  initialize() {
-    this.listenTo(this._setting, 'change', this.render);
-  }
-
   presenter() {
     return this._template(_.extend(this._setting.toJSON(), {
       protocol: location.protocol,
@@ -119,6 +137,7 @@ class HeaderContentView extends BaseView {
       twoPage: this._setting.viewMode() === Setting.ViewMode.TwoPage,
       L2R: this._setting.pageDirection() === Setting.PageDirection.L2R,
       R2L: this._setting.pageDirection() === Setting.PageDirection.R2L,
+      authorized: GoogleDrive.isAuthorized(),
     }));
   }
 
