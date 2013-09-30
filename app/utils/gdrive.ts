@@ -49,14 +49,15 @@ module GoogleDrive {
 
   var showPicker = (callback: (data: PickResult) => void) => {
     (<any>gapi).load('picker', {callback: () => {
-      var view = new google.picker.View(google.picker.ViewId.DOCS);
-      view.setMimeTypes('application/pdf');
+      // var view = new google.picker.View(google.picker.ViewId.PDFS);
+      // view.setMimeTypes('application/pdf');
       var picker = new google.picker.PickerBuilder()
         .enableFeature(google.picker.Feature.NAV_HIDDEN)
         .setOAuthToken(gapi.auth.getToken().access_token)
         .setDeveloperKey(developerKey)
         .setAppId(appId)
-        .addView(view)
+        .addView(google.picker.ViewId.FOLDERS)
+        .addView(google.picker.ViewId.PDFS)
         .setCallback((data: any) => {
           if (data.action !== google.picker.Action.PICKED) { return; }
           var file = data.docs[0];
