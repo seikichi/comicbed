@@ -13,6 +13,7 @@ require.config({
 
     pdfjs: '../assets/app/pdfjs/js/pdf',
     unrarlib: '../assets/app/unrarlib/js/unrarlib',
+    tiff: '../assets/app/tiff/js/tiff.min',
 
     // gapi: 'https://apis.google.com/js/api',
     // gclient: 'https://apis.google.com/js/client',

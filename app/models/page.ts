@@ -8,6 +8,7 @@ import logger = require('utils/logger');
 import jz = require('jsziptools');
 import UnRar = require('utils/unrar');
 import strings = require('utils/strings');
+import Tiff = require('tiff');
 
 export = Page;
 
@@ -555,6 +556,8 @@ module Page {
         format = 'png';
       } else if (strings.endsWith(filename, '.jpg') || strings.endsWith(filename, '.jpeg')) {
         format = 'jpeg';
+      } else if (strings.endsWith(filename, '.tif') || strings.endsWith(filename, '.tiff')) {
+        format = 'tiff';
       } else {
         deferred.reject();
       }
@@ -563,13 +566,18 @@ module Page {
       if (_.isNull(data)) {
         deferred.reject();
       } else {
-        var str = '';
-        var length = data.length;
-        for (var n = 0; n < length; ++n) {
-          str += String.fromCharCode(data[n]);
+        var dataURL = '';
+        if (format === 'tiff') {
+          dataURL = new Tiff(data).toDataURL();
+        } else {
+          var str = '';
+          var length = data.length;
+          for (var n = 0; n < length; ++n) {
+            str += String.fromCharCode(data[n]);
+          }
+          var base64Data: string = window.btoa(str);
+          dataURL = 'data:image/' + format + ';base64,' + base64Data;
         }
-        var base64Data: string = window.btoa(str);
-        var dataURL = 'data:image/' + format + ';base64,' + base64Data;
 
         var image = new Image();
         image.onload = () => {

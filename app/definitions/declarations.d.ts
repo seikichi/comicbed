@@ -18,6 +18,14 @@ declare module "unrarlib" {
   export = Module;
 }
 
+declare module "tiff" {
+  class Tiff {
+    constructor(buffer: ArrayBuffer);
+    toDataURL(): string;
+  }
+  export = Tiff;
+}
+
 declare module "gapi" {
   export = gapi;
 }
