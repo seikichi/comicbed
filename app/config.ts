@@ -12,7 +12,7 @@ require.config({
     spin: '../assets/vendor/spin.js/js/spin',
 
     pdfjs: '../assets/app/pdfjs/js/pdf',
-    unrarlib: '../assets/app/unrarlib/js/unrarlib',
+    unrar: '../assets/app/unrarlib/js/unrar.min',
     tiff: '../assets/app/tiff/js/tiff.min',
 
     // gapi: 'https://apis.google.com/js/api',

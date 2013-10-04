@@ -8,7 +8,7 @@ export = main;
 function main() {
   // setting PDFJS variables
   PDFJS.workerSrc = 'assets/app/pdfjs/js/pdf.worker.js';
-  PDFJS.disableWorker = true;
+  PDFJS.disableWorker = false;
   PDFJS.disableAutoFetch = true;
   PDFJS.disableRange = false;
 

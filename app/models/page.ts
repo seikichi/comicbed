@@ -6,7 +6,7 @@ import sprintf = require('sprintf');
 import Setting = require('models/setting');
 import logger = require('utils/logger');
 import jz = require('jsziptools');
-import UnRar = require('utils/unrar');
+import Unrar = require('unrar');
 import strings = require('utils/strings');
 import Tiff = require('tiff');
 
@@ -514,14 +514,14 @@ module Page {
   class RarPageCollection extends
   Backbone.Collection<RarPageModel, Attributes> implements CollectionInterface {
     private _data: ArrayBuffer;
-    private _unrar: UnRar;
+    private _unrar: Unrar;
 
     constructor(data: ArrayBuffer) {
       this._data = data;
       this.model = RarPageModel;
-      this._unrar = new UnRar(this._data);
+      this._unrar = new Unrar(this._data);
       var models: RarPageModel[] = [];
-      var fileNames = this._unrar.getFileNames();
+      var fileNames = this._unrar.getFilenames();
       for (var i = 0, len = fileNames.length; i < len; ++i) {
         models.push(new RarPageModel({
           name: fileNames[i],
@@ -561,8 +561,7 @@ module Page {
       } else {
         deferred.reject();
       }
-
-      var data = this._unrar.getFileContent(filename);
+      var data = this._unrar.decompress(filename);
       if (_.isNull(data)) {
         deferred.reject();
       } else {

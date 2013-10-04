@@ -26,6 +26,16 @@ declare module "tiff" {
   export = Tiff;
 }
 
+declare module "unrar" {
+  class Unrar {
+    constructor(buffer: ArrayBuffer);
+    getFilenames(): string[];
+    decompress(filename: string): Uint8Array;
+    close(): void;
+  }
+  export = Unrar;
+}
+
 declare module "gapi" {
   export = gapi;
 }
