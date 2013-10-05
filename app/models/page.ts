@@ -151,7 +151,9 @@ module Page {
     }
 
     clearCache(): void {}
-    close(): void {}
+    close(): void {
+      this._document.destroy();
+    }
     totalPageNum(): number { return this.length; }
 
     getPageContent(pageNum: number): JQueryPromise<Content.ModelInterface> {

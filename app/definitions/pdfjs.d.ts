@@ -37,6 +37,7 @@ declare module PDFJS {
   interface PDFDocumentProxy {
     numPages: number;
     getPage(pageNum: number): Promise<PDFPageProxy>;
+    destroy(): void;
   }
 
   interface RenderContext {
