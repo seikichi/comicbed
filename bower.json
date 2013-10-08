@@ -18,7 +18,10 @@
     "sprintf": "*",
     "jsziptools": "*",
     "jquery-ui": "*",
-    "spin.js": "*"
+    "spin.js": "*",
+    "chai": "*",
+    "mocha": "*",
+    "sinon": "http://sinonjs.org/releases/sinon-1.7.3.js"
   },
   "exportsOverride": {
     "underscore": {
@@ -54,6 +57,13 @@
     },
     "spin.js": {
       "js": "dist/spin.js"
+    },
+    "chai": {
+      "js": "chai.js"
+    },
+    "mocha": {
+      "js": "mocha.js",
+      "css": "mocha.css"
     }
   }
 }

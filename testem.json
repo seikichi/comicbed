@@ -1,0 +1,12 @@
+{
+  "framework": "mocha",
+  "test_page": "test.mustache",
+  "launch_in_dev": [
+    "Chromium"
+  ],
+  "src_files": [
+    "app/test/**/*.js"
+  ]
+}
+
+
