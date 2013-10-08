@@ -2,7 +2,8 @@
   "framework": "mocha",
   "test_page": "test.mustache",
   "launch_in_dev": [
-    "Chromium"
+    "Chromium",
+    "Firefox"
   ],
   "src_files": [
     "app/test/**/*.js"

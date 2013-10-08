@@ -58,5 +58,3 @@ require.config({
     }
   }
 });
-
-require(['main'], (main: () => void) => { main(); });
