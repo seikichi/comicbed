@@ -1,6 +1,3 @@
-/// <reference path="./DefinitelyTyped/jquery/jquery.d.ts"/>
-/// <reference path="./backbone.d.ts"/>
-
 declare module "unrarlib" {
   var Module: {
     cwrap: (name: string, retType: string, argTypes: string[]) => (...data: any[]) => any;

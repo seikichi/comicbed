@@ -5,7 +5,7 @@
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
 
-/// <reference path="./DefinitelyTyped/jquery/jquery.d.ts" />
+/// <reference path="./jquery.d.ts" />
 
 declare module Backbone {
 

@@ -1,5 +1,3 @@
-/// <reference path="./DefinitelyTyped/jquery/jquery.d.ts" />
-
 declare module PDFJS {
   var version: string;
   var build: string;
