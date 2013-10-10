@@ -5,7 +5,6 @@ export = ImageUtil;
 module ImageUtil {
   export function pixelDataToImageElement(data: Uint8Array, width: number, height: number)
   : JQueryPromise<HTMLImageElement> {
-    var deferred = $.Deferred<HTMLImageElement>();
     var canvas = document.createElement('canvas');
     var context = canvas.getContext('2d');
     canvas.width = width;
@@ -20,7 +19,11 @@ module ImageUtil {
       }
     }
     context.putImageData(imageData, 0, 0);
-    var dataURL = canvas.toDataURL();
+    return ImageUtil.loadImageFromURL(canvas.toDataURL());
+  }
+
+  export function loadImageFromURL(url: string): JQueryPromise<HTMLImageElement> {
+    var deferred = $.Deferred<HTMLImageElement>();
     var image: HTMLImageElement = new Image();
     image.onload = () => {
       deferred.resolve(image);
@@ -28,7 +31,16 @@ module ImageUtil {
     image.onerror = () => {
       deferred.reject();
     };
-    image.src = dataURL;
+    image.src = url;
     return deferred.promise();
+  }
+
+  export function imageElementToCanvas(image: HTMLImageElement): HTMLCanvasElement {
+    var canvas = document.createElement('canvas');
+    var context = canvas.getContext('2d');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    context.drawImage(image, 0, 0);
+    return canvas;
   }
 }

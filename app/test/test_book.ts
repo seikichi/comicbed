@@ -61,7 +61,7 @@ describe('Book', function () {
       var factory = Book.createFactory(unarchiverFactory);
       factory.createFromURL('').then((book: Book.Book) => {
         var filenames = unarchiver.filenames();
-        assert.strictEqual(filenames.length, book.pages().length());
+        assert.strictEqual(filenames.length, book.pages().length);
         done();
       });
     });
@@ -71,7 +71,7 @@ describe('Book', function () {
       factory.createFromURL('').then((book: Book.Book) => {
         var filenames = unarchiver.filenames();
         var pagenames: string[] = [];
-        for (var i = 0, len = book.pages().length(); i < len; ++i) {
+        for (var i = 0, len = book.pages().length; i < len; ++i) {
           pagenames.push(book.pages().at(i).name());
         }
         assert.deepEqual(filenames, pagenames);

@@ -1,7 +1,10 @@
 export = Page;
 
 module Page {
-  export interface Content extends HTMLElement { }
+  export interface Content extends HTMLElement {
+    width: number;
+    height: number;
+  }
 
   export interface Page {
     name(): string;
@@ -10,7 +13,7 @@ module Page {
   }
 
   export interface Collection {
-    length(): number;
+    length: number;
     at(index: number): Page;
   }
 
@@ -25,7 +28,7 @@ module Page {
 
   export function createCollection(pages: Page[]): Collection {
     return {
-      length: () => pages.length,
+      length: pages.length,
       at: (index: number) => pages[index],
     };
   }

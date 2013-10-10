@@ -17,37 +17,37 @@ import HeaderView = require('views/header');
 export = FlowerpotView;
 
 class FlowerpotView extends CompositeView {
-  private template: (data: {[key:string]: any;}) => string;
-  private setting: Setting.ModelInterface;
-  private book: Book.ModelInterface;
-  private queryOptions: {[field:string]:string;};
-  private _keyEventHandler: KeyEventHandler;
+  // private template: (data: {[key:string]: any;}) => string;
+  // private setting: Setting.ModelInterface;
+  // private book: Book.ModelInterface;
+  // private queryOptions: {[field:string]:string;};
+  // private _keyEventHandler: KeyEventHandler;
 
-  constructor(options: {[field:string]:string;}) {
-    this.template = templates.flowerpot;
-    this.setting = Setting.create(options);
-    this.book = Book.create(this.setting);
-    this.queryOptions = options;
-    this._keyEventHandler = new KeyEventHandler(this.book);
+  // constructor(options: {[field:string]:string;}) {
+  //   this.template = templates.flowerpot;
+  //   this.setting = Setting.create(options);
+  //   this.book = Book.create(this.setting);
+  //   this.queryOptions = options;
+  //   this._keyEventHandler = new KeyEventHandler(this.book);
 
-    super();
-  }
+  //   super();
+  // }
 
-  initialize() {
-    if ('url' in this.queryOptions) {
-      this.book.openURL(this.queryOptions['url']);
-    }
+  // initialize() {
+  //   if ('url' in this.queryOptions) {
+  //     this.book.openURL(this.queryOptions['url']);
+  //   }
 
-    this.assign('#content', new ContentView({book: this.book}));
-    this.listenTo(this.book, 'change:status', this.render);
+  //   this.assign('#content', new ContentView({book: this.book}));
+  //   this.listenTo(this.book, 'change:status', this.render);
 
-    this.assign('#input', new InputView(this.book, templates.input));
-    this.assign('#header', new HeaderView(this.book, templates.header));
-    this.assign('#footer', new FooterView(this.book, templates.footer));
-  }
+  //   this.assign('#input', new InputView(this.book, templates.input));
+  //   this.assign('#header', new HeaderView(this.book, templates.header));
+  //   this.assign('#footer', new FooterView(this.book, templates.footer));
+  // }
 
-  presenter(): string {
-    return this.template({});
-  }
+  // presenter(): string {
+  //   return this.template({});
+  // }
 }
 

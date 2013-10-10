@@ -13,19 +13,24 @@ export = PdfImageUnarchiver;
 
 class PdfImageUnarchiver implements Unarchiver.Unarchiver {
 
-  static createFromURL(url: string) : JQueryPromise<PdfImageUnarchiver> {
-    var deferred = $.Deferred<PdfImageUnarchiver>();
+  static createFromURL(url: string) : JQueryPromise<Unarchiver.Unarchiver> {
+    var deferred = $.Deferred<Unarchiver.Unarchiver>();
     PDFJS.getDocument({url: url}).then((document: PDFJS.PDFDocumentProxy) => {
       deferred.resolve(new PdfImageUnarchiver(document));
+    }, () => {
+      deferred.reject();
     });
     return deferred.promise();
   }
 
+  private _archiveName: string;
   private _document: PDFJS.PDFDocumentProxy;
   private _names: string[];
   private _nameToPageNum: {[name: string]: number;};
+
   constructor(document: PDFJS.PDFDocumentProxy) {
     this._document = document;
+    this._archiveName = (<any>this._document).pdfInfo.info.Title;
     this._names = [];
     this._nameToPageNum = {};
 
@@ -36,6 +41,9 @@ class PdfImageUnarchiver implements Unarchiver.Unarchiver {
       this._names.push(pageName);
       this._nameToPageNum[pageName] = i + 1;
     }
+  }
+  archiveName(): string {
+    return this._archiveName;
   }
   filenames(): string[] {
     return this._names;
@@ -53,7 +61,6 @@ class PdfImageUnarchiver implements Unarchiver.Unarchiver {
       var renderContext = { canvasContext: context, viewport: viewport, };
       return page.render(renderContext);
     }).then(() => {
-      var success = false;
       var objs = page.objs.objs;
       for (var key in objs) if (objs.hasOwnProperty(key)) {
         if (key.indexOf('img_') !== 0) { continue; }
@@ -69,10 +76,9 @@ class PdfImageUnarchiver implements Unarchiver.Unarchiver {
               deferred.reject();
             });
         }
+        return;
       }
-      if (!success) {
-        deferred.reject();
-      }
+      deferred.reject();
     });
     return deferred.promise();
   }

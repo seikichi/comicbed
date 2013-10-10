@@ -5,11 +5,16 @@ export = Unarchiver;
 
 module Unarchiver {
   export interface Unarchiver {
+    archiveName(): string;
     filenames(): string[];
     unpack(name: string): JQueryPromise<Content>;
     close(): void;
   }
-  export interface Content extends HTMLElement {}
+  export interface Content extends HTMLElement {
+    width: number;
+    height: number;
+  }
+
   export interface Options {
     mimeType?: string;
   }
@@ -21,7 +26,7 @@ module Unarchiver {
     getUnarchiverFromURL(url: string,
                          setting?: Setting,
                          options?: Options): JQueryPromise<Unarchiver>;
-    // getUnarchiverFromFile(file: File): void;
+    getUnarchiverFromFile(file: File, setting?: Setting): JQueryPromise<Unarchiver>;
   }
 
   export function createFactory(): Factory {
@@ -30,18 +35,37 @@ module Unarchiver {
 }
 
 // private
-enum FileType { Pdf, Other };
+enum FileType { Pdf, Zip, Rar, Other };
 
 class FactoryImpl implements Unarchiver.Factory {
+
+  getUnarchiverFromFile(file: File, setting: Unarchiver.Setting = {})
+  : JQueryPromise<Unarchiver.Unarchiver> {
+    var url: string = (<any>window).URL.createObjectURL(file);
+    var options = {
+      mimeType: file.type
+    };
+    return this.getUnarchiverFromURL(url, setting, options);
+  }
+
   getUnarchiverFromURL(url: string,
                        setting: Unarchiver.Setting = {},
                        options: Unarchiver.Options = {})
   : JQueryPromise<Unarchiver.Unarchiver> {
+    // detects archive filetype
     var fileType = FileType.Other;
     if ('mimeType' in options) {
       switch (options.mimeType) {
       case 'application/pdf':
         fileType = FileType.Pdf;
+        break;
+      case 'application/zip':
+        fileType = FileType.Zip;
+        break;
+      case 'application/rar':
+      case 'application/x-rar':
+      case 'application/x-rar-compressed':
+        fileType = FileType.Rar;
         break;
       default:
         break;
@@ -53,25 +77,47 @@ class FactoryImpl implements Unarchiver.Factory {
       case 'pdf':
         fileType = FileType.Pdf;
         break;
+      case 'zip':
+      case 'cbz':
+        fileType = FileType.Zip;
+        break;
+      case 'rar':
+      case 'cbr':
+        fileType = FileType.Rar;
+        break;
       default:
         break;
       }
     }
 
     // load specific unarchiver module dynamically
-    var deferred = $.Deferred();
-    if (fileType === FileType.Pdf) {
-      require(['utils/pdf_image_unarchiver'], (PdfImageUnarchiver: typeof PdfImageUnarchiver) => {
-        PdfImageUnarchiver.createFromURL(url).then((unarchiver: typeof PdfImageUnarchiver) => {
-          deferred.resolve(unarchiver);
-        }).fail(() => {
-          deferred.reject();
-        });
-      });  // TODO(seikichi): error handling
-    } else {
-      deferred.reject();
+    var deferred = $.Deferred<Unarchiver.Unarchiver>();
+    var moduleName = '';
+    switch (fileType) {
+    case FileType.Pdf:
+      var moduleName = 'utils/pdf_image_unarchiver';
+      break;
+    case FileType.Zip:
+      // var moduleName = 'utils/zip_unarchiver';
+      // break;
+    case FileType.Rar:
+      // var moduleName = 'utils/rar_unarchiver';
+      // break;
+    default:
+      return deferred.reject().promise();
+      break;
     }
+
+    require([moduleName], (factory: {
+      createFromURL: (url: string) => JQueryPromise<Unarchiver.Unarchiver>;
+    }) => {
+      factory.createFromURL(url).then((unarchiver: Unarchiver.Unarchiver) => {
+        deferred.resolve(unarchiver);
+      }).fail(() => {
+        deferred.reject();
+      });
+    });
+
     return deferred.promise();
   }
-  // getUnarchiverFromFile(file: File): void;
 }

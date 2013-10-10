@@ -13,29 +13,29 @@ enum KeyCode {
 };
 
 class KeyEventHandler {
-  private _book: Book.ModelInterface;
+//   private _book: Book.ModelInterface;
 
-  constructor(book: Book.ModelInterface) {
-    this._book = book;
-    $(document).keydown((e: KeyboardEvent) => { this.keydown(e); });
-  }
+//   constructor(book: Book.ModelInterface) {
+//     this._book = book;
+//     $(document).keydown((e: KeyboardEvent) => { this.keydown(e); });
+//   }
 
-  private keydown(event: KeyboardEvent) {
-    var isL2R = this._book.setting().pageDirection() === Setting.PageDirection.L2R;
-    if ((event.keyCode === KeyCode.Left && !isL2R)
-        || (event.keyCode === KeyCode.Right && isL2R)) {
-      this._book.goNextPage();
-    } else if ((event.keyCode === KeyCode.Left && isL2R)
-               || (event.keyCode === KeyCode.Right && !isL2R)) {
-      this._book.goPrevPage();
-    }
+//   private keydown(event: KeyboardEvent) {
+//     var isL2R = this._book.setting().pageDirection() === Setting.PageDirection.L2R;
+//     if ((event.keyCode === KeyCode.Left && !isL2R)
+//         || (event.keyCode === KeyCode.Right && isL2R)) {
+//       this._book.goNextPage();
+//     } else if ((event.keyCode === KeyCode.Left && isL2R)
+//                || (event.keyCode === KeyCode.Right && !isL2R)) {
+//       this._book.goPrevPage();
+//     }
 
-    if (event.keyCode === KeyCode.Space) {
-      if (this._book.setting().viewMode() === Setting.ViewMode.OnePage) {
-        this._book.setting().setViewMode(Setting.ViewMode.TwoPage);
-      } else {
-        this._book.setting().setViewMode(Setting.ViewMode.OnePage);
-      }
-    }
-  }
+//     if (event.keyCode === KeyCode.Space) {
+//       if (this._book.setting().viewMode() === Setting.ViewMode.OnePage) {
+//         this._book.setting().setViewMode(Setting.ViewMode.TwoPage);
+//       } else {
+//         this._book.setting().setViewMode(Setting.ViewMode.OnePage);
+//       }
+//     }
+//   }
 }

@@ -148,7 +148,7 @@ declare module Backbone {
         omit(...keys: string[]): any;
     }
 
-  class Collection<_Model> {
+  class Collection<_Model> extends Events {
 
         static extend(properties: any, classProperties?: any): any; // do not use, prefer TypeScript's extend functionality
 
