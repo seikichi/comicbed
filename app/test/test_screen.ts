@@ -1,18 +1,19 @@
 import $ = require('jquery');
 import Screen = require('models/screen');
 import Page = require('models/page');
+import Builder = require('models/builder');
 
 var assert = chai.assert;
 declare var sinon: any;
 
 describe('Screen', () => {
-  var builder: Screen.ContentBuilder = {
-    build: (pages: Page.Content[], params: Screen.ContentBuilderParams) => <any>undefined
+  var builder: Builder.Builder = {
+    build: (pages: Page.Content[], params: Builder.BuildParams) => <any>undefined
   };
   var size = { width: 640, height: 480 };
   var pageContents = [ new Image(), new Image(), new Image(), new Image(), new Image(), ];
   var pages: Page.Collection = {
-    length: 5,
+    length: pageContents.length,
     at: (i: number) => {
       return {
         name: () => 'page',
@@ -57,7 +58,7 @@ describe('Screen', () => {
     it('calls builder.build with pages.length === 1 if second page.content() failed', (done) => {
       var first = true;
       var pages: Page.Collection = {
-        length: 5,
+        length: pageContents.length,
         at: (i: number) => {
           return {
             name: () => 'page',
@@ -97,7 +98,7 @@ describe('Screen', () => {
         isSpreadPage: (content: Page.Content) => false,
       };
       var screen = Screen.createScreen(size, builder, setting);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: 1,
+      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
                              readingDirection: Screen.ReadingDirection.Forward})
         .then(() => {
           mock.expects('build').once().withArgs([pageContents[0]], {width: 1280, height: 960});
@@ -118,7 +119,7 @@ describe('Screen', () => {
       var mock = sinon.mock(setting);
       mock.expects('isSpreadPage').never();
       var screen = Screen.createScreen(size, builder, setting);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: 1,
+      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
                              readingDirection: Screen.ReadingDirection.Forward})
         .then(() => { mock.verify(); done(); });
     });
@@ -127,7 +128,7 @@ describe('Screen', () => {
       var content = new Image();
       mock.expects('build').once().withArgs([pageContents[0]], size).returns(content);
       var screen = Screen.createScreen(size, builder, setting);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: 1,
+      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
                              readingDirection: Screen.ReadingDirection.Forward})
         .then(() => {
           assert.strictEqual(content, screen.content());
@@ -138,8 +139,8 @@ describe('Screen', () => {
     it('makes screen.content() from Page.Content', (done) => {
       var deferred = $.Deferred<any>();
       var promise = deferred.promise();
-      var builder: Screen.ContentBuilder = {
-        build: (pages: Page.Content[], params: Screen.ContentBuilderParams) => pages[0],
+      var builder: Builder.Builder = {
+        build: (pages: Page.Content[], params: Builder.BuildParams) => pages[0],
       };
       var screen = Screen.createScreen(size, builder, setting);
       for (var i = 0, len = pages.length; i < len; ++i) {

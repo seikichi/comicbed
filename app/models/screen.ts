@@ -1,7 +1,9 @@
 import $ = require('jquery');
-import Page = require('models/page');
-import Events = require('models/events');
 import Backbone = require('backbone');
+
+import Page = require('models/page');
+import Builder = require('models/builder');
+import Events = require('models/events');
 
 export = _Screen;
 
@@ -10,16 +12,15 @@ module _Screen {
 
   export enum Status { Success, Error, Loading, }
   export enum ViewMode { OnePage, TwoPage, }
-  export enum PageDirection { L2R, R2L, }
   export enum ReadingDirection { Forward = +1, Backward = -1 }
 
-  export interface  ScreenSetting {
+  export interface  Setting {
     detectsSpreadPage(): boolean;
     viewMode(): ViewMode;
     isSpreadPage(content: Page.Content): boolean;
   }
 
-  export interface ScreenUpdateParams {
+  export interface UpdateParams {
     currentPageNum: number;
     totalPageNum: number;
     readingDirection: ReadingDirection;
@@ -37,34 +38,25 @@ module _Screen {
     content(): Content;
 
     pages(): Page.Page[];
-    update(pages: Page.Collection, params: ScreenUpdateParams): JQueryPromise<UpdateResult>;
+    update(pages: Page.Collection, params: UpdateParams): JQueryPromise<UpdateResult>;
     resize(width: number, height: number): void;
   }
 
-  export interface ContentBuilderParams {
-    width: number;
-    height: number;
-  }
-
-  export interface ContentBuilder {
-    build(pages: Page.Content[], params: ContentBuilderParams): Content;
-  }
-
-  export function createScreen(size: Size, builder: ContentBuilder, setting: ScreenSetting): Screen {
+  export function createScreen(size: Size, builder: Builder.Builder, setting: Setting): Screen {
     return new ScreenModel(size, builder, setting);
   }
 }
 
 // private
 class ScreenModel extends Backbone.Model implements _Screen.Screen {
-  private _builder: _Screen.ContentBuilder;
+  private _builder: Builder.Builder;
   private _size: _Screen.Size;
-  private _setting: _Screen.ScreenSetting;
+  private _setting: _Screen.Setting;
   private _pages: Page.Page[];
   private _pageContents: Page.Content[];
   private _deferred: JQueryDeferred<_Screen.UpdateResult>;
 
-  constructor(size: _Screen.Size, builder: _Screen.ContentBuilder, setting: _Screen.ScreenSetting) {
+  constructor(size: _Screen.Size, builder: Builder.Builder, setting: _Screen.Setting) {
     this._builder = builder;
     this._size = size;
     this._setting = setting;
@@ -92,7 +84,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
     this.setContent(this._builder.build(this._pageContents, this._size));
   }
 
-  update(pages: Page.Collection, params: _Screen.ScreenUpdateParams)
+  update(pages: Page.Collection, params: _Screen.UpdateParams)
   : JQueryPromise<_Screen.UpdateResult> {
     if (this._deferred !== null) { this._deferred.reject(); }
     var deferred = this._deferred = $.Deferred<_Screen.UpdateResult>();
@@ -152,55 +144,6 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
     return deferred.promise();;
   }
 }
-
-
-  // export interface Setting {
-  //   prevScreenNum(): number;
-  //   nextScreenNum(): number;
-  //   detectsSpreadPage(): boolean;
-  //   viewMode(): ViewMode;
-  //   pageDirection(): PageDirection;
-  //   isSpreadPage(content: Page.Content): boolean;
-  // }
-
-  // export interface ReadingInfo {
-  //   currentPageNum: number;
-  //   totalPageNum: number;
-  //   readingDirection: ReadingDirection;
-  // }
-
-
-  // export interface Collection extends Events.Events {
-  //   length: number;
-  //   at(index: number): Screen;
-  //   focusedScreenIndex(): number;
-  //   update(pages: Page.Collection, readingInfo: ReadingInfo): JQueryPromise<void>;
-  //   // resize(width: number, height: number): void;
-  // }
-
-  // export interface ContentBuilderSetting {
-  //   width: number;
-  //   height: number;
-  //   direction: PageDirection;
-  // }
-
-  // export interface ContentBuilder {
-  //   build(pages: Page.Content[], setting: ContentBuilderSetting): Content;
-  // }
-
-  // export interface Size {
-  //   width: number;
-  //   height: number;
-  // }
-
-  // export function createCollection(builder: ContentBuilder, size: Size, setting: Setting): Collection {
-  //   return new ScreenCollection(builder, size, setting);
-  // }
-
-  // export function createBuilder(): ContentBuilder {
-  //   return undefined;
-  // }
-
 
 // class ScreenCollection extends Backbone.Collection<ScreenModel> implements _Screen.Collection {
 //   private _builder: _Screen.ContentBuilder;
