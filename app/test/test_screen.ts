@@ -1,6 +1,7 @@
 import $ = require('jquery');
 import Screen = require('models/screen');
 import Page = require('models/page');
+import Pages = require('collections/pages');
 import Builder = require('models/builder');
 
 var assert = chai.assert;
@@ -12,7 +13,7 @@ describe('Screen', () => {
   };
   var size = { width: 640, height: 480 };
   var pageContents = [ new Image(), new Image(), new Image(), new Image(), new Image(), ];
-  var pages: Page.Collection = {
+  var pages: Pages.Collection = {
     length: pageContents.length,
     at: (i: number) => {
       return {
@@ -57,7 +58,7 @@ describe('Screen', () => {
     });
     it('calls builder.build with pages.length === 1 if second page.content() failed', (done) => {
       var first = true;
-      var pages: Page.Collection = {
+      var pages: Pages.Collection = {
         length: pageContents.length,
         at: (i: number) => {
           return {

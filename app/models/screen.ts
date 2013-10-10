@@ -2,6 +2,7 @@ import $ = require('jquery');
 import Backbone = require('backbone');
 
 import Page = require('models/page');
+import Pages = require('collections/pages');
 import Builder = require('models/builder');
 import Events = require('models/events');
 
@@ -38,12 +39,22 @@ module _Screen {
     content(): Content;
 
     pages(): Page.Page[];
-    update(pages: Page.Collection, params: UpdateParams): JQueryPromise<UpdateResult>;
+    update(pages: Pages.Collection, params: UpdateParams): JQueryPromise<UpdateResult>;
     resize(width: number, height: number): void;
+  }
+
+  export interface Factory {
+    create(size: Size): Screen;
   }
 
   export function createScreen(size: Size, builder: Builder.Builder, setting: Setting): Screen {
     return new ScreenModel(size, builder, setting);
+  }
+
+  export function createFactory(builder: Builder.Builder, setting: Setting): Factory {
+    return {
+      create: (size: Size) => createScreen(size, builder, setting),
+    };
   }
 }
 
@@ -84,7 +95,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
     this.setContent(this._builder.build(this._pageContents, this._size));
   }
 
-  update(pages: Page.Collection, params: _Screen.UpdateParams)
+  update(pages: Pages.Collection, params: _Screen.UpdateParams)
   : JQueryPromise<_Screen.UpdateResult> {
     if (this._deferred !== null) { this._deferred.reject(); }
     var deferred = this._deferred = $.Deferred<_Screen.UpdateResult>();
@@ -144,175 +155,3 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
     return deferred.promise();;
   }
 }
-
-// class ScreenCollection extends Backbone.Collection<ScreenModel> implements _Screen.Collection {
-//   private _builder: _Screen.ContentBuilder;
-//   private _size: _Screen.Size;
-//   private _setting: _Screen.Setting;
-//   private _focusedScreenIndex: number;
-
-//   private _currentDeferred: JQueryDeferred<void>;
-//   private _prevScreens: ScreenModel[];
-//   private _nextScreens: ScreenModel[];
-//   private _nextScreenPage: number;
-//   private _prevScreenPage: number;
-
-//   constructor(builder: _Screen.ContentBuilder, size: _Screen.Size, setting: _Screen.Setting) {
-//     this._builder = builder;
-//     this._size = size;
-//     this._setting = setting;
-//     this._focusedScreenIndex = 0;
-//     this._currentDeferred = null;
-//     this._prevScreens = [];
-//     this._nextScreens = [];
-//     this.model = ScreenModel;
-//     super();
-//   }
-
-//   focusedScreenIndex(): number { return this._focusedScreenIndex; }
-//   update(pages: Page.Collection, readingInfo: _Screen.ReadingInfo): JQueryPromise<void> {
-//     // cleanup previous update task
-//     if (this._currentDeferred !== null) {
-//       this._currentDeferred.reject();
-//       this._currentDeferred = null;
-//     }
-//     // if pages is empty, return immediately
-//     if (pages.length === 0) {
-//       if (this.length > 0) { this.reset([]); }
-//       return $.Deferred<void>().resolve().promise();
-//     }
-//     // reset # of screens
-//     this.resetScreens(readingInfo);
-//     var maxlen = Math.max(this._prevScreens.length, this._nextScreens.length);
-//     var updateScreenList: ScreenModel[] = [this.at(this._focusedScreenIndex)];
-//     for (var i = 0; i < maxlen; ++i) {
-//       if (i < this._prevScreens.length) {
-//         updateScreenList.push(this._prevScreens[i]);
-//       }
-//       if (i < this._nextScreens.length) {
-//         updateScreenList.push(this._nextScreens[i]);
-//       }
-//     }
-
-//     var promise: JQueryPromise<void> = null;
-//     for (var i = 0, len = updateScreenList.length; i < len; ++i) {
-//       if (i === 0) {
-//         this._currentDeferred = this.updateScreen(updateScreenList[i], pages, readingInfo);
-//         promise = this._currentDeferred.promise();
-//       } else {
-//         ((index: number) => {
-//           promise = promise.then(() => {
-//             this._currentDeferred = this.updateScreen(updateScreenList[i], pages, readingInfo);
-//             return this._currentDeferred.promise();
-//           });
-//         }(i));
-//       }
-//     }
-//     return promise;
-//   }
-
-//   updateScreen(screen: ScreenModel, pages: Page.Collection, readingInfo: _Screen.ReadingInfo)
-//   : JQueryDeferred<void> {
-//     var deferred = $.Deferred<void>();
-//     var screenIndex = this.indexOf(screen);
-//     var pageNum: number = 0;
-//     var direction: _Screen.ReadingDirection = null;
-//     if (screenIndex === this._focusedScreenIndex) {
-//       pageNum = readingInfo.currentPageNum;
-//       direction = readingInfo.readingDirection;
-//     } else if (screenIndex < this._focusedScreenIndex) {
-//       pageNum = readingInfo.currentPageNum + this._prevScreenPage;
-//       direction = _Screen.ReadingDirection.Backward;
-//     } else {
-//       pageNum = readingInfo.currentPageNum - this._prevScreenPage;
-//       direction = _Screen.ReadingDirection.Forward;
-//     }
-
-//     if (pageNum < 0 || readingInfo.totalPageNum <= pageNum) {
-//       this.remove(screen);
-//       if (screenIndex < this._focusedScreenIndex) {
-//         this._focusedScreenIndex -= 1;
-//       }
-//       return deferred.resolve();
-//     }
-
-//     var pageContents: Page.Content[] = [];
-
-//     var promise = pages.at(pageNum).content().then((content: Page.Content) => {
-//       pageContents.push(content);
-//     });
-
-//     if (this._setting.viewMode() === _Screen.ViewMode.TwoPage) {
-//       promise = promise.then(() => {
-//         var content = pageContents[0];
-//         var nextPage = pageNum + direction;
-//         if (nextPage < 0
-//             || readingInfo.totalPageNum <= nextPage
-//             || this._setting.isSpreadPage(content)) {
-//           return $.Deferred<void>().resolve().promise();
-//         }
-//         var nextPromise = pages.at(nextPage).content()
-//           .then<void>((nextContent: Page.Content) => {
-//             if (!this._setting.isSpreadPage(nextContent)) {
-//               if (direction === _Screen.ReadingDirection.Backward) {
-//                 pageContents.unshift(nextContent);
-//               } else {
-//                 pageContents.push(nextContent);
-//               }
-//             }
-//           });
-//         return nextPromise;
-//       });
-//     }
-
-//     promise.then(() => {
-//       screen.setContent(this._builder.build(pageContents, {
-//         width: this._size.width,
-//         height: this._size.height,
-//         direction: this._setting.pageDirection(),
-//       }));
-//       var focused = screenIndex === this._focusedScreenIndex ? 1 : 0;
-//       if (direction === _Screen.ReadingDirection) {
-//         this._prevScreenPage += pageContents.length - focused;
-//       } else {
-//         this._nextScreenPage += pageContents.length - focused;
-//       }
-//       deferred.resolve();
-//     });
-//     return deferred;
-//   }
-
-//   resetScreens(readingInfo: _Screen.ReadingInfo): void {
-//     var currentPageNum = readingInfo.currentPageNum;
-//     var totalPageNum = readingInfo.totalPageNum;
-//     var prevScreenNum = Math.min(this._setting.prevScreenNum(), currentPageNum);
-//     var nextScreenNum = Math.min(this._setting.nextScreenNum(), totalPageNum - currentPageNum - 1);
-
-//     var screenNum = 1 + prevScreenNum + nextScreenNum;
-//     if (screenNum !== this.length) {
-//       var screens: ScreenModel[] = [];
-//       for (var i = 0; i < screenNum; ++i) {
-//         screens.push(new ScreenModel({status: _Screen.Status.Loading}));
-//       }
-//       this.reset(screens);
-//     }
-
-//     if (this._focusedScreenIndex !== prevScreenNum) {
-//       this._focusedScreenIndex = prevScreenNum;
-//       this.trigger('update');
-//     }
-
-//     this._prevScreens = [];
-//     this._nextScreens = [];
-//     for (var i = 0; i < prevScreenNum; ++i) {
-//       this._prevScreens.push(this.at(this.focusedScreenIndex() - i - 1));
-//     }
-//     for (var i = 0; i < nextScreenNum; ++i) {
-//       this._nextScreens.push(this.at(this.focusedScreenIndex() + i + 1));
-//     }
-
-//     this._nextScreenPage = 1;
-//     this._prevScreenPage = 1;
-//   }
-//   // resize(width: number, height: number): void {}
-// }

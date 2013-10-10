@@ -26,7 +26,7 @@ module Builder {
 }
 
 // private
-;class VerticalSizeAlignBuilder implements Builder.Builder {
+class VerticalSizeAlignBuilder implements Builder.Builder {
   private _setting: Builder.Setting;
 
   constructor(setting: Builder.Setting) {
