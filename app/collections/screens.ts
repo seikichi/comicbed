@@ -51,8 +51,11 @@ class ScreenWithOnePrevNext implements Screens.Screens {
     this._factory = factory;
 
     this._currentScreen = this._factory.create(this._size);
-    this._prevScreens = new ScreenCollection([]);
-    this._nextScreens = new ScreenCollection([]);
+    this._prevScreens = new ScreenCollection();
+    this._nextScreens = new ScreenCollection();
+
+    this._prevScreens.add(this._factory.create(this._size));
+    this._nextScreens.add(this._factory.create(this._size));
   }
 
 
@@ -61,13 +64,16 @@ class ScreenWithOnePrevNext implements Screens.Screens {
   nextScreens(): Screens.Collection { return this._nextScreens; }
 
   update(pages: Pages.Collection, params: Screen.UpdateParams): JQueryPromise<void> {
-    // return this._currentScreen.update(pages, params).then((result: Screen.UpdateResult) => {});
     var prevPageNum = params.currentPageNum - 1;
     var nextPageNum = params.currentPageNum + 1;
     if (prevPageNum < 0) { this._prevScreens.reset([]); }
-    else if (this._prevScreens.length === 0) { this._prevScreens.add(this._factory.create(this._size)); }
+    else if (this._prevScreens.length === 0) {
+      this._prevScreens.add(this._factory.create(this._size));
+    }
     if (params.totalPageNum <= nextPageNum) { this._nextScreens.reset([]); }
-    else if (this._nextScreens.length === 0) { this._nextScreens.add(this._factory.create(this._size)); }
+    else if (this._nextScreens.length === 0) {
+      this._nextScreens.add(this._factory.create(this._size));
+    }
 
     var currentPageNum: number = 1;
     var promise = this._currentScreen.update(pages, params).then(() => {
@@ -102,10 +108,9 @@ class ScreenWithOnePrevNext implements Screens.Screens {
       } else {
         nextParams.currentPageNum = nextPageNum;
       }
-      return this._nextScreens.at(0).update(pages, nextParams);
-      // update next screen
+      return this._nextScreens.at(0).update(pages, nextParams).then(() => {});
     });
-    return undefined;
+    return promise;
   }
 
   resize(width: number, height: number): void {

@@ -24,7 +24,7 @@ describe('Screen', () => {
     }
   };
 
-  describe('error handling', () => {
+  describe('the update method', () => {
     var setting = {
       detectsSpreadPage: () => true,
       viewMode: () => Screen.ViewMode.TwoPage,
