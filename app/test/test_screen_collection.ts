@@ -11,7 +11,7 @@ declare var sinon: any;
 class ScreenStub extends Backbone.Model {
   status() { return Screen.Status.Loading; }
   content() { return <Screen.Content>undefined; }
-  pages() { return <Page.Page[]>[]; }
+  pages() { return <Page.Page[]>[undefined]; }
   update(pages: Pages.Collection, params: Screen.UpdateParams) {
     return $.Deferred<any>().resolve().promise();
   }
@@ -27,9 +27,46 @@ describe('Screens', () => {
     'createScreensWithoutPrevNext': Screens.createScreensWithoutPrevNext(size, factory),
     'createScreensWithOnePrevNext': Screens.createScreensWithOnePrevNext(size, factory),
   };
+  var pageContents = [ new Image(), new Image(), new Image(), new Image(), new Image(), ];
+  var pages: Pages.Collection = {
+    length: pageContents.length,
+    at: (i: number) => {
+      return {
+        name: () => 'page',
+        pageNum: () => i + 1,
+        content: () => $.Deferred<Page.Content>().resolve(pageContents[i]).promise()
+      };
+    }
+  };
+
   for (var key in impls) if (impls.hasOwnProperty(key)) {
     ((screens: Screens.Screens) => {
       describe('created by ' + key, () => {
+        describe('the update method ' + key, () => {
+          it('updates the currentScreen', (done) => {
+            var current = screens.currentScreen();
+            var mock = sinon.mock(current);
+            mock.expects('update').once().returns($.Deferred<any>().resolve().promise());
+            screens.update(pages, {
+              currentPageNum: 0,
+              readingDirection: Screen.ReadingDirection.Forward,
+            }).then(() => {
+              mock.verify();
+              done();
+            });
+          });
+          it('should make prevScreens empty when the currentPage is firstPage', () => {
+          });
+          // it('shuold make prevScreens empty when the currentScreen contains first and second pages', () => {
+          // });
+          // it('shuold make prevScreens empty when the currentPage is firstPage', () => {
+          // });
+          // it('shuold make prevScreens empty when the currentScreen contains first and second pages', () => {
+          // });
+          // it('makes prevScreens empty after currentPage is updated', () => {
+          // });
+        });
+
         describe('the resize method ' + key, () => {
           var newWidth = 100, newHeight = 200;
           it('calls Screen.resize of currentScreen', () => {

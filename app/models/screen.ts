@@ -23,7 +23,6 @@ module _Screen {
 
   export interface UpdateParams {
     currentPageNum: number;
-    totalPageNum: number;
     readingDirection: ReadingDirection;
   }
 
@@ -116,7 +115,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
         var content = newPageContents[0];
         var nextPageNum = pageNum + direction;
         if (nextPageNum < 0
-            || params.totalPageNum <= nextPageNum
+            || pages.length <= nextPageNum
             || (this._setting.detectsSpreadPage()
                 && this._setting.isSpreadPage(content))) {
           return $.Deferred<void>().resolve().promise();

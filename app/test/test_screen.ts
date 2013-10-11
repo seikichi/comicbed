@@ -32,12 +32,13 @@ describe('Screen', () => {
     };
     it('makes the status Screen.Status.Success', (done) => {
       var screen = Screen.createScreen(size, builder, setting);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
-                             readingDirection: Screen.ReadingDirection.Forward})
-        .then(() => {
-          assert.strictEqual(Screen.Status.Success, screen.status());
-          done();
-        });
+      screen.update(pages, {
+        currentPageNum: 0,
+        readingDirection: Screen.ReadingDirection.Forward
+      }).then(() => {
+        assert.strictEqual(Screen.Status.Success, screen.status());
+        done();
+      });
     });
     it('makes the status Screen.Status.Error when first page.content() failed', (done) => {
       var mock = sinon.mock(pages);
@@ -47,14 +48,15 @@ describe('Screen', () => {
         content: () => $.Deferred<Page.Content>().reject().promise(),
       });
       var screen = Screen.createScreen(size, builder, setting);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
-                             readingDirection: Screen.ReadingDirection.Forward})
-        .then(() => {
-          assert.strictEqual(Screen.Status.Error, screen.status());
-          assert.strictEqual(1, screen.pages().length);
-          mock.verify();
-          done();
-        });
+      screen.update(pages, {
+        currentPageNum: 0,
+        readingDirection: Screen.ReadingDirection.Forward
+      }).then(() => {
+        assert.strictEqual(Screen.Status.Error, screen.status());
+        assert.strictEqual(1, screen.pages().length);
+        mock.verify();
+        done();
+      });
     });
     it('calls builder.build with pages.length === 1 if second page.content() failed', (done) => {
       var first = true;
@@ -78,15 +80,16 @@ describe('Screen', () => {
       var content = new Image();
       mock.expects('build').once().withArgs([pageContents[0]], size).returns(content);
       var screen = Screen.createScreen(size, builder, setting);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
-                             readingDirection: Screen.ReadingDirection.Forward})
-        .then(() => {
-          assert.strictEqual(Screen.Status.Success, screen.status());
-          assert.strictEqual(content, screen.content());
-          assert.strictEqual(1, screen.pages().length);
-          mock.verify();
-          done();
-        });
+      screen.update(pages, {
+        currentPageNum: 0,
+        readingDirection: Screen.ReadingDirection.Forward
+      }).then(() => {
+        assert.strictEqual(Screen.Status.Success, screen.status());
+        assert.strictEqual(content, screen.content());
+        assert.strictEqual(1, screen.pages().length);
+        mock.verify();
+        done();
+      });
     });
   });
 
@@ -99,14 +102,15 @@ describe('Screen', () => {
         isSpreadPage: (content: Page.Content) => false,
       };
       var screen = Screen.createScreen(size, builder, setting);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
-                             readingDirection: Screen.ReadingDirection.Forward})
-        .then(() => {
-          mock.expects('build').once().withArgs([pageContents[0]], {width: 1280, height: 960});
-          screen.resize(1280, 960);
-          mock.verify();
-          done();
-        });
+      screen.update(pages, {
+        currentPageNum: 0,
+        readingDirection: Screen.ReadingDirection.Forward
+      }).then(() => {
+        mock.expects('build').once().withArgs([pageContents[0]], {width: 1280, height: 960});
+        screen.resize(1280, 960);
+        mock.verify();
+        done();
+      });
     });
   });
 
@@ -120,22 +124,24 @@ describe('Screen', () => {
       var mock = sinon.mock(setting);
       mock.expects('isSpreadPage').never();
       var screen = Screen.createScreen(size, builder, setting);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
-                             readingDirection: Screen.ReadingDirection.Forward})
-        .then(() => { mock.verify(); done(); });
+      screen.update(pages, {
+        currentPageNum: 0,
+        readingDirection: Screen.ReadingDirection.Forward
+      }).then(() => { mock.verify(); done(); });
     });
     it('calls builer.build with pages whose length equals to 1', (done) => {
       var mock = sinon.mock(builder);
       var content = new Image();
       mock.expects('build').once().withArgs([pageContents[0]], size).returns(content);
       var screen = Screen.createScreen(size, builder, setting);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
-                             readingDirection: Screen.ReadingDirection.Forward})
-        .then(() => {
-          assert.strictEqual(content, screen.content());
-          mock.verify();
-          done();
-        });
+      screen.update(pages, {
+        currentPageNum: 0,
+        readingDirection: Screen.ReadingDirection.Forward
+      }).then(() => {
+        assert.strictEqual(content, screen.content());
+        mock.verify();
+        done();
+      });
     });
     it('makes screen.content() from Page.Content', (done) => {
       var deferred = $.Deferred<any>();
@@ -147,9 +153,10 @@ describe('Screen', () => {
       for (var i = 0, len = pages.length; i < len; ++i) {
         ((index: number) => {
           promise = promise
-            .then(() => screen.update(pages, { currentPageNum: index, totalPageNum: len,
-                                               readingDirection: Screen.ReadingDirection.Forward}))
-            .then(() => {
+            .then(() => screen.update(pages, {
+              currentPageNum: index, 
+              readingDirection: Screen.ReadingDirection.Forward
+            })).then(() => {
               assert.strictEqual(pageContents[index], screen.content());
             });
         }(i));
@@ -168,27 +175,30 @@ describe('Screen', () => {
       var mock = sinon.mock(setting);
       mock.expects('isSpreadPage').never();
       var screen = Screen.createScreen(size, builder, setting);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
-                             readingDirection: Screen.ReadingDirection.Forward})
-        .then(() => { mock.verify(); done(); });
+      screen.update(pages, {
+        currentPageNum: 0, 
+        readingDirection: Screen.ReadingDirection.Forward
+      }).then(() => { mock.verify(); done(); });
     });
     it('calls builder.build with pages.length === 1 if the update with last page and read forward', (done) => {
       var len = pages.length;
       var mock = sinon.mock(builder);
       var screen = Screen.createScreen(size, builder, setting);
       mock.expects('build').once().withArgs([pageContents[len - 1]], size);
-      screen.update(pages, { currentPageNum: len - 1, totalPageNum: len,
-                             readingDirection: Screen.ReadingDirection.Forward})
-        .then(() => { mock.verify(); done(); });
+      screen.update(pages, {
+        currentPageNum: len - 1,
+        readingDirection: Screen.ReadingDirection.Forward
+      }).then(() => { mock.verify(); done(); });
     });
     it('calls builder.build with pages.length === 2 if the update with last page and read backward', (done) => {
       var len = pages.length;
       var mock = sinon.mock(builder);
       var screen = Screen.createScreen(size, builder, setting);
       mock.expects('build').once().withArgs([pageContents[len - 2], pageContents[len - 1]], size);
-      screen.update(pages, { currentPageNum: len - 1, totalPageNum: len,
-                             readingDirection: Screen.ReadingDirection.Backward})
-        .then(() => { mock.verify(); done(); });
+      screen.update(pages, {
+        currentPageNum: len - 1,
+        readingDirection: Screen.ReadingDirection.Backward
+      }).then(() => { mock.verify(); done(); });
     });
     it('calls builder.build with pages.length === 2 if the update with first page and read forward', (done) => {
       var mock = sinon.mock(builder);
@@ -202,9 +212,10 @@ describe('Screen', () => {
       var mock = sinon.mock(builder);
       var screen = Screen.createScreen(size, builder, setting);
       mock.expects('build').once().withArgs([pageContents[0]], size);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
-                             readingDirection: Screen.ReadingDirection.Backward})
-        .then(() => { mock.verify(); done(); });
+      screen.update(pages, {
+        currentPageNum: 0,
+        readingDirection: Screen.ReadingDirection.Backward
+      }).then(() => { mock.verify(); done(); });
     });
   });
   describe('the update function, when viewMode is TwoPage, detectsSpreadPage is true', () => {
@@ -217,25 +228,28 @@ describe('Screen', () => {
       var mock = sinon.mock(setting);
       mock.expects('isSpreadPage').once().returns(true);
       var screen = Screen.createScreen(size, builder, setting);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
-                             readingDirection: Screen.ReadingDirection.Forward})
-        .then(() => { mock.verify(); done(); });
+      screen.update(pages, {
+        currentPageNum: 0,
+        readingDirection: Screen.ReadingDirection.Forward
+      }).then(() => { mock.verify(); done(); });
     });
     it('should call twice setting.isSpreadPage function if isSpreadPage returns false', (done) => {
       var mock = sinon.mock(setting);
       mock.expects('isSpreadPage').twice().returns(false);
       var screen = Screen.createScreen(size, builder, setting);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
-                             readingDirection: Screen.ReadingDirection.Forward})
-        .then(() => { mock.verify(); done(); });
+      screen.update(pages, {
+        currentPageNum: 0,
+        readingDirection: Screen.ReadingDirection.Forward
+      }).then(() => { mock.verify(); done(); });
     });
     it('calls builder.build with pages.length === 1 if the isSpreadPage returns true', (done) => {
       var mock = sinon.mock(builder);
       var screen = Screen.createScreen(size, builder, setting);
       mock.expects('build').once().withArgs([pageContents[0]], size);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
-                             readingDirection: Screen.ReadingDirection.Forward})
-        .then(() => { mock.verify(); done(); });
+      screen.update(pages, {
+        currentPageNum: 0,
+        readingDirection: Screen.ReadingDirection.Forward
+      }).then(() => { mock.verify(); done(); });
     });
     it('calls builder.build with pages.length === 1 if the isSpreadPage returns true for second page', (done) => {
       var first = true;
@@ -251,9 +265,10 @@ describe('Screen', () => {
       var mock = sinon.mock(builder);
       var screen = Screen.createScreen(size, builder, setting);
       mock.expects('build').once().withArgs([pageContents[0]], size);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
-                             readingDirection: Screen.ReadingDirection.Forward})
-        .then(() => { mock.verify(); done(); });
+      screen.update(pages, {
+        currentPageNum: 0,
+        readingDirection: Screen.ReadingDirection.Forward
+      }).then(() => { mock.verify(); done(); });
     });
     it('calls builder.build with pages.length === 2 if the isSpreadPage returns false', (done) => {
       var first = true;
@@ -265,9 +280,10 @@ describe('Screen', () => {
       var mock = sinon.mock(builder);
       var screen = Screen.createScreen(size, builder, setting);
       mock.expects('build').once().withArgs([pageContents[0], pageContents[1]], size);
-      screen.update(pages, { currentPageNum: 0, totalPageNum: pages.length,
-                             readingDirection: Screen.ReadingDirection.Forward})
-        .then(() => { mock.verify(); done(); });
+      screen.update(pages, {
+        currentPageNum: 0,
+        readingDirection: Screen.ReadingDirection.Forward
+      }).then(() => { mock.verify(); done(); });
     });
   });
 });

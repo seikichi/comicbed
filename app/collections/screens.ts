@@ -70,44 +70,50 @@ class ScreenWithOnePrevNext implements Screens.Screens {
     else if (this._prevScreens.length === 0) {
       this._prevScreens.add(this._factory.create(this._size));
     }
-    if (params.totalPageNum <= nextPageNum) { this._nextScreens.reset([]); }
+    if (pages.length <= nextPageNum) { this._nextScreens.reset([]); }
     else if (this._nextScreens.length === 0) {
       this._nextScreens.add(this._factory.create(this._size));
     }
 
-    var currentPageNum: number = 1;
+    var currentScreenPages: number = 1;
     var promise = this._currentScreen.update(pages, params).then(() => {
-      currentPageNum = this._currentScreen.pages.length;
+      currentScreenPages = this._currentScreen.pages.length;
       if (this._prevScreens.length === 0) {
+        return $.Deferred<void>().resolve().promise();
+      }
+      // check whether the new previous page is valid or not
+      var newPrevPageNum = prevPageNum;
+      if (params.readingDirection === Screen.ReadingDirection.Backward) {
+        newPrevPageNum = params.currentPageNum - currentScreenPages;
+      }
+      if (newPrevPageNum < 0) {
+        this._prevScreens.reset([]);
         return $.Deferred<void>().resolve().promise();
       }
       // update prev screen
       var prevParams: Screen.UpdateParams = {
-        currentPageNum: null,
+        currentPageNum: newPrevPageNum,
         readingDirection: Screen.ReadingDirection.Backward,
-        totalPageNum: params.totalPageNum,
       };
-      if (params.readingDirection === Screen.ReadingDirection.Forward) {
-        prevParams.currentPageNum = prevPageNum;
-      } else {
-        prevParams.currentPageNum = params.currentPageNum - currentPageNum;
-      }
       return this._prevScreens.at(0).update(pages, prevParams);
     }).then(() => {
       if (this._nextScreens.length === 0) {
         return $.Deferred<void>().resolve().promise();
       }
+      // check whether the new next page is valid or not
+      var newNextPageNum = nextPageNum;
+      if (params.readingDirection === Screen.ReadingDirection.Forward) {
+        newNextPageNum = params.currentPageNum + currentScreenPages;
+      }
+      if (pages.length <= newNextPageNum) {
+        this._nextScreens.reset([]);
+        return $.Deferred<void>().resolve().promise();
+      }
       // update next screen
       var nextParams: Screen.UpdateParams = {
-        currentPageNum: null,
+        currentPageNum: newNextPageNum,
         readingDirection: Screen.ReadingDirection.Forward,
-        totalPageNum: params.totalPageNum,
       };
-      if (params.readingDirection === Screen.ReadingDirection.Forward) {
-        nextParams.currentPageNum = params.currentPageNum + currentPageNum;
-      } else {
-        nextParams.currentPageNum = nextPageNum;
-      }
       return this._nextScreens.at(0).update(pages, nextParams).then(() => {});
     });
     return promise;
