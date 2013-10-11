@@ -76,8 +76,9 @@ class ScreenWithOnePrevNext implements Screens.Screens {
     }
 
     var currentScreenPages: number = 1;
+    // first, update the current screen
     var promise = this._currentScreen.update(pages, params).then(() => {
-      currentScreenPages = this._currentScreen.pages.length;
+      currentScreenPages = this._currentScreen.pages().length;
       if (this._prevScreens.length === 0) {
         return $.Deferred<void>().resolve().promise();
       }
