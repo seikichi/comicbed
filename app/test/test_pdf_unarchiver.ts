@@ -4,6 +4,7 @@ import ImageUtil = require('utils/image');
 var assert = chai.assert;
 
 describe('PdfImageUnarchiver', function () {
+  this.timeout(5000);
   var compressTypes = [
     'None',
     'BZip',
