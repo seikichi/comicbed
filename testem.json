@@ -3,6 +3,7 @@
   "test_page": "test.mustache",
   "launch_in_dev": [
     "Chromium",
+    "Chrome",
     "Firefox"
   ],
   "src_files": [
