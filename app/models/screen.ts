@@ -1,10 +1,10 @@
 import $ = require('jquery');
 import Backbone = require('backbone');
 
+import Events = require('models/events');
 import Page = require('models/page');
 import Pages = require('collections/pages');
 import Scaler = require('models/scaler');
-import Events = require('models/events');
 
 export = _Screen;
 
@@ -16,7 +16,7 @@ module _Screen {
   export enum ReadingDirection { Forward = +1, Backward = -1 }
   export enum PageDirection { L2R, R2L, }
 
-  export interface Setting {
+  export interface Setting extends Events.Events {
     detectsSpreadPage(): boolean;
     viewMode(): ViewMode;
     isSpreadPage(content: Page.Content): boolean;

@@ -1,4 +1,5 @@
 import $ = require('jquery');
+import Events = require('events');
 
 // public
 export = Unarchiver;
@@ -19,7 +20,7 @@ module Unarchiver {
     mimeType?: string;
   }
 
-  export interface Setting {
+  export interface Setting extends Events.Events {
     loadImageXObjectOnlyInPdf(): boolean;
   }
 

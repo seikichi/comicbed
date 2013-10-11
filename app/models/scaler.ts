@@ -1,3 +1,4 @@
+import Events = require('models/events');
 import Page = require('models/page');
 
 export = Scaler;
@@ -6,7 +7,7 @@ module Scaler {
   export enum ScaleMode { AlignVertical, Original, FitWindow, }
   export interface Content extends HTMLElement {}
 
-  export interface Setting {
+  export interface Setting extends Events.Events {
     scaleMode(): ScaleMode;
   }
 

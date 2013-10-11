@@ -12,7 +12,6 @@ module Setting {
     screenSetting(): Screen.Setting;
     unarchiverSetting(): Unarchiver.Setting;
     scalerSetting(): Scaler.Setting;
-
     // cacheSetting(): CacheSetting;
     // inputSetting(): InputSetting;
     // uiSetting(): UISetting;
