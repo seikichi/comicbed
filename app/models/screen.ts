@@ -15,7 +15,7 @@ module _Screen {
   export enum ViewMode { OnePage, TwoPage, }
   export enum ReadingDirection { Forward = +1, Backward = -1 }
 
-  export interface  Setting {
+  export interface Setting {
     detectsSpreadPage(): boolean;
     viewMode(): ViewMode;
     isSpreadPage(content: Page.Content): boolean;

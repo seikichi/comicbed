@@ -1,10 +1,24 @@
 import _ = require('underscore');
 import Backbone = require('backbone');
-import logger = require('utils/logger');
+
+import Screen = require('models/screen');
+import Builder = require('models/builder');
+import Unarchiver = require('utils/unarchiver');
 
 export = Setting;
 
 module Setting {
+  export interface Setting {
+    screenSetting(): Screen.Setting;
+    unarchiverSetting(): Unarchiver.Setting;
+    builderSetting(): Builder.Setting;
+  }
+
+  export function createFromQueryString(queryString: string): Setting {
+    return undefined;
+  }
+}
+
   // public
   // export enum ViewMode { OnePage, TwoPage, }
   // export enum PageDirection { L2R, R2L, }
@@ -87,4 +101,3 @@ module Setting {
   //   setDisplaysOnlyImageInPdf(value: boolean): void { this.set('displaysOnlyImageInPdf', value); }
   //   setCanvasScale(scale: number): void { this.set('canvasScale', scale); }
   // }
-}

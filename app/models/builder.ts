@@ -20,13 +20,13 @@ module Builder {
     build(pages: Page.Content[], params: BuildParams): Content;
   }
 
-  export function createVerticalSizeAlignBuilder(setting: Setting): Builder {
-    return new VerticalSizeAlignBuilder(setting);
+  export function create(setting: Setting): Builder {
+    return new ContentBulder(setting);
   }
 }
 
 // private
-class VerticalSizeAlignBuilder implements Builder.Builder {
+class ContentBulder implements Builder.Builder {
   private _setting: Builder.Setting;
 
   constructor(setting: Builder.Setting) {
