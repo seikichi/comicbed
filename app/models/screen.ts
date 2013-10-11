@@ -3,7 +3,7 @@ import Backbone = require('backbone');
 
 import Page = require('models/page');
 import Pages = require('collections/pages');
-import Builder = require('models/builder');
+import Scaler = require('models/scaler');
 import Events = require('models/events');
 
 export = _Screen;
@@ -14,11 +14,13 @@ module _Screen {
   export enum Status { Success, Error, Loading, }
   export enum ViewMode { OnePage, TwoPage, }
   export enum ReadingDirection { Forward = +1, Backward = -1 }
+  export enum PageDirection { L2R, R2L, }
 
   export interface Setting {
     detectsSpreadPage(): boolean;
     viewMode(): ViewMode;
     isSpreadPage(content: Page.Content): boolean;
+    pageDirection(): PageDirection;
   }
 
   export interface UpdateParams {
@@ -46,27 +48,27 @@ module _Screen {
     create(size: Size): Screen;
   }
 
-  export function createScreen(size: Size, builder: Builder.Builder, setting: Setting): Screen {
-    return new ScreenModel(size, builder, setting);
+  export function createScreen(size: Size, scaler: Scaler.Scaler, setting: Setting): Screen {
+    return new ScreenModel(size, scaler, setting);
   }
 
-  export function createFactory(builder: Builder.Builder, setting: Setting): Factory {
+  export function createFactory(scaler: Scaler.Scaler, setting: Setting): Factory {
     return {
-      create: (size: Size) => createScreen(size, builder, setting),
+      create: (size: Size) => createScreen(size, scaler, setting),
     };
   }
 }
 
 // private
 class ScreenModel extends Backbone.Model implements _Screen.Screen {
-  private _builder: Builder.Builder;
+  private _builder: Scaler.Scaler;
   private _size: _Screen.Size;
   private _setting: _Screen.Setting;
   private _pages: Page.Page[];
   private _pageContents: Page.Content[];
   private _deferred: JQueryDeferred<_Screen.UpdateResult>;
 
-  constructor(size: _Screen.Size, builder: Builder.Builder, setting: _Screen.Setting) {
+  constructor(size: _Screen.Size, builder: Scaler.Scaler, setting: _Screen.Setting) {
     this._builder = builder;
     this._size = size;
     this._setting = setting;
@@ -83,6 +85,15 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
     };
   }
 
+  updateContent(contents: Page.Content[]): void {
+    this._pageContents = contents;
+    if (this._setting.pageDirection() === _Screen.PageDirection.L2R) {
+      contents = contents.slice(0);
+      contents.reverse();
+    }
+    this.setContent(this._builder.scale(contents, this._size));
+  }
+
   status() { return <_Screen.Status>this.get('status'); }
   content() { return <_Screen.Content>this.get('content'); }
   setStatus(status: _Screen.Status) { this.set('status', status); }
@@ -91,7 +102,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
 
   resize(width: number, height: number): void {
     this._size = { width: width, height: height };
-    this.setContent(this._builder.build(this._pageContents, this._size));
+    this.updateContent(this._pageContents);
   }
 
   update(pages: Pages.Collection, params: _Screen.UpdateParams)
@@ -137,19 +148,19 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
       });
     }
     promise.then(() => {
-      this._pageContents = newPageContents;
-      this.setContent(this._builder.build(this._pageContents, this._size));
+      this.updateContent(newPageContents);
       this.setStatus(_Screen.Status.Success);
       deferred.resolve({});
+      this._deferred = null;
     }).fail(() => {
       if (successFirstPage) {
-        this._pageContents = newPageContents;
-        this.setContent(this._builder.build(this._pageContents, this._size));
+        this.updateContent(newPageContents);
         this.setStatus(_Screen.Status.Success);
       } else {
         this.setStatus(_Screen.Status.Error);
       }
       deferred.resolve({});
+      this._deferred = null;
     });;
     return deferred.promise();;
   }

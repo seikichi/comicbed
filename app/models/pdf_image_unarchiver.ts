@@ -1,4 +1,4 @@
-import Unarchiver = require('utils/unarchiver');
+import Unarchiver = require('models/unarchiver');
 import PDFJS = require('pdfjs');
 import sprintf = require('sprintf');
 import ImageUtil = require('utils/image');

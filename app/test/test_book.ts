@@ -1,6 +1,6 @@
 import $ = require('jquery');
 import Book = require('models/book');
-import Unarchiver = require('utils/unarchiver');
+import Unarchiver = require('models/unarchiver');
 
 declare var sinon: any;
 var assert = chai.assert;

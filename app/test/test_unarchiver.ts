@@ -1,4 +1,4 @@
-import Unarchiver = require('utils/unarchiver');
+import Unarchiver = require('models/unarchiver');
 
 var assert = chai.assert;
 

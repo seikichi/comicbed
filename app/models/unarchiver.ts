@@ -18,15 +18,15 @@ module Unarchiver {
   export interface Options {
     mimeType?: string;
   }
+
   export interface Setting {
-    loadImageXObjectOnlyInPdf?: boolean;
+    loadImageXObjectOnlyInPdf(): boolean;
   }
 
   export interface Factory {
     getUnarchiverFromURL(url: string,
-                         setting?: Setting,
                          options?: Options): JQueryPromise<Unarchiver>;
-    getUnarchiverFromFile(file: File, setting?: Setting): JQueryPromise<Unarchiver>;
+    getUnarchiverFromFile(file: File): JQueryPromise<Unarchiver>;
   }
 
   export function createFactory(): Factory {
@@ -39,17 +39,15 @@ enum FileType { Pdf, Zip, Rar, Other };
 
 class FactoryImpl implements Unarchiver.Factory {
 
-  getUnarchiverFromFile(file: File, setting: Unarchiver.Setting = {})
-  : JQueryPromise<Unarchiver.Unarchiver> {
+  getUnarchiverFromFile(file: File) : JQueryPromise<Unarchiver.Unarchiver> {
     var url: string = (<any>window).URL.createObjectURL(file);
     var options = {
       mimeType: file.type
     };
-    return this.getUnarchiverFromURL(url, setting, options);
+    return this.getUnarchiverFromURL(url, options);
   }
 
   getUnarchiverFromURL(url: string,
-                       setting: Unarchiver.Setting = {},
                        options: Unarchiver.Options = {})
   : JQueryPromise<Unarchiver.Unarchiver> {
     // detects archive filetype
@@ -95,7 +93,7 @@ class FactoryImpl implements Unarchiver.Factory {
     var moduleName = '';
     switch (fileType) {
     case FileType.Pdf:
-      var moduleName = 'utils/pdf_image_unarchiver';
+      var moduleName = 'models/pdf_image_unarchiver';
       break;
     case FileType.Zip:
       // var moduleName = 'utils/zip_unarchiver';

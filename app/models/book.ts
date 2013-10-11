@@ -1,4 +1,4 @@
-import Unarchiver = require('utils/unarchiver');
+import Unarchiver = require('models/unarchiver');
 import Page = require('models/page');
 import Pages = require('collections/pages');
 
