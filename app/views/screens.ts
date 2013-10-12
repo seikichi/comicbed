@@ -9,6 +9,8 @@ import Reader = require('models/reader');
 export = ScreenCollectionView;
 
 class ScreenCollectionView extends BaseView {
+  events: {[event:string]:string;};
+
   private _setting: Screen.Setting;
   private _screens: Screens.Screens;
   private _childViews: ScreenView[];
@@ -31,6 +33,11 @@ class ScreenCollectionView extends BaseView {
     this._prevs = this._screens.prevScreens();
     this._nexts = this._screens.nextScreens();
     this._scroll = null;
+
+    this.events = {
+      'click': 'onLeftClick',
+      'contextmenu': 'onRightClick',
+    };
     super(options);
   }
 
@@ -115,6 +122,19 @@ class ScreenCollectionView extends BaseView {
       this._childViews[i].close();
     }
     this._childViews = [];
+  }
+
+  onLeftClick(): void {
+    if (this._scroll !== null && !this._scroll.moved) {
+      this._mover.goNextScreen();
+    }
+  }
+
+  onRightClick(event: Event): void {
+    if (this._scroll !== null && !this._scroll.moved) {
+      event.preventDefault();
+      this._mover.goPrevScreen();
+    }
   }
 }
 
