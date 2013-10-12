@@ -19,51 +19,25 @@
     "jsziptools": "*",
     "jquery-ui": "*",
     "spin.js": "*",
+    "iscroll": "*",
     "chai": "*",
     "mocha": "*",
     "sinon": "http://sinonjs.org/releases/sinon-1.7.3.js"
   },
   "exportsOverride": {
-    "underscore": {
-      "js": "underscore.js"
-    },
-    "jquery": {
-      "js": "jquery.js"
-    },
-    "backbone": {
-      "js": "backbone.js"
-    },
-    "text": {
-      "js": "text.js"
-    },
-    "requirejs": {
-      "js": "require.js"
-    },
-    "handlebars": {
-      "js": "handlebars.js"
-    },
-    "log4javascript": {
-      "js": "log4javascript.js"
-    },
-    "sprintf": {
-      "js": "src/sprintf.js"
-    },
-    "jsziptools": {
-      "js": "dist/*.js"
-    },
-    "jquery-ui": {
-      "js": "ui/jquery-ui.js",
-      "css": "themes/base/*"
-    },
-    "spin.js": {
-      "js": "dist/spin.js"
-    },
-    "chai": {
-      "js": "chai.js"
-    },
-    "mocha": {
-      "js": "mocha.js",
-      "css": "mocha.css"
-    }
+    "underscore": { "js": "underscore.js" },
+    "jquery": { "js": "jquery.js" },
+    "backbone": { "js": "backbone.js" },
+    "text": { "js": "text.js" },
+    "requirejs": { "js": "require.js" },
+    "handlebars": { "js": "handlebars.js" },
+    "log4javascript": { "js": "log4javascript.js" },
+    "sprintf": { "js": "src/sprintf.js" },
+    "jsziptools": { "js": "dist/*.js" },
+    "jquery-ui": { "js": "ui/jquery-ui.js", "css": "themes/base/*" },
+    "iscroll": { "js": "dist/*.js" },
+    "spin.js": { "js": "dist/spin.js" },
+    "chai": { "js": "chai.js" },
+    "mocha": { "js": "mocha.js", "css": "mocha.css" }
   }
 }

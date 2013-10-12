@@ -1,4 +1,5 @@
 import $ = require('jquery');
+import IScroll = require('iscroll');
 
 import Setting = require('models/setting');
 import Unarchiver = require('models/unarchiver');
@@ -15,6 +16,7 @@ $(() => {
   var URL = 'tmp/yuyushiki04.pdf';
   var $flowerpot = $('#flowerpot');
   $flowerpot.css({'background-color': 'rgb(100, 100, 100)'});
+
   var size = { width: $flowerpot.width(), height: $flowerpot.height() };
   var setting = Setting.createFromQueryString('');
   var bookFactory = Book.createFactory(Unarchiver.createFactory());
@@ -28,7 +30,6 @@ $(() => {
     screens: screens,
     setting: setting.screenSetting(),
   });
-  // new ScreenView({el: $flowerpot, screen: screens.currentScreen()});
   reader.openURL(URL).then(() => {
     reader.goToPage(1);
   });

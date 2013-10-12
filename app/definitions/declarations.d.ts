@@ -15,6 +15,10 @@ declare module "unrarlib" {
   export = Module;
 }
 
+declare module "iscroll" {
+  export = IScroll;
+}
+
 declare module "tiff" {
   class Tiff {
     constructor(buffer: ArrayBuffer);
