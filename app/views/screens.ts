@@ -107,7 +107,6 @@ class ScreenCollectionView extends BaseView {
           || (centerPageIndex < newPageIndex
               && pageDirection === Screen.PageDirection.L2R)) {
         // go forward
-        console.log('go forward!');
         this._mover.goNextScreen();
       } else {
         // go backward

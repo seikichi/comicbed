@@ -22,7 +22,7 @@ $(() => {
   var setting = Setting.createFromQueryString('');
   var bookFactory = Book.createFactory(Unarchiver.createFactory());
   var scaler = Scaler.create(setting.scalerSetting());
-  var screenFactory = Screen.createFactory(scaler, setting.screenSetting());
+  var screenFactory = Screen.createCacheFactory(scaler, setting.screenSetting());
   var screens = Screens.create(size, screenFactory);
 
   var reader = Reader.create(bookFactory, screens);
