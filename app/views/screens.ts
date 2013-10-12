@@ -33,13 +33,12 @@ class ScreenCollectionView extends BaseView {
     this.$el.empty();
     // order Screen.Screen
     var screens: Screen.Screen[] = [this._current];
-    for (var i = 0, len = this._prevs.length; i < len; ++i) {
-      screens.push(this._prevs.at(0));
-    }
-    for (var i = 0, len = this._nexts.length; i < len; ++i) {
-      screens.unshift(this._nexts.at(0));
-    }
-
+    // for (var i = 0, len = this._prevs.length; i < len; ++i) {
+    //   screens.push(this._prevs.at(0));
+    // }
+    // for (var i = 0, len = this._nexts.length; i < len; ++i) {
+    //   screens.unshift(this._nexts.at(0));
+    // }
     for (var i = 0, len = screens.length; i < len; ++i) {
       var view = new ScreenView({screen: screens[i]});
       this.$el.append(view.render().el)

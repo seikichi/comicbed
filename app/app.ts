@@ -31,6 +31,8 @@ $(() => {
     setting: setting.screenSetting(),
   });
   reader.openURL(URL).then(() => {
-    reader.goToPage(1);
+    // setTimeout(() => {
+      reader.goToPage(10);
+    // }, 1);
   });
 });
