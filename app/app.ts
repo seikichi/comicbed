@@ -8,7 +8,10 @@ import Scaler = require('models/scaler');
 import Screen = require('models/screen');
 import Screens = require('collections/screens');
 
+import ScreenView = require('views/screen');
+
 $(() => {
+  var URL = 'tmp/yuyushiki04.pdf';
   var $flowerpot = $('#flowerpot');
   $flowerpot.css({'background-color': 'rgb(100, 100, 100)'});
   var size = { width: $flowerpot.width(), height: $flowerpot.height() };
@@ -25,11 +28,7 @@ $(() => {
       $flowerpot.append(currentScreen.content());
     }
   });
-  // var nextScreen0 = reader.screens().nextScreens().at(0);
-  // nextScreen0.on('change:status', () => {
-  //   if (nextScreen0.status() === Screen.Status.Success) {
-  //     // $flowerpot.append(nextScreen0.content());
-  //   }
-  // });
-  reader.openURL('tmp/yuyushiki04.pdf');
+
+  new ScreenView({screen: currentScreen, el: $flowerpot}).render();
+  reader.openURL(URL);
 });
