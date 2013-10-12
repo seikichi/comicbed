@@ -23,6 +23,10 @@ module Screens {
     resize(width: number, height: number): void;
   }
 
+  export function create(size: Screen.Size, factory: Screen.Factory): Screens {
+    return new ScreenWithOnePrevNext(size, factory);
+  }
+
   export function createScreensWithOnePrevNext(size: Screen.Size, factory: Screen.Factory)
   : Screens {
     return new ScreenWithOnePrevNext(size, factory);

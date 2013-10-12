@@ -7,10 +7,7 @@
 
 
 require(['config'], () => {
-  require(['jquery', 'utils/unarchiver'], ($: typeof $, Unarchiver: typeof Unarchiver) => {
-    console.log('Hello, world!');
-    console.log($);
-    console.log(Unarchiver);
+  require(['app'], () => {
   });
 });
 
