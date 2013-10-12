@@ -123,7 +123,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     if (!this.isValidPageNum(newPageNum)) {
       return;
     }
-    this.update(newPageNum, Screen.ReadingDirection.Forward);
+    this.update(newPageNum, Screen.ReadingDirection.Backward);
   }
 
   goToPage(pageNum: number): void {
