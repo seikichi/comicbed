@@ -33,9 +33,7 @@ $(() => {
     mover: reader,
     template: templates.screens,
   });
-  reader.openURL(URL).then(() => {
-    // reader.goToPage(10);
-  });
+  reader.openURL(URL).then(() => {});
 
   (<any>window).reader = reader;
 });

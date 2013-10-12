@@ -61,7 +61,7 @@ declare module PDFJS {
     pageInfo: { pageIndex: number; rotate: number; }
     view: number[];
     getViewport(scale: number, rotate?: number): PageViewport;
-    render(context: RenderContext): RenderContext;
+    render(context: RenderContext): RenderTask;
     destroy(): void;
   }
 }

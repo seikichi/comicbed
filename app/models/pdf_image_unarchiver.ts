@@ -27,12 +27,14 @@ class PdfImageUnarchiver implements Unarchiver.Unarchiver {
   private _document: PDFJS.PDFDocumentProxy;
   private _names: string[];
   private _nameToPageNum: {[name: string]: number;};
+  private _renderTask: PDFJS.RenderTask;
 
   constructor(document: PDFJS.PDFDocumentProxy) {
     this._document = document;
     this._archiveName = (<any>this._document).pdfInfo.info.Title;
     this._names = [];
     this._nameToPageNum = {};
+    this._renderTask = null;
 
     var numOfDigits = 1 + Math.floor(Math.log(this._document.numPages) / Math.log(10));
     var pageNameformat = sprintf('pdf-page-%%0%dd', numOfDigits);
@@ -59,8 +61,13 @@ class PdfImageUnarchiver implements Unarchiver.Unarchiver {
       var viewport = page.getViewport(0);
       var context = canvas.getContext('2d');
       var renderContext = { canvasContext: context, viewport: viewport, };
-      return page.render(renderContext);
+      if (this._renderTask !== null) {
+        this._renderTask.cancel();
+      }
+      this._renderTask = page.render(renderContext);
+      return this._renderTask;
     }).then(() => {
+      this._renderTask = null;
       var objs = page.objs.objs;
       for (var key in objs) if (objs.hasOwnProperty(key)) {
         if (key.indexOf('img_') !== 0) { continue; }
