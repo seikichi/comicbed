@@ -70,6 +70,7 @@ class ContentScaler implements Scaler.Scaler {
 
   scaleTwoPage(pages: Page.Content[], params: Scaler.ScaleParams): Scaler.Content {
     var div = document.createElement('div');
+
     var leftContent = pages[1];
     var rightContent =  pages[0];
 

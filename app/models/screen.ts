@@ -103,6 +103,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
   setStatus(status: _Screen.Status) { this.set('status', status); }
   setContent(content: _Screen.Content) { this.set('content', content); }
   pages() { return this._pages; }
+  setPages(pages: Page.Page[]) { this._pages = pages; }
 
   resize(width: number, height: number): void {
     this._size = { width: width, height: height };
@@ -175,7 +176,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
 
 // cache ver
 class ScreenCacheFactory implements _Screen.Factory {
-  private _cache: {[key:string]:{content: _Screen.Content; status: _Screen.Status;};};
+  private _cache: {[key:string]:ScreenModelAttribute;}
 
   constructor(private _scaler: Scaler.Scaler,
               private _setting: _Screen.Setting) {
@@ -192,10 +193,16 @@ class ScreenCacheFactory implements _Screen.Factory {
   }
 }
 
-class CacheScreenModel extends ScreenModel {
-  private _cache: {[key:string]:{content: _Screen.Content; status: _Screen.Status;};};
+interface ScreenModelAttribute {
+  status: _Screen.Status;
+  content: _Screen.Content;
+  pages: Page.Page[];
+}
 
-  constructor(cache: {[key:string]:{content: _Screen.Content; status: _Screen.Status;};},
+class CacheScreenModel extends ScreenModel {
+  private _cache: {[key:string]:ScreenModelAttribute;}
+
+  constructor(cache: {[key:string]:ScreenModelAttribute;},
               size: _Screen.Size,
               scaler: Scaler.Scaler,
               setting: _Screen.Setting) {
@@ -211,13 +218,31 @@ class CacheScreenModel extends ScreenModel {
       this.setContent(data.content);
       if (this.status() === data.status) {
         this.trigger('change:status');
-      } else {
-        this.setStatus(data.status);
       }
+      this.setStatus(data.status);
       return $.Deferred<_Screen.UpdateResult>().resolve({}).promise();
     }
     var ret = super.update(pages, params).then((result: _Screen.UpdateResult) => {
-      this._cache[key] = { content: this.content(), status: this.status() };
+      // var data = {
+      //   content: this.content(),
+      //   status: this.status(),
+      //   pages: this.pages(),
+      // };
+      // var removesKeys: string[] = [];
+      // for (var k in this._cache) if (this._cache.hasOwnProperty(k)) {
+      //   for (var i = 0, len = this.pages().length; i < len; ++i) {
+      //     for (var j = 0, clen = this._cache[k].pages.length; j < clen; ++j) {
+      //       if (this.pages()[i] === this._cache[k].pages[j]) {
+      //         removesKeys.push(k);
+      //         break;
+      //       }
+      //     }
+      //   }
+      // }
+      // for (var i = 0, len = removesKeys.length; i < len; ++i) {
+      //   delete this._cache[k];
+      // }
+      // this._cache[key] = data;
       return result;
     });
     return ret;

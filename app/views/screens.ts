@@ -47,7 +47,6 @@ class ScreenCollectionView extends BaseView {
   }
 
   render() {
-    this.removeChildViews();
     this.$el.html(this._template({}));
     // order Screen.Screen
     var screens: Screen.Screen[] = [this._current];
