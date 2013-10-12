@@ -77,6 +77,8 @@ declare module "templates" {
     footercontent: (data: {[key:string]: any;}) => string;
     header: (data: {[key:string]: any;}) => string;
     headercontent: (data: {[key:string]: any;}) => string;
+
+    screens: (data: {[key:string]: any;}) => string;
   };
   export = JST;
 }

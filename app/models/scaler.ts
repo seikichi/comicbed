@@ -55,7 +55,10 @@ class ContentScaler implements Scaler.Scaler {
     var newTop = Math.floor((params.height - newHeight) / 2);
     var newLeft = Math.floor((params.width - newWidth) / 2);
 
-    div.style.cssText = 'position: relative;';
+    div.style.cssText =
+      'position: relative;' +
+      'width: ' + params.width + 'px;' +
+      'height: ' + params.height + 'px;';
     content.style.cssText =
       'position: absolute;' +
       'top: ' + newTop + 'px;' +
@@ -92,7 +95,10 @@ class ContentScaler implements Scaler.Scaler {
     var rightTop = Math.floor((params.height - newRightHeight) / 2);
     var rightLeft = Math.floor(leftLeft + newLeftWidth);
 
-    div.style.cssText = 'position: relative;';
+    div.style.cssText =
+      'position: relative;' +
+      'width: ' + params.width + 'px;' +
+      'height: ' + params.height + 'px;';
     leftContent.style.cssText =
       'position: absolute;' +
       'top: ' + leftTop + 'px;' +

@@ -30,6 +30,11 @@ module Reader {
   export function create(bookFactory: Book.Factory, screens: Screens.Screens): Reader {
     return new ReaderModel(bookFactory, screens);
   }
+
+  export interface ScreenMover {
+    goNextScreen(): void;
+    goPrevScreen(): void;
+  }
 }
 
 class ReaderModel extends Backbone.Model implements Reader.Reader {

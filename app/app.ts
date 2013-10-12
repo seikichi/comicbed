@@ -12,10 +12,11 @@ import Screens = require('collections/screens');
 import ScreenView = require('views/screen');
 import ScreenCollectionView = require('views/screens');
 
+import templates = require('templates');
+
 $(() => {
   var URL = 'tmp/yuyushiki04.pdf';
   var $flowerpot = $('#flowerpot');
-  $flowerpot.css({'background-color': 'rgb(100, 100, 100)'});
 
   var size = { width: $flowerpot.width(), height: $flowerpot.height() };
   var setting = Setting.createFromQueryString('');
@@ -29,9 +30,11 @@ $(() => {
     el: $flowerpot,
     screens: screens,
     setting: setting.screenSetting(),
+    mover: reader,
+    template: templates.screens,
   });
   reader.openURL(URL).then(() => {
-    reader.goToPage(10);
+    // reader.goToPage(10);
   });
 
   (<any>window).reader = reader;
