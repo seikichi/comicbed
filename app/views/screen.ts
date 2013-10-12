@@ -16,7 +16,6 @@ class ScreenView extends BaseView {
   }
 
   render() {
-    console.log('Yay!');
     this.$el.empty();
     if (this._screen.status() === Screen.Status.Success) {
       this.$el.append(this._screen.content());

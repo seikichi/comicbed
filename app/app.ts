@@ -9,6 +9,7 @@ import Screen = require('models/screen');
 import Screens = require('collections/screens');
 
 import ScreenView = require('views/screen');
+import ScreenCollectionView = require('views/screens');
 
 $(() => {
   var URL = 'tmp/yuyushiki04.pdf';
@@ -22,13 +23,13 @@ $(() => {
   var screens = Screens.create(size, screenFactory);
 
   var reader = Reader.create(bookFactory, screens);
-  var currentScreen = reader.screens().currentScreen();
-  currentScreen.on('change:status', () => {
-    if (currentScreen.status() === Screen.Status.Success) {
-      $flowerpot.append(currentScreen.content());
-    }
+  var view = new ScreenCollectionView({
+    el: $flowerpot,
+    screens: screens,
+    setting: setting.screenSetting(),
   });
-
-  new ScreenView({screen: currentScreen, el: $flowerpot}).render();
-  reader.openURL(URL);
+  // new ScreenView({el: $flowerpot, screen: screens.currentScreen()});
+  reader.openURL(URL).then(() => {
+    reader.goToPage(1);
+  });
 });

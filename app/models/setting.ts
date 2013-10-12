@@ -24,7 +24,7 @@ class ScreenSettingModel extends Backbone.Model implements Screen.Setting {
   defaults() {
     return {
       detectsSpreadPage: true,
-      viewMode: Screen.ViewMode.OnePage,
+      viewMode: Screen.ViewMode.TwoPage,
       pageDirection: Screen.PageDirection.R2L,
     };
   }
