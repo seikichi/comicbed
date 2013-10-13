@@ -14,3 +14,5 @@ Thumb.db
 *.js.map
 DefinitelyTyped
 assets/vendor
+
+tmp/
