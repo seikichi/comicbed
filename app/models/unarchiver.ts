@@ -99,6 +99,7 @@ class FactoryImpl implements Unarchiver.Factory {
       var moduleName = 'models/pdf_unarchiver';
       break;
     case FileType.Zip:
+      var moduleName = 'models/zip_unarchiver';
       break;
     case FileType.Rar:
       var moduleName = 'models/rar_unarchiver';

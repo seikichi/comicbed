@@ -19,6 +19,7 @@ $(() => {
   // var URL = 'tmp/jwa.pdf';
   var URL = 'tmp/lovelab03-04.rar';
   // var URL = 'tmp/firegirl01-B.rar';
+  // var URL = 'tmp/firegirl.zip';
   var $flowerpot = $('#flowerpot');
 
   var size = { width: $flowerpot.width(), height: $flowerpot.height() };

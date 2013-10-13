@@ -57,10 +57,6 @@ module _Screen {
       create: (size: Size) => createScreen(size, scaler, setting),
     };
   }
-
-  export function createCacheFactory(scaler: Scaler.Scaler, setting: Setting): Factory {
-    return new ScreenCacheFactory(scaler, setting);
-  }
 }
 
 // private
@@ -177,72 +173,5 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
       this._deferred = null;
     });
     return deferred.promise();;
-  }
-}
-
-// cache ver
-class ScreenCacheFactory implements _Screen.Factory {
-  private _cache: {[key:string]:ScreenModelAttribute;}
-
-  constructor(private _scaler: Scaler.Scaler,
-              private _setting: _Screen.Setting) {
-    this._cache = {};
-    this._setting.on('change', this.clearCache);
-  }
-
-  clearCache(): void {
-    this._cache = {};
-  }
-
-  create(size: _Screen.Size): _Screen.Screen {
-    return new CacheScreenModel(this._cache, size, this._scaler, this._setting);
-  }
-}
-
-interface ScreenModelAttribute {
-  status: _Screen.Status;
-  content: _Screen.Content;
-  pages: Page.Page[];
-}
-
-class CacheScreenModel extends ScreenModel {
-  private _cache: {[key:string]:ScreenModelAttribute;}
-
-  constructor(cache: {[key:string]:ScreenModelAttribute;},
-              size: _Screen.Size,
-              scaler: Scaler.Scaler,
-              setting: _Screen.Setting) {
-    this._cache = cache;
-    super(size, scaler, setting);
-  }
-
-  update(pages: Pages.Collection, params: _Screen.UpdateParams)
-  : JQueryPromise<_Screen.UpdateResult> {
-    var key = this.createKey(params);
-    if (key in this._cache) {
-      var data = this._cache[key];
-      if (data.content.innerHTML !== '') {
-        this.setContent(data.content);
-        if (this.status() === data.status) {
-          this.trigger('change:status');
-        }
-        this.setStatus(data.status);
-        return $.Deferred<_Screen.UpdateResult>().resolve({}).promise();
-      }
-    }
-    var ret = super.update(pages, params).then((result: _Screen.UpdateResult) => {
-      var data = {
-        content: this.content(),
-        status: this.status(),
-        pages: this.pages(),
-      };
-      this._cache[key] = data;
-      return result;
-    });
-    return ret;
-  }
-
-  createKey(params: _Screen.UpdateParams): string {
-    return String(params.currentPageNum) + '+' + String(params.readingDirection);
   }
 }

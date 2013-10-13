@@ -1,5 +1,4 @@
 import Unarchiver = require('models/unarchiver');
-import PDFJS = require('pdfjs');
 import Unrar = require('unrar');
 import ImageUtil = require('utils/image');
 
@@ -32,7 +31,6 @@ class RarUnarchiver implements Unarchiver.Unarchiver {
   archiveName(): string { return 'RAR archive'; } // TODO(seikichi): fix
   filenames(): string[] { return this._filenames; }
   unpack(name: string): JQueryPromise<Unarchiver.Content> {
-    var deferred = $.Deferred<Unarchiver.Content>();
     var data = this._unrar.decompress(name);
     return ImageUtil.createImageElementFromArrayBuffer(data);
   }
