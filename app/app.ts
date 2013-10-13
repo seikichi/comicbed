@@ -15,14 +15,15 @@ import ScreenCollectionView = require('views/screens');
 import templates = require('templates');
 
 $(() => {
-  var URL = 'tmp/yuyushiki04.pdf';
+  // var URL = 'tmp/yuyushiki04.pdf';
+  var URL = 'tmp/jwa.pdf';
   var $flowerpot = $('#flowerpot');
 
   var size = { width: $flowerpot.width(), height: $flowerpot.height() };
   var setting = Setting.createFromQueryString('');
-  var bookFactory = Book.createFactory(Unarchiver.createFactory());
+  var bookFactory = Book.createFactory(Unarchiver.createFactory(setting.unarchiverSetting()));
   var scaler = Scaler.create(setting.scalerSetting());
-  var screenFactory = Screen.createCacheFactory(scaler, setting.screenSetting());
+  var screenFactory = Screen.createFactory(scaler, setting.screenSetting());
   var screens = Screens.create(size, screenFactory);
 
   var reader = Reader.create(bookFactory, screens);

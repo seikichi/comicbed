@@ -41,7 +41,8 @@ class ScalerSettingModel extends Backbone.Model implements Scaler.Setting {
 }
 
 class UnarchiverSettingModel extends Backbone.Model implements Unarchiver.Setting {
-  loadImageXObjectOnlyInPdf() { return true; }
+  pdfjsCanvasScale(): number { return 2; }
+  detectsImageXObjectPageInPdf(): boolean { return true; }
 }
 
 class SettingImpl implements Setting.Setting {

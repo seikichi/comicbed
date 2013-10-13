@@ -21,7 +21,8 @@ module Unarchiver {
   }
 
   export interface Setting extends Events.Events {
-    loadImageXObjectOnlyInPdf(): boolean;
+    pdfjsCanvasScale(): number;
+    detectsImageXObjectPageInPdf(): boolean;
   }
 
   export interface Factory {
@@ -30,8 +31,8 @@ module Unarchiver {
     getUnarchiverFromFile(file: File): JQueryPromise<Unarchiver>;
   }
 
-  export function createFactory(): Factory {
-    return new FactoryImpl();
+  export function createFactory(setting: Setting): Factory {
+    return new FactoryImpl(setting);
   }
 }
 
@@ -39,6 +40,7 @@ module Unarchiver {
 enum FileType { Pdf, Zip, Rar, Other };
 
 class FactoryImpl implements Unarchiver.Factory {
+  constructor(private _setting: Unarchiver.Setting) {}
 
   getUnarchiverFromFile(file: File) : JQueryPromise<Unarchiver.Unarchiver> {
     var url: string = (<any>window).URL.createObjectURL(file);
@@ -94,27 +96,25 @@ class FactoryImpl implements Unarchiver.Factory {
     var moduleName = '';
     switch (fileType) {
     case FileType.Pdf:
-      var moduleName = 'models/pdf_image_unarchiver';
+      var moduleName = 'models/pdf_unarchiver';
       break;
     case FileType.Zip:
-      // var moduleName = 'utils/zip_unarchiver';
-      // break;
     case FileType.Rar:
-      // var moduleName = 'utils/rar_unarchiver';
-      // break;
     default:
       return deferred.reject().promise();
       break;
     }
 
     require([moduleName], (factory: {
-      createFromURL: (url: string) => JQueryPromise<Unarchiver.Unarchiver>;
+      createFromURL: (url: string, setting: Unarchiver.Setting)
+        => JQueryPromise<Unarchiver.Unarchiver>;
     }) => {
-      factory.createFromURL(url).then((unarchiver: Unarchiver.Unarchiver) => {
-        deferred.resolve(unarchiver);
-      }).fail(() => {
-        deferred.reject();
-      });
+      factory.createFromURL(url, this._setting)
+        .then((unarchiver: Unarchiver.Unarchiver) => {
+          deferred.resolve(unarchiver);
+        }).fail(() => {
+          deferred.reject();
+        });
     });
 
     return deferred.promise();

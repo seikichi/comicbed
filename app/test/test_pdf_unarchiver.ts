@@ -17,8 +17,10 @@ describe('PdfImageUnarchiver', function () { return; // skip
     'RLE',
     'Zip',
   ];
-
-  var factory = Unarchiver.createFactory();
+  var factory = Unarchiver.createFactory({
+    pdfjsCanvasScale: () => 1,
+    detectsImageXObjectPageInPdf: () => true,
+  });
   var PAGE_SIZE = 2;
   var pdfDir = location.protocol + '//' + location.host + '/testdata/pdf/';
 
