@@ -34,43 +34,7 @@ class RarUnarchiver implements Unarchiver.Unarchiver {
   unpack(name: string): JQueryPromise<Unarchiver.Content> {
     var deferred = $.Deferred<Unarchiver.Content>();
     var data = this._unrar.decompress(name);
-
-    var format = '';
-    var ext = name.split('.').pop();
-    switch (ext) {
-    case 'png':
-      format = 'png';
-      break;
-    case 'jpg':
-    case 'jpeg':
-      format = 'jpeg';
-      break;
-    case 'tif':
-    case 'tiff':
-      // format = 'tiff';
-      break;
-    }
-    if (format === '') {
-      return deferred.reject().promise();
-    }
-
-    if (_.isNull(data)) {
-      return deferred.reject().promise();
-    } else {
-      var str = '';
-      var length = data.length;
-      for (var n = 0; n < length; ++n) {
-        str += String.fromCharCode(data[n]);
-      }
-      var base64Data: string = window.btoa(str);
-      var dataURL = 'data:image/' + format + ';base64,' + base64Data;
-      ImageUtil.loadImageFromURL(dataURL).then((image: HTMLImageElement) => {
-        deferred.resolve(image);
-      }).fail(() => {
-        deferred.reject();
-      });
-    }
-    return deferred.promise();
+    return ImageUtil.createImageElementFromArrayBuffer(data);
   }
   close(): void { this._unrar.close(); }
 }

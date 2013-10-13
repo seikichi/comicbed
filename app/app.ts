@@ -18,6 +18,7 @@ $(() => {
   // var URL = 'tmp/yuyushiki04.pdf';
   // var URL = 'tmp/jwa.pdf';
   var URL = 'tmp/lovelab03-04.rar';
+  // var URL = 'tmp/firegirl01-B.rar';
   var $flowerpot = $('#flowerpot');
 
   var size = { width: $flowerpot.width(), height: $flowerpot.height() };
