@@ -28,6 +28,7 @@ class PdfImageUnarchiver implements Unarchiver.Unarchiver {
   private _names: string[];
   private _nameToPageNum: {[name: string]: number;};
   private _renderTask: PDFJS.RenderTask;
+  private _deferred: JQueryDeferred<Unarchiver.Content>;
 
   constructor(document: PDFJS.PDFDocumentProxy) {
     this._document = document;
@@ -35,6 +36,7 @@ class PdfImageUnarchiver implements Unarchiver.Unarchiver {
     this._names = [];
     this._nameToPageNum = {};
     this._renderTask = null;
+    this._deferred = null;
 
     var numOfDigits = 1 + Math.floor(Math.log(this._document.numPages) / Math.log(10));
     var pageNameformat = sprintf('pdf-page-%%0%dd', numOfDigits);
@@ -51,12 +53,23 @@ class PdfImageUnarchiver implements Unarchiver.Unarchiver {
     return this._names;
   }
   unpack(name: string): JQueryPromise<Unarchiver.Content> {
+    if (this._deferred !== null && this._deferred.state() === 'pending') {
+      this._deferred.reject();
+    }
+
     var pageNum = this._nameToPageNum[name];
     var deferred = $.Deferred<Unarchiver.Content>();
+    this._deferred = deferred;
+
+    if (pageNum <= 0 || this._document.numPages < pageNum) {
+      deferred.reject();
+      return this._deferred.promise();
+    }
 
     var canvas = document.createElement('canvas');
     var page: PDFJS.PDFPageProxy = null;
     this._document.getPage(pageNum).then((_page: PDFJS.PDFPageProxy) => {
+      if (deferred.state() === 'rejected') { return; }
       page = _page;
       var viewport = page.getViewport(0);
       var context = canvas.getContext('2d');
@@ -67,12 +80,12 @@ class PdfImageUnarchiver implements Unarchiver.Unarchiver {
       this._renderTask = page.render(renderContext);
       return this._renderTask;
     }).then(() => {
+      if (deferred.state() === 'rejected') { return; }
       this._renderTask = null;
       var objs = page.objs.objs;
       for (var key in objs) if (objs.hasOwnProperty(key)) {
         if (key.indexOf('img_') !== 0) { continue; }
         var data: any = page.objs.getData(key)
-
         if (!('data' in data)) {
           deferred.resolve(<HTMLElement>data);
         } else {

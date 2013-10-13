@@ -112,8 +112,11 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
 
   update(pages: Pages.Collection, params: _Screen.UpdateParams)
   : JQueryPromise<_Screen.UpdateResult> {
-    if (this._deferred !== null) { this._deferred.reject(); }
+    if (this._deferred !== null) {
+      this._deferred.reject();
+    }
     var deferred = this._deferred = $.Deferred<_Screen.UpdateResult>();
+    var resolvedPromise = $.Deferred<void>().resolve().promise();
     this.setStatus(_Screen.Status.Loading);
 
     var successFirstPage: boolean = false;
@@ -121,12 +124,14 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
     var direction = params.readingDirection;
     var newPageContents: Page.Content[] = [];
     var promise = pages.at(pageNum).content().then((content: Page.Content) => {
+      if (deferred.state() === 'rejected') { return resolvedPromise; }
       successFirstPage = true;
       newPageContents.push(content);
     });
     var displayedPages = [pages.at(pageNum)];
     if (this._setting.viewMode() === _Screen.ViewMode.TwoPage) {
       promise = promise.then(() => {
+        if (deferred.state() === 'rejected') { return resolvedPromise; }
         var content = newPageContents[0];
         var nextPageNum = pageNum + direction;
         if (nextPageNum < 0
@@ -137,6 +142,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
         }
         var nextPromise = pages.at(nextPageNum).content()
           .then<void>((nextContent: Page.Content) => {
+            if (deferred.state() === 'rejected') { return resolvedPromise; }
             if (!this._setting.detectsSpreadPage()
                 || !this._setting.isSpreadPage(nextContent)) {
               if (direction === _Screen.ReadingDirection.Backward) {

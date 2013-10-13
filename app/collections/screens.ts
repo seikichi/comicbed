@@ -48,6 +48,7 @@ class ScreenWithOnePrevNext implements Screens.Screens {
   private _currentScreen: Screen.Screen;
   private _prevScreens: ScreenCollection;
   private _nextScreens: ScreenCollection;
+  private _deferred: JQueryDeferred<void>;
 
   constructor(size: Screen.Size,
               factory: Screen.Factory) {
@@ -60,6 +61,8 @@ class ScreenWithOnePrevNext implements Screens.Screens {
 
     this._prevScreens.add(this._factory.create(this._size));
     this._nextScreens.add(this._factory.create(this._size));
+
+    this._deferred = $.Deferred<void>().resolve();
   }
 
 
@@ -68,6 +71,10 @@ class ScreenWithOnePrevNext implements Screens.Screens {
   nextScreens(): Screens.Collection { return this._nextScreens; }
 
   update(pages: Pages.Collection, params: Screen.UpdateParams): JQueryPromise<void> {
+    if (this._deferred.state() === 'pending') {
+      this._deferred.reject();
+    }
+    var deferred = $.Deferred<void>();
     var prevPageNum = params.currentPageNum - 1;
     var nextPageNum = params.currentPageNum + 1;
     if (prevPageNum < 0) { this._prevScreens.reset([]); }
@@ -80,11 +87,15 @@ class ScreenWithOnePrevNext implements Screens.Screens {
     }
 
     var currentScreenPages: number = 1;
+    var resolvedPromise = $.Deferred<void>().resolve().promise();
     // first, update the current screen
-    var promise = this._currentScreen.update(pages, params).then(() => {
+    this._deferred = deferred;
+
+    this._currentScreen.update(pages, params).then(() => {
+      if (deferred.state() === 'rejected') { return resolvedPromise; }
       currentScreenPages = this._currentScreen.pages().length;
       if (this._prevScreens.length === 0) {
-        return $.Deferred<void>().resolve().promise();
+        return resolvedPromise;
       }
       // check whether the new previous page is valid or not
       var newPrevPageNum = prevPageNum;
@@ -93,7 +104,7 @@ class ScreenWithOnePrevNext implements Screens.Screens {
       }
       if (newPrevPageNum < 0) {
         this._prevScreens.reset([]);
-        return $.Deferred<void>().resolve().promise();
+        return resolvedPromise;
       }
       // update prev screen
       var prevParams: Screen.UpdateParams = {
@@ -102,8 +113,9 @@ class ScreenWithOnePrevNext implements Screens.Screens {
       };
       return this._prevScreens.at(0).update(pages, prevParams);
     }).then(() => {
+      if (deferred.state() === 'rejected') { return resolvedPromise; }
       if (this._nextScreens.length === 0) {
-        return $.Deferred<void>().resolve().promise();
+        return resolvedPromise;
       }
       // check whether the new next page is valid or not
       var newNextPageNum = nextPageNum;
@@ -112,7 +124,7 @@ class ScreenWithOnePrevNext implements Screens.Screens {
       }
       if (pages.length <= newNextPageNum) {
         this._nextScreens.reset([]);
-        return $.Deferred<void>().resolve().promise();
+        return resolvedPromise;
       }
       // update next screen
       var nextParams: Screen.UpdateParams = {
@@ -120,8 +132,10 @@ class ScreenWithOnePrevNext implements Screens.Screens {
         readingDirection: Screen.ReadingDirection.Forward,
       };
       return this._nextScreens.at(0).update(pages, nextParams).then(() => {});
+    }).then(() => {
+      deferred.resolve();
     });
-    return promise;
+    return deferred.promise();
   }
 
   resize(width: number, height: number): void {
