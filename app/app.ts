@@ -15,8 +15,9 @@ import ScreenCollectionView = require('views/screens');
 import templates = require('templates');
 
 $(() => {
-  var URL = 'tmp/yuyushiki04.pdf';
+  // var URL = 'tmp/yuyushiki04.pdf';
   // var URL = 'tmp/jwa.pdf';
+  var URL = 'tmp/lovelab03-04.rar';
   var $flowerpot = $('#flowerpot');
 
   var size = { width: $flowerpot.width(), height: $flowerpot.height() };

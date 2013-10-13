@@ -80,6 +80,10 @@ class ScreenCollectionView extends BaseView {
   close(): void {
     super.close();
     this.removeChildViews();
+    if (this._scroll !== null) {
+      this._scroll.destroy();
+      this._scroll = null;
+    }
   }
 
   createScroll(centerPageIndex: number): void {

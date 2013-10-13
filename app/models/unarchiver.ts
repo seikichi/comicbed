@@ -99,7 +99,10 @@ class FactoryImpl implements Unarchiver.Factory {
       var moduleName = 'models/pdf_unarchiver';
       break;
     case FileType.Zip:
+      break;
     case FileType.Rar:
+      var moduleName = 'models/rar_unarchiver';
+      break;
     default:
       return deferred.reject().promise();
       break;
