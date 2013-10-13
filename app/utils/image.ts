@@ -27,9 +27,11 @@ module ImageUtil {
     var image: HTMLImageElement = new Image();
     image.onload = () => {
       deferred.resolve(image);
+      image = null;
     };
     image.onerror = () => {
       deferred.reject();
+      image = null;
     };
     image.src = url;
     return deferred.promise();

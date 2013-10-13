@@ -96,6 +96,7 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
     }
 
     var existsImageXObject = false;
+    var pageAspectRatio = 0;
     var promise = this._document.getPage(pageNum);
 
     if (this._setting.detectsImageXObjectPageInPdf()) {
@@ -103,6 +104,8 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
       // first, render the page with size 0 (scale === 0), and find a XObject
       promise = promise.then((page: PDFJS.PDFPageProxy) => {
         if (deferred.state() === 'rejected') { return page; }
+        var viewport = page.getViewport(1);
+        pageAspectRatio = viewport.width / viewport.height;
         return this.renderPage(page, 0);
       }).then((page: PDFJS.PDFPageProxy) => {
         if (deferred.state() === 'rejected') { return page; }
@@ -110,10 +113,13 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
         var objs = page.objs.objs;
         for (var key in objs) if (objs.hasOwnProperty(key)) {
           if (key.indexOf('img_') !== 0) { continue; }
-          existsImageXObject = true;
           var data: any = page.objs.getData(key)
+          var imageAspectRatio = data.width / data.height;
+          if (Math.abs(pageAspectRatio - imageAspectRatio) >= 1e-3) { continue; }
+
+          existsImageXObject = true;
           if (!('data' in data)) {
-            deferred.resolve(<HTMLElement>data);
+            deferred.resolve(<HTMLImageElement>data);
           } else {
             ImageUtil.pixelDataToImageElement(data.data, data.width, data.height)
               .then((image: HTMLImageElement) => {
