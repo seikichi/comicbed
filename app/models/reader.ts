@@ -111,7 +111,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     var newPageNum = this.currentPageNum() + 1;
     if (this.readingDirection() === Screen.ReadingDirection.Forward) {
       var displayedPageNum = this._screens.currentScreen().pages().length;
-      newPageNum = this.currentPageNum() + displayedPageNum;
+      newPageNum = this.currentPageNum() + Math.max(1, displayedPageNum);
     }
     if (!this.isValidPageNum(newPageNum)) {
       return;
@@ -123,7 +123,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     var newPageNum = this.currentPageNum() - 1;
     if (this.readingDirection() === Screen.ReadingDirection.Backward) {
       var displayedPageNum = this._screens.currentScreen().pages().length;
-      newPageNum = this.currentPageNum() - displayedPageNum;
+      newPageNum = this.currentPageNum() - Math.max(1, displayedPageNum);
     }
     if (!this.isValidPageNum(newPageNum)) {
       return;
