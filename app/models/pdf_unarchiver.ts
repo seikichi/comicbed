@@ -73,7 +73,8 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
     if (this._renderTask !== null) {
       this._renderTask.cancel();
     }
-    var promise = page.render(renderContext).then(() => {
+    this._renderTask = page.render(renderContext);
+    var promise = this._renderTask.then(() => {
       this._renderTask = null;
       return page;
     });

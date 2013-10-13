@@ -35,7 +35,18 @@ $(() => {
     template: templates.screens,
   });
   reader.openURL(URL).then(() => {
-    reader.goNextScreen();
+    // setTimeout(() => {
+    //   console.log('goNextScreen');
+    //   reader.goNextScreen();
+    //   setTimeout(() => {
+    //     console.log('goNextScreen');
+    //     reader.goNextScreen();
+    //     setTimeout(() => {
+    //       console.log('goNextScreen');
+    //       reader.goNextScreen();
+    //     }, 500);
+    //   }, 500);
+    // }, 1000);
   });
 
   (<any>window).reader = reader;
