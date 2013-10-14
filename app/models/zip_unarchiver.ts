@@ -25,7 +25,10 @@ class ZipUnarchiver implements Unarchiver.Unarchiver {
     };
     xhr.send();
     var task = new Task(deferred.promise());
-    task.oncancel = () => { deferred.reject(); xhr.abort(); };
+    task.oncancel = () => {
+      deferred.reject();
+      if (xhr !== null) { xhr.abort(); xhr = null; }
+    };
     return task;
   }
 

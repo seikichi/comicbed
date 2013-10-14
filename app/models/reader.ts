@@ -12,9 +12,11 @@ export = Reader;
 module Reader {
   export enum Status { Closed, Opening, Opened, Error }
 
+  export interface Options extends Book.Options {}
+
   export interface Reader extends Events.Events {
     // open/close
-    openURL(url: string): JQueryPromise<Reader>;
+    openURL(url: string, options?: Options): JQueryPromise<Reader>;
     close(): void;
     // properties
     status(): Status;
@@ -94,11 +96,13 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   }
 
   // open/close;
-  openURL(url: string): Task<Reader.Reader> {
+  openURL(url: string, options?: Reader.Options): Task<Reader.Reader> {
     this.close();
     this.setStatus(Reader.Status.Opening);
     var deferred = $.Deferred<Reader.Reader>();
-    var innerTask = this._bookFactory.createFromURL(url);
+    var task = this._task = new Task(deferred.promise());
+
+    var innerTask = this._bookFactory.createFromURL(url, options);
     innerTask.progress((progress: Progress.Progress) => {
       deferred.notify(progress);
     }).then((book: Book.Book) => {
@@ -117,7 +121,6 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
       deferred.reject();
     });
 
-    var task = this._task = new Task(deferred.promise());
     task.oncancel = () => {
       innerTask.cancel();
       deferred.reject();

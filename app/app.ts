@@ -27,7 +27,7 @@ enum KeyCode {
 $(() => {
   // var URL = 'tmp/yuyushiki04.pdf';
   // var URL = 'tmp/jwa.pdf';
-  var URL = 'tmp/lovelab03-04.rar';
+  // var URL = 'tmp/lovelab03-04.rar';
   // var URL = 'tmp/firegirl01-B.rar';
   // var URL = 'tmp/firegirl.zip';
   var $flowerpot = $('#flowerpot');
@@ -51,20 +51,16 @@ $(() => {
     mover: reader,
     template: templates.screens,
   });
-  reader.openURL(URL).progress((progress: Progress.Progress) => {
-    console.log('progress:', progress);
-  }).then(() => {
-    console.log('then:', Reader.Status[reader.status()]);
-  }).fail(() => {
-    console.log('fail:', Reader.Status[reader.status()]);
-  });
-  // setTimeout(() => {
-  //   reader.close();
-  // }, 10);
-  // for debug
+
+  // reader.openURL(URL).progress((progress: Progress.Progress) => {
+  //   console.log('progress:', progress);
+  // }).then(() => {
+  //   console.log('then:', Reader.Status[reader.status()]);
+  // }).fail(() => {
+  //   console.log('fail:', Reader.Status[reader.status()]);
+  // });
+
   (<any>window).reader = reader;
-
-
   var screenSetting = setting.screenSetting();
   $(document).keydown((e: KeyboardEvent) => {
     if (e.keyCode === KeyCode.Left) {
@@ -86,5 +82,26 @@ $(() => {
         screenSetting.setPageDirection(Screen.PageDirection.L2R);
       }
     }
+  });
+
+  $flowerpot.on('drop', (jqEvent: any) => {
+    var event: DragEvent = jqEvent.originalEvent;
+    event.stopPropagation();
+    event.preventDefault();
+    var files = event.dataTransfer.files;
+    if (files.length === 0) {
+      return;
+    }
+    var file = files[0];
+    var url: string = (<any>window).URL.createObjectURL(file);
+    reader.openURL(url, {
+      mimeType: file.type
+    });
+  });
+
+  $flowerpot.on('dragover', (jqEvent: any) => {
+    var event: DragEvent = jqEvent.originalEvent;
+    event.stopPropagation();
+    event.preventDefault();
   });
 });
