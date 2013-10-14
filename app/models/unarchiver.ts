@@ -23,6 +23,7 @@ module Unarchiver {
   export interface Setting extends Events.Events {
     pdfjsCanvasScale(): number;
     detectsImageXObjectPageInPdf(): boolean;
+    pageFileExtensions(): string[];
   }
 
   export interface Factory {

@@ -7,12 +7,21 @@ import Reader = require('models/reader');
 import Book = require('models/book');
 import Scaler = require('models/scaler');
 import Screen = require('models/screen');
+import Cache = require('models/cache');
 import Screens = require('collections/screens');
 
 import ScreenView = require('views/screen');
 import ScreenCollectionView = require('views/screens');
 
 import templates = require('templates');
+
+enum KeyCode {
+  Space = 32,
+  Left = 37,
+  Up = 38,
+  Right = 39,
+  Down = 40,
+};
 
 $(() => {
   // var URL = 'tmp/yuyushiki04.pdf';
@@ -26,7 +35,11 @@ $(() => {
   var setting = Setting.createFromQueryString('');
   var bookFactory = Book.createFactory(Unarchiver.createFactory(setting.unarchiverSetting()));
   var scaler = Scaler.create(setting.scalerSetting());
-  var screenFactory = Screen.createFactory(scaler, setting.screenSetting());
+  // var screenFactory = Screen.createFactory(scaler, setting.screenSetting());
+  var screenFactory = Cache.createScreenFactory(
+    Screen.createFactory(scaler, setting.screenSetting()),
+    setting.screenSetting(),
+    setting.cacheSetting());
   var screens = Screens.create(size, screenFactory);
 
   var reader = Reader.create(bookFactory, screens);
@@ -37,20 +50,15 @@ $(() => {
     mover: reader,
     template: templates.screens,
   });
-  reader.openURL(URL).then(() => {
-    // setTimeout(() => {
-    //   console.log('goNextScreen');
-    //   reader.goNextScreen();
-    //   setTimeout(() => {
-    //     console.log('goNextScreen');
-    //     reader.goNextScreen();
-    //     setTimeout(() => {
-    //       console.log('goNextScreen');
-    //       reader.goNextScreen();
-    //     }, 500);
-    //   }, 500);
-    // }, 1000);
-  });
+  reader.openURL(URL).then(() => {});
 
+  // for debug
   (<any>window).reader = reader;
+  $(document).keydown((e: KeyboardEvent) => {
+    if (e.keyCode === KeyCode.Left) {
+      reader.goNextScreen();
+    } else if (e.keyCode === KeyCode.Right) {
+      reader.goPrevScreen();
+    }
+  });
 });

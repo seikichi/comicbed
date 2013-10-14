@@ -11,8 +11,8 @@ export = _Screen;
 module _Screen {
   export interface Content extends HTMLElement {}
 
-  export enum Status { Success, Error, Loading, }
-  export enum ViewMode { OnePage, TwoPage, }
+  export enum Status { Success, Error, Interrupted, Loading, }
+  export enum ViewMode { OnePage = 1, TwoPage = 2, }
   export enum ReadingDirection { Forward = +1, Backward = -1 }
   export enum PageDirection { L2R, R2L, }
 
@@ -165,13 +165,13 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
       this._pages = displayedPages;
       if (successFirstPage) {
         this.updateContent(newPageContents);
-        this.setStatus(_Screen.Status.Success);
+        this.setStatus(_Screen.Status.Interrupted);
       } else {
         this.setStatus(_Screen.Status.Error);
       }
       deferred.resolve({});
       this._deferred = null;
     });
-    return deferred.promise();;
+    return deferred.promise();
   }
 }

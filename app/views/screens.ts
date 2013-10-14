@@ -95,7 +95,7 @@ class ScreenCollectionView extends BaseView {
       momentum: false,
       scrollX: true,
       scrollY: false,
-      click: true,
+      click: false,
       bounce: false,
     });
     this._scroll.goToPage(centerPageIndex, 0, 0);

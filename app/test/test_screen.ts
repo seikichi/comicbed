@@ -85,7 +85,7 @@ describe('Screen', () => {
         currentPageNum: 0,
         readingDirection: Screen.ReadingDirection.Forward
       }).then(() => {
-        assert.strictEqual(Screen.Status.Success, screen.status());
+        assert.strictEqual(Screen.Status.Interrupted, screen.status());
         assert.strictEqual(content, screen.content());
         assert.strictEqual(1, screen.pages().length);
         mock.verify();

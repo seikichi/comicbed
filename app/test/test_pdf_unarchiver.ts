@@ -20,6 +20,7 @@ describe('PdfImageUnarchiver', function () { return; // skip
   var factory = Unarchiver.createFactory({
     pdfjsCanvasScale: () => 1,
     detectsImageXObjectPageInPdf: () => true,
+    pageFileExtensions: () => [''],
   });
   var PAGE_SIZE = 2;
   var pdfDir = location.protocol + '//' + location.host + '/testdata/pdf/';
