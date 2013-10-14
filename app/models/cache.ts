@@ -46,6 +46,10 @@ class ScreenCache {
     this._cacheSetting = cacheSetting;
     this._cacheUsedPages = [];
     this.initialize(null);
+
+    this._screenSetting.on('change', () => {
+      this.initialize(null);
+    });
   }
 
   initialize(pages: Pages.Collection) {

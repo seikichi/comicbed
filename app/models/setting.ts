@@ -10,8 +10,14 @@ import Unarchiver = require('models/unarchiver');
 export = Setting;
 
 module Setting {
+  export interface ScreenSetting extends Screen.Setting {
+    setDetectsSpreadPage(value: boolean): void;
+    setViewMode(mode: Screen.ViewMode): void;
+    setPageDirection(direction: Screen.PageDirection): void;
+  }
+
   export interface Setting {
-    screenSetting(): Screen.Setting;
+    screenSetting(): ScreenSetting;
     unarchiverSetting(): Unarchiver.Setting;
     scalerSetting(): Scaler.Setting;
     cacheSetting(): Cache.Setting;
@@ -22,7 +28,7 @@ module Setting {
   }
 }
 
-class ScreenSettingModel extends Backbone.Model implements Screen.Setting {
+class ScreenSettingModel extends Backbone.Model implements Setting.ScreenSetting {
   defaults() {
     return {
       detectsSpreadPage: true,
@@ -36,6 +42,10 @@ class ScreenSettingModel extends Backbone.Model implements Screen.Setting {
   isSpreadPage(content: Page.Content): boolean {
     return content.width > content.height;
   }
+
+  setDetectsSpreadPage(value: boolean) { this.set('detectsSpreadPage', value); }
+  setViewMode(mode: Screen.ViewMode) { this.set('viewMode', mode); }
+  setPageDirection(direction: Screen.PageDirection) { this.set('pageDirection', direction); }
 }
 
 class CacheSettingModel extends Backbone.Model implements Cache.Setting {
@@ -55,7 +65,7 @@ class UnarchiverSettingModel extends Backbone.Model implements Unarchiver.Settin
 }
 
 class SettingImpl implements Setting.Setting {
-  private _screenSetting: Screen.Setting;
+  private _screenSetting: Setting.ScreenSetting;
   private _unarchiverSetting: Unarchiver.Setting;
   private _scalerSetting: Scaler.Setting;
   private _cacheSetting: Cache.Setting;

@@ -25,7 +25,8 @@ class RarUnarchiver implements Unarchiver.Unarchiver {
     };
     xhr.onprogress = (ev: ProgressEvent) => {
       if (ev.lengthComputable) {
-        console.log(Math.round((ev.loaded / ev.total) * 100));
+        var progress = Math.round((ev.loaded / ev.total) * 100);
+        deferred.notify({ message: 'downloading ...', progress: progress });
       }
     };
     xhr.send();

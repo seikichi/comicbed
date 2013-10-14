@@ -1,6 +1,8 @@
 import $ = require('jquery');
 import Events = require('events');
 import Task = require('models/task');
+import Progress = require('models/progress');
+
 
 // public
 export = Unarchiver;
@@ -121,7 +123,9 @@ class FactoryImpl implements Unarchiver.Factory {
     }) => {
       if (task.canceled) { return; }
       innerTask = factory.createFromURL(url, this._setting);
-      innerTask.then((unarchiver: Unarchiver.Unarchiver) => {
+      innerTask.progress((progress: Progress.Progress) => {
+        deferred.notify(progress);
+      }).then((unarchiver: Unarchiver.Unarchiver) => {
         deferred.resolve(unarchiver);
       }).fail(() => {
         deferred.reject();

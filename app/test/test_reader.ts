@@ -1,4 +1,5 @@
 import $ = require('jquery');
+import Backbone = require('backbone');
 import Reader = require('models/reader');
 import Page = require('models/page');
 import Pages = require('collections/pages');
@@ -46,7 +47,10 @@ describe('Reader', function () {
         => $.Deferred<void>().resolve().promise(),
       resize: (width: number, height: number) => {}
     };
-    reader = Reader.create(bookFactory, screens);
+    var setting = {
+      screenSetting: () => new Backbone.Model(),
+    };
+    reader = Reader.create(bookFactory, screens, <any>setting);
   });
 
   it('the status should be Closed at first', () => {

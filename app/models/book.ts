@@ -2,6 +2,7 @@ import Unarchiver = require('models/unarchiver');
 import Page = require('models/page');
 import Pages = require('collections/pages');
 import Task = require('models/task');
+import Progress = require('models/progress');
 
 export = Book;
 

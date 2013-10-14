@@ -4,6 +4,8 @@ import Screen = require('models/screen');
 import Screens = require('collections/screens');
 import Book = require('models/book');
 import Task = require('models/task');
+import Progress = require('models/progress');
+import Setting = require('models/setting');
 
 export = Reader;
 
@@ -28,8 +30,11 @@ module Reader {
     resize(width: number, height: number): void;
   }
 
-  export function create(bookFactory: Book.Factory, screens: Screens.Screens): Reader {
-    return new ReaderModel(bookFactory, screens);
+  export function create(bookFactory: Book.Factory,
+                         screens: Screens.Screens,
+                         setting: Setting.Setting)
+  : Reader {
+    return new ReaderModel(bookFactory, screens, setting);
   }
 
   export interface ScreenMover {
@@ -42,20 +47,26 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   // immultable members
   private _bookFactory: Book.Factory;
   private _screens: Screens.Screens;
+  private _setting: Setting.Setting;
   // mutable members
   private _book: Book.Book;
   private _task: Task<Reader.Reader>;
 
   // ctor & initializer (TODO);
-  constructor(bookFactory: Book.Factory, screens: Screens.Screens) {
+  constructor(bookFactory: Book.Factory, screens: Screens.Screens, setting: Setting.Setting) {
     this._bookFactory = bookFactory;
     this._screens = screens;
+    this._setting = setting;
     this._book = null;
     this._task = null;
     super();
   }
 
-  initialize() { }
+  initialize() {
+    this.listenTo(this._setting.screenSetting(), 'change', () => {
+      this.update(this.currentPageNum(), this.readingDirection());
+    });
+  }
 
   // properties
   //// defaults
@@ -88,7 +99,9 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     this.setStatus(Reader.Status.Opening);
     var deferred = $.Deferred<Reader.Reader>();
     var innerTask = this._bookFactory.createFromURL(url);
-    innerTask.then((book: Book.Book) => {
+    innerTask.progress((progress: Progress.Progress) => {
+      deferred.notify(progress);
+    }).then((book: Book.Book) => {
       if (deferred.state() === 'rejected') { return; }
       this._book = book;
       this.resetReadingInfo();
@@ -96,7 +109,11 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
       this.setStatus(Reader.Status.Opened);
       deferred.resolve(this);
     }).fail(() => {
-      this.setStatus(Reader.Status.Error);
+      if (!task.canceled) {
+        this.setStatus(Reader.Status.Error);
+      } else {
+        this.setStatus(Reader.Status.Closed);
+      }
       deferred.reject();
     });
 
