@@ -51,4 +51,6 @@ interface IScrollOption {
   HWCompositing?: boolean;
   useTransition?: boolean;
   useTransform?: boolean;
+
+  snapSpeed?: number;
 }

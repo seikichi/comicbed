@@ -13,7 +13,7 @@ describe('Book', function () {
       unpack: (name: string) => $.Deferred<any>().resolve(undefined).promise(),
       close: () => {},
     };
-    var unarchiverFactory: Unarchiver.Factory = {
+    var unarchiverFactory: Unarchiver.Factory = <any>{
       getUnarchiverFromURL: () => $.Deferred().resolve(unarchiver).promise(),
       getUnarchiverFromFile: () => <any>undefined,
     }

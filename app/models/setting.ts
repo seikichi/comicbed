@@ -39,7 +39,7 @@ class ScreenSettingModel extends Backbone.Model implements Screen.Setting {
 }
 
 class CacheSettingModel extends Backbone.Model implements Cache.Setting {
-  cacheScreenNum() { return 5; }
+  cacheScreenNum() { return 7; }
 }
 
 class ScalerSettingModel extends Backbone.Model implements Scaler.Setting {

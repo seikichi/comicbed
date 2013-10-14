@@ -6,6 +6,7 @@ import Book = require('models/book');
 import Screen = require('models/screen');
 import Screens = require('collections/screens');
 import Unarchiver = require('models/unarchiver');
+import Task = require('models/task');
 
 declare var sinon: any;
 var assert = chai.assert;
@@ -35,7 +36,7 @@ describe('Reader', function () {
   beforeEach(() => {
     bookFactory = {
       createFromURL: (url: string)
-        => $.Deferred<Book.Book>().resolve(book).promise(),
+        => new Task($.Deferred<Book.Book>().resolve(book).promise()),
     };
     screens = {
       currentScreen: () => <any>undefined,
@@ -93,7 +94,7 @@ describe('Reader', function () {
     factoryMock.expects('createFromURL')
       .once()
       .withExactArgs(url)
-      .returns(deferred.promise());
+      .returns(new Task(deferred.promise()));
     reader.openURL(url).fail(() => { factoryMock.verify(); done(); });
     reader.openURL('new book url');
   });

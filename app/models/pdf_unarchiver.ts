@@ -2,6 +2,7 @@ import Unarchiver = require('models/unarchiver');
 import PDFJS = require('pdfjs');
 import sprintf = require('sprintf');
 import ImageUtil = require('utils/image');
+import Task = require('models/task');
 
 // TODO(seikichi): move to unarchiver.setting
 PDFJS.workerSrc = 'assets/app/pdfjs/js/pdf.worker.js';
@@ -16,12 +17,15 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
   static createFromURL(url: string, setting: Unarchiver.Setting)
   : JQueryPromise<Unarchiver.Unarchiver> {
     var deferred = $.Deferred<Unarchiver.Unarchiver>();
+    var task = new Task(deferred.promise());
     PDFJS.getDocument({url: url}).then((doc: PDFJS.PDFDocumentProxy) => {
+      if (task.canceled) { doc.destroy(); return; }
       deferred.resolve(new PdfUnarchiver(doc, setting));
     }, () => {
       deferred.reject();
     });
-    return deferred.promise();
+    task.oncancel = () => { deferred.reject(); }
+    return task;
   }
 
   private _document: PDFJS.PDFDocumentProxy;

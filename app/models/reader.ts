@@ -3,6 +3,7 @@ import Events = require('models/events');
 import Screen = require('models/screen');
 import Screens = require('collections/screens');
 import Book = require('models/book');
+import Task = require('models/task');
 
 export = Reader;
 
@@ -43,14 +44,14 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   private _screens: Screens.Screens;
   // mutable members
   private _book: Book.Book;
-  private _deferred: JQueryDeferred<Reader.Reader>;
+  private _task: Task<Reader.Reader>;
 
   // ctor & initializer (TODO);
   constructor(bookFactory: Book.Factory, screens: Screens.Screens) {
     this._bookFactory = bookFactory;
     this._screens = screens;
     this._book = null;
-    this._deferred = $.Deferred<Reader.Reader>().reject();
+    this._task = null;
     super();
   }
 
@@ -82,12 +83,13 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   }
 
   // open/close;
-  openURL(url: string): JQueryPromise<Reader.Reader> {
+  openURL(url: string): Task<Reader.Reader> {
     this.close();
     this.setStatus(Reader.Status.Opening);
-    var deferred = this._deferred = $.Deferred<Reader.Reader>();
-    this._bookFactory.createFromURL(url).then((book: Book.Book) => {
-      if (this._deferred.state() === 'rejected') { return; }
+    var deferred = $.Deferred<Reader.Reader>();
+    var innerTask = this._bookFactory.createFromURL(url);
+    innerTask.then((book: Book.Book) => {
+      if (deferred.state() === 'rejected') { return; }
       this._book = book;
       this.resetReadingInfo();
       this.goToPage(this.currentPageNum());
@@ -97,12 +99,18 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
       this.setStatus(Reader.Status.Error);
       deferred.reject();
     });
-    return deferred.promise();
+
+    var task = this._task = new Task(deferred.promise());
+    task.oncancel = () => {
+      innerTask.cancel();
+      deferred.reject();
+    };
+    return task;
   }
   close(): void {
     this._book = null;
-    if (this._deferred !== null) {
-      this._deferred.reject();
+    if (this._task !== null) {
+      this._task.cancel();
     }
     this.setStatus(Reader.Status.Closed);
   }

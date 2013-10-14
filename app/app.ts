@@ -50,8 +50,7 @@ $(() => {
     mover: reader,
     template: templates.screens,
   });
-  reader.openURL(URL).then(() => {});
-
+  reader.openURL(URL);
   // for debug
   (<any>window).reader = reader;
   $(document).keydown((e: KeyboardEvent) => {

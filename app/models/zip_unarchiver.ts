@@ -1,13 +1,14 @@
 import Unarchiver = require('models/unarchiver');
 import jz = require('jsziptools');
 import ImageUtil = require('utils/image');
+import Task = require('models/task');
 
 export = ZipUnarchiver;
 
 class ZipUnarchiver implements Unarchiver.Unarchiver {
 
   static createFromURL(url: string, setting: Unarchiver.Setting)
-  : JQueryPromise<Unarchiver.Unarchiver> {
+  : Task<Unarchiver.Unarchiver> {
     var deferred = $.Deferred<Unarchiver.Unarchiver>();
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url);
@@ -23,7 +24,9 @@ class ZipUnarchiver implements Unarchiver.Unarchiver {
       xhr = null;
     };
     xhr.send();
-    return deferred.promise();
+    var task = new Task(deferred.promise());
+    task.oncancel = () => { deferred.reject(); xhr.abort(); };
+    return task;
   }
 
   private _filenames: string[];
