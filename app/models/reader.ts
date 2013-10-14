@@ -85,18 +85,19 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   openURL(url: string): JQueryPromise<Reader.Reader> {
     this.close();
     this.setStatus(Reader.Status.Opening);
-    this._deferred = $.Deferred<Reader.Reader>();
+    var deferred = this._deferred = $.Deferred<Reader.Reader>();
     this._bookFactory.createFromURL(url).then((book: Book.Book) => {
+      if (this._deferred.state() === 'rejected') { return; }
       this._book = book;
       this.resetReadingInfo();
       this.goToPage(this.currentPageNum());
       this.setStatus(Reader.Status.Opened);
-      this._deferred.resolve(this);
+      deferred.resolve(this);
     }).fail(() => {
       this.setStatus(Reader.Status.Error);
-      this._deferred.reject();
+      deferred.reject();
     });
-    return this._deferred.promise();
+    return deferred.promise();
   }
   close(): void {
     this._book = null;
