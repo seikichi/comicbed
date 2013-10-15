@@ -104,6 +104,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
   resize(width: number, height: number): void {
     this._size = { width: width, height: height };
     this.updateContent(this._pageContents);
+    this.trigger('change:status');
   }
 
   update(pages: Pages.Collection, params: _Screen.UpdateParams)

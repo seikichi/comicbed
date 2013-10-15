@@ -184,6 +184,7 @@ class CacheScreenModel extends Backbone.Model implements Screen.Screen {
     var cachedScreen = this._cache.find(pages, params);
     if (cachedScreen !== null) {
       this.updateInnerModel(cachedScreen);
+      this.resize(this._size.width, this._size.height);
       this.trigger('change:status');
       return $.Deferred<Screen.UpdateResult>().resolve({}).promise();
     } else {

@@ -44,6 +44,8 @@ class ScreenCollectionView extends BaseView {
   initialize() {
     this.listenTo(this._prevs, 'add remove reset sort', this.render);
     this.listenTo(this._nexts, 'add remove reset sort', this.render);
+
+    $(window).on('resize', () => { this.render(); });
   }
 
   render() {

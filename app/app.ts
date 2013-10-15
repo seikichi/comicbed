@@ -27,13 +27,15 @@ enum KeyCode {
 $(() => {
   // var URL = 'tmp/yuyushiki04.pdf';
   // var URL = 'tmp/jwa.pdf';
-  // var URL = 'tmp/lovelab03-04.rar';
+  var URL = 'tmp/lovelab03-04.rar';
   // var URL = 'tmp/firegirl01-B.rar';
-  // var URL = 'tmp/firegirl.zip';
+  // var URL = 'tmp/book.rar';
   var $flowerpot = $('#flowerpot');
 
   var size = { width: $flowerpot.width(), height: $flowerpot.height() };
   var setting = Setting.createFromQueryString('');
+  setting.screenSetting().setViewMode(Screen.ViewMode.OnePage);
+
   var bookFactory = Book.createFactory(Unarchiver.createFactory(setting.unarchiverSetting()));
   var scaler = Scaler.create(setting.scalerSetting());
   // var screenFactory = Screen.createFactory(scaler, setting.screenSetting());
@@ -52,13 +54,9 @@ $(() => {
     template: templates.screens,
   });
 
-  // reader.openURL(URL).progress((progress: Progress.Progress) => {
-  //   console.log('progress:', progress);
-  // }).then(() => {
-  //   console.log('then:', Reader.Status[reader.status()]);
-  // }).fail(() => {
-  //   console.log('fail:', Reader.Status[reader.status()]);
-  // });
+  $(window).resize(() => {
+    reader.resize($flowerpot.width(), $flowerpot.height());
+  });
 
   (<any>window).reader = reader;
   var screenSetting = setting.screenSetting();
