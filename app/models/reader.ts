@@ -109,8 +109,8 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
       if (deferred.state() === 'rejected') { return; }
       this._book = book;
       this.resetReadingInfo();
-      this.goToPage(this.currentPageNum());
       this.setStatus(Reader.Status.Opened);
+      this.goToPage(this.currentPageNum());
       deferred.resolve(this);
     }).fail(() => {
       if (!task.canceled) {
@@ -137,6 +137,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
 
   // move
   goNextScreen(): void {
+    if (this.status() !== Reader.Status.Opened) { return; }
     var newPageNum = this.currentPageNum() + 1;
     if (this.readingDirection() === Screen.ReadingDirection.Forward) {
       var displayedPageNum = this._screens.currentScreen().pages().length;
@@ -149,6 +150,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   }
 
   goPrevScreen(): void {
+    if (this.status() !== Reader.Status.Opened) { return; }
     var newPageNum = this.currentPageNum() - 1;
     if (this.readingDirection() === Screen.ReadingDirection.Backward) {
       var displayedPageNum = this._screens.currentScreen().pages().length;
@@ -161,6 +163,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   }
 
   goToPage(pageNum: number): void {
+    if (this.status() !== Reader.Status.Opened) { return; }
     var pages = this._book.pages();
     if (!this.isValidPageNum(pageNum)) {
       return;
@@ -170,7 +173,10 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
 
   // other
   screens(): Screens.Screens { return this._screens; }
-  resize(width: number, height: number): void { this._screens.resize(width, height); }
+  resize(width: number, height: number): void {
+    if (this.status() !== Reader.Status.Opened) { return; }
+    this._screens.resize(width, height);
+  }
 
   // private
   private update(pageNum: number, direction: Screen.ReadingDirection) {
