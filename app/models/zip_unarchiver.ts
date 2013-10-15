@@ -14,14 +14,12 @@ class ZipUnarchiver implements Unarchiver.Unarchiver {
     xhr.open('GET', url);
     xhr.responseType = 'arraybuffer';
     xhr.onload = (e: Event) => {
-      if (xhr.status !== 200) { deferred.reject(); return; }
       var buffer: ArrayBuffer = xhr.response;
       jz.zip.unpack({buffer: buffer}).done((reader: jz.zip.ZipArchiveReader) => {
         deferred.resolve(new ZipUnarchiver(reader, setting));
       }).fail(() => {
         deferred.reject();
       });
-      xhr = null;
     };
     xhr.send();
     var task = new Task(deferred.promise());

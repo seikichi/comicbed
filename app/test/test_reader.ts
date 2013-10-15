@@ -63,7 +63,7 @@ describe('Reader', function () {
     var deferred = $.Deferred<Book.Book>();
     factoryMock.expects('createFromURL')
       .once()
-      .withExactArgs(url)
+      .withExactArgs(url, undefined)
       .returns(deferred.promise());
     reader.openURL(url).then(() => {
       assert.strictEqual(Reader.Status.Opened, reader.status());
@@ -81,7 +81,7 @@ describe('Reader', function () {
     var deferred = $.Deferred<Book.Book>();
     factoryMock.expects('createFromURL')
       .once()
-      .withExactArgs(url)
+      .withExactArgs(url, undefined)
       .returns(deferred.promise());
     reader.openURL(url).fail(() => {
       assert.strictEqual(Reader.Status.Error, reader.status());
@@ -97,7 +97,7 @@ describe('Reader', function () {
     var deferred = $.Deferred<Book.Book>();
     factoryMock.expects('createFromURL')
       .once()
-      .withExactArgs(url)
+      .withExactArgs(url, undefined)
       .returns(new Task(deferred.promise()));
     reader.openURL(url).fail(() => { factoryMock.verify(); done(); });
     reader.openURL('new book url');

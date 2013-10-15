@@ -1,3 +1,1 @@
-require(['config'], () => {
-  require(['app'], () => {});
-});
+require(['config', 'app'], () => {});

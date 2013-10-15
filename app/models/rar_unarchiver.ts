@@ -14,11 +14,6 @@ class RarUnarchiver implements Unarchiver.Unarchiver {
     xhr.open('GET', url);
     xhr.responseType = 'arraybuffer';
     xhr.onload = (e: Event) => {
-      if (xhr.status !== 200) {
-        console.log('xhr error');
-        deferred.reject();
-        return;
-      }
       var buffer: ArrayBuffer = xhr.response;
       deferred.resolve(new RarUnarchiver(new Unrar(buffer), setting));
       xhr = null;
