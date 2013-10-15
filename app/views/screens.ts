@@ -107,8 +107,9 @@ class ScreenCollectionView extends BaseView {
     });
     this._scroll.goToPage(centerPageIndex, 0, 0);
 
-    this._scroll.on('zoomEnd', () => {
-      this._scroll.zoom(1);
+    this._scroll.on('scrollStart', () => {
+      this._scroll.zoom(1, 0, 0, undefined);
+      this._scroll.goToPage(centerPageIndex, 0, 0);
     });
 
     this._scroll.on('scrollEnd', () => {
@@ -126,7 +127,12 @@ class ScreenCollectionView extends BaseView {
         // go backward
         this._mover.goPrevScreen();
       }
-      this._scroll.goToPage(centerPageIndex, 0, 0);
+
+      var newCenterPageIndex = this._nexts.length;
+      if (this._setting.pageDirection() === Screen.PageDirection.L2R) {
+        newCenterPageIndex = this._prevs.length;
+      }
+      this._scroll.goToPage(newCenterPageIndex, 0, 0);
     });
   }
 
