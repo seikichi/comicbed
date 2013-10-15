@@ -14,7 +14,7 @@ export = PdfUnarchiver;
 
 class PdfUnarchiver implements Unarchiver.Unarchiver {
 
-  static createFromURL(url: string, setting: Unarchiver.Setting)
+  static createFromURL(url: string, setting: Unarchiver.Setting, options: Unarchiver.Options)
   : JQueryPromise<Unarchiver.Unarchiver> {
     var deferred = $.Deferred<Unarchiver.Unarchiver>();
     var task = new Task(deferred.promise());

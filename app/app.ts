@@ -95,7 +95,12 @@ $(() => {
     var file = files[0];
     var url: string = (<any>window).URL.createObjectURL(file);
     reader.openURL(url, {
-      mimeType: file.type
+      name: file.name,
+      mimeType: file.type,
+    }).progress((progress: Progress.Progress) => {
+      console.log(progress);
+    }).then(() => {
+      console.log('opened!');
     });
   });
 

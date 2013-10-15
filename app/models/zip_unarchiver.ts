@@ -7,8 +7,15 @@ export = ZipUnarchiver;
 
 class ZipUnarchiver implements Unarchiver.Unarchiver {
 
-  static createFromURL(url: string, setting: Unarchiver.Setting)
+  static createFromURL(url: string, setting: Unarchiver.Setting, options: Unarchiver.Options)
   : Task<Unarchiver.Unarchiver> {
+    var name = '';
+    if ('name' in options) {
+      name = options.name;
+    } else {
+      name = url.split(/(\#|\?)/).shift().split('/').pop();
+    }
+
     var deferred = $.Deferred<Unarchiver.Unarchiver>();
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url);
@@ -16,10 +23,16 @@ class ZipUnarchiver implements Unarchiver.Unarchiver {
     xhr.onload = (e: Event) => {
       var buffer: ArrayBuffer = xhr.response;
       jz.zip.unpack({buffer: buffer}).done((reader: jz.zip.ZipArchiveReader) => {
-        deferred.resolve(new ZipUnarchiver(reader, setting));
+        deferred.resolve(new ZipUnarchiver(name, reader, setting));
       }).fail(() => {
         deferred.reject();
       });
+    };
+    xhr.onprogress = (ev: ProgressEvent) => {
+      if (ev.lengthComputable) {
+        var progress = Math.round((ev.loaded / ev.total) * 100);
+        deferred.notify({ message: 'downloading ...', progress: progress });
+      }
     };
     xhr.send();
     var task = new Task(deferred.promise());
@@ -31,12 +44,13 @@ class ZipUnarchiver implements Unarchiver.Unarchiver {
   }
 
   private _filenames: string[];
-  constructor(private _reader: jz.zip.ZipArchiveReader,
+  constructor(private _name: string,
+              private _reader: jz.zip.ZipArchiveReader,
               private _setting: Unarchiver.Setting) {
     this._filenames = this._reader.getFileNames();
   }
 
-  archiveName(): string { return 'ZIP archive'; } // TODO(seikichi): fix
+  archiveName(): string { return this._name; }
   filenames(): string[] { return this._filenames; }
   unpack(name: string): JQueryPromise<Unarchiver.Content> {
     var deferred = $.Deferred<Unarchiver.Content>();

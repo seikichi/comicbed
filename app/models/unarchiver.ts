@@ -20,6 +20,7 @@ module Unarchiver {
   }
 
   export interface Options {
+    name?: string;
     mimeType?: string;
   }
 
@@ -118,11 +119,11 @@ class FactoryImpl implements Unarchiver.Factory {
     var innerTask: Task<Unarchiver.Unarchiver> = null;
 
     require([moduleName], (factory: {
-      createFromURL: (url: string, setting: Unarchiver.Setting)
+      createFromURL: (url: string, setting: Unarchiver.Setting, options: Unarchiver.Options)
         => Task<Unarchiver.Unarchiver>;
     }) => {
       if (task.canceled) { return; }
-      innerTask = factory.createFromURL(url, this._setting);
+      innerTask = factory.createFromURL(url, this._setting, options);
       innerTask.progress((progress: Progress.Progress) => {
         deferred.notify(progress);
       }).then((unarchiver: Unarchiver.Unarchiver) => {
