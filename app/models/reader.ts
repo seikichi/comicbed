@@ -6,6 +6,7 @@ import Book = require('models/book');
 import Task = require('models/task');
 import Progress = require('models/progress');
 import Setting = require('models/setting');
+import Sort = require('models/sort');
 
 export = Reader;
 
@@ -34,9 +35,10 @@ module Reader {
 
   export function create(bookFactory: Book.Factory,
                          screens: Screens.Screens,
+                         pageSorter: Sort.PageSorter,
                          setting: Setting.Setting)
   : Reader {
-    return new ReaderModel(bookFactory, screens, setting);
+    return new ReaderModel(bookFactory, screens, pageSorter, setting);
   }
 
   export interface ScreenMover {
@@ -49,15 +51,20 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   // immultable members
   private _bookFactory: Book.Factory;
   private _screens: Screens.Screens;
+  private _pageSorter: Sort.PageSorter;
   private _setting: Setting.Setting;
   // mutable members
   private _book: Book.Book;
   private _task: Task<Reader.Reader>;
 
   // ctor & initializer (TODO);
-  constructor(bookFactory: Book.Factory, screens: Screens.Screens, setting: Setting.Setting) {
+  constructor(bookFactory: Book.Factory,
+              screens: Screens.Screens,
+              pageSorter: Sort.PageSorter,
+              setting: Setting.Setting) {
     this._bookFactory = bookFactory;
     this._screens = screens;
+    this._pageSorter = pageSorter;
     this._setting = setting;
     this._book = null;
     this._task = null;
@@ -105,6 +112,8 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     var innerTask = this._bookFactory.createFromURL(url, options);
     innerTask.progress((progress: Progress.Progress) => {
       deferred.notify(progress);
+    }).then((book: Book.Book) => {
+      return this._pageSorter.sort(book, this._setting.sortSetting());
     }).then((book: Book.Book) => {
       if (deferred.state() === 'rejected') { return; }
       this._book = book;

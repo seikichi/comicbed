@@ -9,6 +9,7 @@ import Scaler = require('models/scaler');
 import Screen = require('models/screen');
 import Cache = require('models/cache');
 import Screens = require('collections/screens');
+import Sort = require('models/sort');
 import Progress = require('models/progress');
 
 import ScreenView = require('views/screen');
@@ -44,8 +45,9 @@ $(() => {
     setting.screenSetting(),
     setting.cacheSetting());
   var screens = Screens.create(size, screenFactory);
+  var pageSorter = Sort.createPageSorter();
 
-  var reader = Reader.create(bookFactory, screens, setting);
+  var reader = Reader.create(bookFactory, screens, pageSorter, setting);
   var view = new ScreenCollectionView({
     el: $flowerpot,
     screens: screens,

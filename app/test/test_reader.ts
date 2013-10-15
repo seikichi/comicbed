@@ -8,6 +8,7 @@ import Screen = require('models/screen');
 import Screens = require('collections/screens');
 import Unarchiver = require('models/unarchiver');
 import Task = require('models/task');
+import Sort = require('models/sort');
 
 declare var sinon: any;
 var assert = chai.assert;
@@ -50,7 +51,10 @@ describe('Reader', function () {
     var setting = {
       screenSetting: () => new Backbone.Model(),
     };
-    reader = Reader.create(bookFactory, screens, <any>setting);
+    var sorter = {
+      sort: (book: Book.Book, setting: Sort.Setting) => book,
+    };
+    reader = Reader.create(bookFactory, screens, sorter, <any>setting);
   });
 
   it('the status should be Closed at first', () => {

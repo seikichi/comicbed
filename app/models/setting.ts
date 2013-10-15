@@ -1,6 +1,7 @@
 import _ = require('underscore');
 import Backbone = require('backbone');
 
+import Sort = require('models/sort');
 import Cache = require('models/cache');
 import Page = require('models/page');
 import Screen = require('models/screen');
@@ -21,6 +22,7 @@ module Setting {
     unarchiverSetting(): Unarchiver.Setting;
     scalerSetting(): Scaler.Setting;
     cacheSetting(): Cache.Setting;
+    sortSetting(): Sort.Setting;
   }
 
   export function createFromQueryString(queryString: string): Setting {
@@ -64,21 +66,31 @@ class UnarchiverSettingModel extends Backbone.Model implements Unarchiver.Settin
   detectsImageXObjectPageInPdf(): boolean { return true; }
 }
 
+
+class SortSettingModel extends Backbone.Model implements Sort.Setting {
+  order() { return Sort.Order.NameNatural; } 
+  reverse() { return false; }
+}
+
+
 class SettingImpl implements Setting.Setting {
   private _screenSetting: Setting.ScreenSetting;
   private _unarchiverSetting: Unarchiver.Setting;
   private _scalerSetting: Scaler.Setting;
   private _cacheSetting: Cache.Setting;
+  private _sortSetting: Sort.Setting;
 
   constructor(queryString: string) {
     this._screenSetting = new ScreenSettingModel();
     this._scalerSetting = new ScalerSettingModel();
     this._unarchiverSetting = new UnarchiverSettingModel();
     this._cacheSetting = new CacheSettingModel();
+    this._sortSetting = new SortSettingModel();
   }
 
   screenSetting() { return this._screenSetting; }
   unarchiverSetting() { return this._unarchiverSetting; }
   scalerSetting() { return this._scalerSetting; }
   cacheSetting() { return this._cacheSetting; }
+  sortSetting() { return this._sortSetting; }
 }
