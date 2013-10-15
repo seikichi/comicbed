@@ -93,16 +93,23 @@ class ScreenCollectionView extends BaseView {
       this._scroll.destroy();
     }
     this._scroll = new IScroll('#screen-scroller', {
+      zoom: true,
+      mouseWheel: true,
+      wheelAction: 'zoom',
       snap: true,
       momentum: false,
       scrollX: true,
-      scrollY: false,
+      scrollY: true,
       click: false,
       bounce: false,
       snapThreshold: 0.1,
       snapSpeed: 100,
     });
     this._scroll.goToPage(centerPageIndex, 0, 0);
+
+    this._scroll.on('zoomEnd', () => {
+      this._scroll.zoom(1);
+    });
 
     this._scroll.on('scrollEnd', () => {
       var newPageIndex = this._scroll.currentPage.pageX;
@@ -137,8 +144,8 @@ class ScreenCollectionView extends BaseView {
   }
 
   onRightClick(event: Event): void {
+    event.preventDefault();
     if (this._scroll !== null && !this._scroll.moved) {
-      event.preventDefault();
       this._mover.goPrevScreen();
     }
   }

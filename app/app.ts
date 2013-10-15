@@ -58,6 +58,8 @@ $(() => {
     reader.resize($flowerpot.width(), $flowerpot.height());
   });
 
+  reader.openURL(URL);
+
   (<any>window).reader = reader;
   var screenSetting = setting.screenSetting();
   $(document).keydown((e: KeyboardEvent) => {

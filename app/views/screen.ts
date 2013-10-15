@@ -12,11 +12,10 @@ class ScreenView extends BaseView {
   }
 
   initialize() {
-    this.listenTo(this._screen, 'change:status', this.render);
+    this.listenTo(this._screen, 'change', this.render);
   }
 
   render() {
-    console.log('AYAYAYAYAY');
     this.$el.empty();
     if (this._screen.status() === Screen.Status.Success) {
       this.$el.append(this._screen.content());

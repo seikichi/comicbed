@@ -10,7 +10,7 @@ require.config({
     jqueryui: '../assets/vendor/jquery-ui/js/jquery-ui',
     jsziptools: '../assets/vendor/jsziptools/js/jsziptools.min',
     spin: '../assets/vendor/spin.js/js/spin',
-    iscroll: '../assets/vendor/iscroll/js/iscroll-min',
+    iscroll: '../assets/vendor/iscroll/js/iscroll-zoom-min',
 
     pdfjs: '../assets/app/pdfjs/js/pdf',
     unrar: '../assets/app/unrarlib/js/unrar.min',

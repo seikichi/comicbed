@@ -19,6 +19,8 @@ declare class IScroll {
   on(type: 'flick', fn: () => void): void;
   on(type: 'refresh', fn: () => void): void;
   on(type: 'destroy', fn: () => void): void;
+  on(type: 'zoomStart', fn: () => void): void;
+  on(type: 'zoomEnd', fn: () => void): void;
 
   scrollBy(x: number, y: number, time?: number, easing?: string): void;
   scrollTo(x: number, y: number, time: number, easing?: string): void;
@@ -26,17 +28,32 @@ declare class IScroll {
   next(time: number, easing?: string): void;
   prev(time: number, easing?: string): void;
 
+  zoom(scale: number, x?: number, y?: number, time?: number): void;
+
   currentPage: IScrollPage;
   moved: boolean;
+  scale: number;
+  options: IScrollOption;
+  snapThresholdX: number;
+  snapThresholdY: number;
 }
 
 interface IScrollOption {
+  zoom?: boolean;
+  zoomMin?: number;
+  zoomMax?: number;
+  startZoom?: number;
+  mouseWheel?: boolean;
+  wheelAction?: string;
+
   resizeIndicator?: boolean;
   mouseWheelSpeed?: number;
   snapThreshold?: number;
+  snap?: boolean;
 
   startX?: number;
   startY?: number;
+  scrollX?: boolean;
   scrollY?: boolean;
   directionLockThreshold?: number;
   momentum?: boolean;
