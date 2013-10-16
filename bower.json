@@ -20,6 +20,7 @@
     "jquery-ui": "*",
     "spin.js": "*",
     "iscroll": "*",
+    "bluebird": "git://github.com/petkaantonov/bluebird.git",
     "chai": "*",
     "mocha": "*",
     "sinon": "http://sinonjs.org/releases/sinon-1.7.3.js"
@@ -36,6 +37,7 @@
     "jsziptools": { "js": "dist/*.js" },
     "jquery-ui": { "js": "ui/jquery-ui.js", "css": "themes/base/*" },
     "iscroll": { "js": "dist/*.js" },
+    "bluebird": { "js": "js/*.js" },
     "spin.js": { "js": "dist/spin.js" },
     "chai": { "js": "chai.js" },
     "mocha": { "js": "mocha.js", "css": "mocha.css" }

@@ -17,6 +17,9 @@ import ScreenCollectionView = require('views/screens');
 
 import templates = require('templates');
 
+import Promise = require('Promise');
+console.log(Promise);
+
 enum KeyCode {
   Space = 32,
   Left = 37,
