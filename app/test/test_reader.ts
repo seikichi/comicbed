@@ -50,6 +50,7 @@ describe('Reader', function () {
     };
     var setting = {
       screenSetting: () => new Backbone.Model(),
+      sortSetting: () => new Backbone.Model(),
     };
     var sorter = {
       sort: (book: Book.Book, setting: Sort.Setting) => book,
