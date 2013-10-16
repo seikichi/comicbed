@@ -24,8 +24,7 @@ describe('Screens', () => {
     create: (size: Screen.Size) => new ScreenStub(),
   };
   var impls = {
-    'createScreensWithoutPrevNext': Screens.createScreensWithoutPrevNext(size, factory),
-    'createScreensWithOnePrevNext': Screens.createScreensWithOnePrevNext(size, factory),
+    'Screens': Screens.create(size, factory),
   };
   var pageContents = [ new Image(), new Image(), new Image(), new Image(), new Image(), ];
   var pages: Pages.Collection = {

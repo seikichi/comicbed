@@ -44,7 +44,7 @@ describe('Reader', function () {
       prevScreens: () => <any>undefined,
       nextScreens: () => <any>undefined,
       update: (pages: Pages.Collection, params: Screen.UpdateParams)
-        => $.Deferred<void>().resolve().promise(),
+        => Promise.fulfilled(null),
       resize: (width: number, height: number) => {}
     };
     var setting = {

@@ -1,4 +1,4 @@
-import $ = require('jquery');
+import Promise = require('promise');
 import Backbone = require('backbone');
 
 import Events = require('models/events');
@@ -19,22 +19,12 @@ module Screens {
     prevScreens(): Collection;
     nextScreens(): Collection;
 
-    update(pages: Pages.Collection, params: Screen.UpdateParams): JQueryPromise<void>;
+    update(pages: Pages.Collection, params: Screen.UpdateParams): Promise<void>;
     resize(width: number, height: number): void;
   }
 
   export function create(size: Screen.Size, factory: Screen.Factory): Screens {
     return new ScreenWithOnePrevNext(size, factory);
-  }
-
-  export function createScreensWithOnePrevNext(size: Screen.Size, factory: Screen.Factory)
-  : Screens {
-    return new ScreenWithOnePrevNext(size, factory);
-  }
-
-  export function createScreensWithoutPrevNext(size: Screen.Size, factory: Screen.Factory)
-  : Screens {
-    return new ScreenWithoutPrevNext(size, factory);
   }
 }
 
@@ -48,7 +38,7 @@ class ScreenWithOnePrevNext implements Screens.Screens {
   private _currentScreen: Screen.Screen;
   private _prevScreens: ScreenCollection;
   private _nextScreens: ScreenCollection;
-  private _deferred: JQueryDeferred<void>;
+  private _previousUpdatePromise: Promise<void>;
 
   constructor(size: Screen.Size,
               factory: Screen.Factory) {
@@ -62,7 +52,7 @@ class ScreenWithOnePrevNext implements Screens.Screens {
     this._prevScreens.add(this._factory.create(this._size));
     this._nextScreens.add(this._factory.create(this._size));
 
-    this._deferred = $.Deferred<void>().resolve();
+    this._previousUpdatePromise = Promise.rejected(null);
   }
 
 
@@ -70,11 +60,9 @@ class ScreenWithOnePrevNext implements Screens.Screens {
   prevScreens(): Screens.Collection { return this._prevScreens; }
   nextScreens(): Screens.Collection { return this._nextScreens; }
 
-  update(pages: Pages.Collection, params: Screen.UpdateParams): JQueryPromise<void> {
-    if (this._deferred.state() === 'pending') {
-      this._deferred.reject();
-    }
-    var deferred = $.Deferred<void>();
+  update(pages: Pages.Collection, params: Screen.UpdateParams): Promise<void> {
+    this._previousUpdatePromise.cancel();
+
     var prevPageNum = params.currentPageNum - 1;
     var nextPageNum = params.currentPageNum + 1;
     if (prevPageNum < 0) { this._prevScreens.reset([]); }
@@ -87,12 +75,10 @@ class ScreenWithOnePrevNext implements Screens.Screens {
     }
 
     var currentScreenPages: number = 1;
-    var resolvedPromise = $.Deferred<void>().resolve().promise();
     // first, update the current screen
-    this._deferred = deferred;
+    var resolvedPromise = $.Deferred<void>().resolve().promise();
 
-    this._currentScreen.update(pages, params).then(() => {
-      if (deferred.state() === 'rejected') { return resolvedPromise; }
+    var jqpromise = this._currentScreen.update(pages, params).then(() => {
       currentScreenPages = this._currentScreen.pages().length;
       if (this._prevScreens.length === 0) {
         return resolvedPromise;
@@ -113,7 +99,6 @@ class ScreenWithOnePrevNext implements Screens.Screens {
       };
       return this._prevScreens.at(0).update(pages, prevParams);
     }).then(() => {
-      if (deferred.state() === 'rejected') { return resolvedPromise; }
       if (this._nextScreens.length === 0) {
         return resolvedPromise;
       }
@@ -132,10 +117,8 @@ class ScreenWithOnePrevNext implements Screens.Screens {
         readingDirection: Screen.ReadingDirection.Forward,
       };
       return this._nextScreens.at(0).update(pages, nextParams).then(() => {});
-    }).then(() => {
-      deferred.resolve();
     });
-    return deferred.promise();
+    return Promise.cast<void>(jqpromise);
   }
 
   resize(width: number, height: number): void {
@@ -149,40 +132,3 @@ class ScreenWithOnePrevNext implements Screens.Screens {
     });
   }
 }
-
-
-class ScreenWithoutPrevNext implements Screens.Screens {
-  private _size: Screen.Size;
-  private _factory: Screen.Factory;
-
-  private _currentScreen: Screen.Screen;
-  private _prevScreens: ScreenCollection;
-  private _nextScreens: ScreenCollection;
-
-  constructor(size: Screen.Size,
-              factory: Screen.Factory) {
-    this._size = size;
-    this._factory = factory;
-
-    this._currentScreen = this._factory.create(this._size);
-
-    // do not update
-    this._prevScreens = new ScreenCollection([]);
-    this._nextScreens = new ScreenCollection([]);
-  }
-
-  currentScreen(): Screen.Screen { return this._currentScreen; }
-  prevScreens(): Screens.Collection { return this._prevScreens; }
-  nextScreens(): Screens.Collection { return this._nextScreens; }
-
-  update(pages: Pages.Collection, params: Screen.UpdateParams): JQueryPromise<void> {
-    return this._currentScreen.update(pages, params).then((result: Screen.UpdateResult) => {});
-  }
-
-  resize(width: number, height: number): void {
-    this._size = { width: width, height: height };
-    this._currentScreen.resize(width, height);
-  }
-}
-
-

@@ -1,4 +1,3 @@
-import $ = require('jquery');
 import Events = require('models/events');
 import Screen = require('models/screen');
 import Screens = require('collections/screens');
