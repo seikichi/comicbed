@@ -52,9 +52,8 @@ class ScreenWithOnePrevNext implements Screens.Screens {
     this._prevScreens.add(this._factory.create(this._size));
     this._nextScreens.add(this._factory.create(this._size));
 
-    this._previousUpdatePromise = Promise.rejected(null);
+    this._previousUpdatePromise = Promise.fulfilled(null);
   }
-
 
   currentScreen(): Screen.Screen { return this._currentScreen; }
   prevScreens(): Screens.Collection { return this._prevScreens; }
@@ -75,13 +74,10 @@ class ScreenWithOnePrevNext implements Screens.Screens {
     }
 
     var currentScreenPages: number = 1;
-    // first, update the current screen
-    var resolvedPromise = $.Deferred<void>().resolve().promise();
-
-    var jqpromise = this._currentScreen.update(pages, params).then(() => {
+    this._previousUpdatePromise = this._currentScreen.update(pages, params).then(() => {
       currentScreenPages = this._currentScreen.pages().length;
       if (this._prevScreens.length === 0) {
-        return resolvedPromise;
+        return Promise.fulfilled(null);
       }
       // check whether the new previous page is valid or not
       var newPrevPageNum = prevPageNum;
@@ -90,7 +86,7 @@ class ScreenWithOnePrevNext implements Screens.Screens {
       }
       if (newPrevPageNum < 0) {
         this._prevScreens.reset([]);
-        return resolvedPromise;
+        return Promise.fulfilled(null);
       }
       // update prev screen
       var prevParams: Screen.UpdateParams = {
@@ -100,7 +96,7 @@ class ScreenWithOnePrevNext implements Screens.Screens {
       return this._prevScreens.at(0).update(pages, prevParams);
     }).then(() => {
       if (this._nextScreens.length === 0) {
-        return resolvedPromise;
+        return Promise.fulfilled(null);
       }
       // check whether the new next page is valid or not
       var newNextPageNum = nextPageNum;
@@ -109,7 +105,7 @@ class ScreenWithOnePrevNext implements Screens.Screens {
       }
       if (pages.length <= newNextPageNum) {
         this._nextScreens.reset([]);
-        return resolvedPromise;
+        return Promise.fulfilled(null);
       }
       // update next screen
       var nextParams: Screen.UpdateParams = {
@@ -118,7 +114,7 @@ class ScreenWithOnePrevNext implements Screens.Screens {
       };
       return this._nextScreens.at(0).update(pages, nextParams).then(() => {});
     });
-    return Promise.cast<void>(jqpromise);
+    return this._previousUpdatePromise;
   }
 
   resize(width: number, height: number): void {

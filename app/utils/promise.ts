@@ -13,6 +13,20 @@ module PromiseUtil {
     });
   }
 
+  export function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
+    return new Promise<ArrayBuffer>((resolve, reject) => {
+      var fileReader = new FileReader();
+      fileReader.onload = () => {
+        var buffer: ArrayBuffer = fileReader.result;
+        resolve(buffer);
+      };
+      fileReader.onerror = (error: any) => {
+        reject(error);
+      };
+      fileReader.readAsArrayBuffer(file);
+    });
+  }
+
   export function getArrayBufferByXHR(url: string): Promise<ArrayBuffer> {
     var resolver = Promise.pending<ArrayBuffer>();
 

@@ -19,11 +19,12 @@ declare module "iscroll" {
   export = IScroll;
 }
 
+declare class Tiff {
+  constructor(buffer: ArrayBuffer);
+  toDataURL(): string;
+}
+
 declare module "tiff" {
-  class Tiff {
-    constructor(buffer: ArrayBuffer);
-    toDataURL(): string;
-  }
   export = Tiff;
 }
 

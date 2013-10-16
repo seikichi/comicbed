@@ -4,7 +4,6 @@ import Unarchiver = require('models/unarchiver');
 import Unrar = require('unrar');
 import ImageUtil = require('utils/image');
 
-
 export = RarUnarchiver;
 
 class RarUnarchiver implements Unarchiver.Unarchiver {
@@ -39,7 +38,7 @@ class RarUnarchiver implements Unarchiver.Unarchiver {
 
   archiveName(): string { return this._name; }
   filenames(): string[] { return this._filenames; }
-  unpack(name: string): JQueryPromise<Unarchiver.Content> {
+  unpack(name: string): Promise<Unarchiver.Content> {
     var data = this._unrar.decompress(name);
     return ImageUtil.createImageElementFromArrayBuffer(data);
   }

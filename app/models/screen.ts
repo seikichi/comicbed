@@ -1,5 +1,5 @@
-import $ = require('jquery');
 import Backbone = require('backbone');
+import Promise = require('promise');
 
 import Events = require('models/events');
 import Page = require('models/page');
@@ -40,7 +40,7 @@ module _Screen {
     content(): Content;
 
     pages(): Page.Page[];
-    update(pages: Pages.Collection, params: UpdateParams): JQueryPromise<UpdateResult>;
+    update(pages: Pages.Collection, params: UpdateParams): Promise<UpdateResult>;
     resize(width: number, height: number): void;
   }
 
@@ -66,7 +66,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
   private _setting: _Screen.Setting;
   private _pages: Page.Page[];
   private _pageContents: Page.Content[];
-  private _deferred: JQueryDeferred<_Screen.UpdateResult>;
+  private _previousUpdatePromise: Promise<_Screen.UpdateResult>;
 
   constructor(size: _Screen.Size, builder: Scaler.Scaler, setting: _Screen.Setting) {
     this._builder = builder;
@@ -74,7 +74,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
     this._setting = setting;
     this._pages = [];
     this._pageContents = [];
-    this._deferred = null;
+    this._previousUpdatePromise = Promise.fulfilled({});
     super();
   }
 
@@ -108,13 +108,8 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
     this.trigger('change:status');
   }
 
-  update(pages: Pages.Collection, params: _Screen.UpdateParams)
-  : JQueryPromise<_Screen.UpdateResult> {
-    if (this._deferred !== null) {
-      this._deferred.reject();
-    }
-    var deferred = this._deferred = $.Deferred<_Screen.UpdateResult>();
-    var resolvedPromise = $.Deferred<void>().resolve().promise();
+  update(pages: Pages.Collection, params: _Screen.UpdateParams) : Promise<_Screen.UpdateResult> {
+    this._previousUpdatePromise.cancel();
     this.setStatus(_Screen.Status.Loading);
 
     var successFirstPage: boolean = false;
@@ -122,48 +117,45 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
     var direction = params.readingDirection;
     var newPageContents: Page.Content[] = [];
     var promise = pages.at(pageNum).content().then((content: Page.Content) => {
-      if (deferred.state() === 'rejected') { return resolvedPromise; }
       successFirstPage = true;
       newPageContents.push(content);
     });
     var displayedPages = [pages.at(pageNum)];
     if (this._setting.viewMode() === _Screen.ViewMode.TwoPage) {
       promise = promise.then(() => {
-        if (deferred.state() === 'rejected') { return resolvedPromise; }
         var content = newPageContents[0];
         var nextPageNum = pageNum + direction;
         if (nextPageNum < 0
             || pages.length <= nextPageNum
             || (this._setting.detectsSpreadPage()
                 && this._setting.isSpreadPage(content))) {
-          return $.Deferred<void>().resolve().promise();
+          return Promise.fulfilled<void>(null);
         }
-        var nextPromise = pages.at(nextPageNum).content()
-          .then<void>((nextContent: Page.Content) => {
-            if (deferred.state() === 'rejected') { return resolvedPromise; }
-            if (!this._setting.detectsSpreadPage()
-                || !this._setting.isSpreadPage(nextContent)) {
-              if (direction === _Screen.ReadingDirection.Backward) {
-                newPageContents.unshift(nextContent);
-                displayedPages.unshift(pages.at(nextPageNum));
-              } else {
-                newPageContents.push(nextContent);
-                displayedPages.push(pages.at(nextPageNum));
-              }
+
+        return pages.at(nextPageNum).content().then<void>((nextContent: Page.Content) => {
+          if (!this._setting.detectsSpreadPage()
+              || !this._setting.isSpreadPage(nextContent)) {
+            if (direction === _Screen.ReadingDirection.Backward) {
+              newPageContents.unshift(nextContent);
+              displayedPages.unshift(pages.at(nextPageNum));
+            } else {
+              newPageContents.push(nextContent);
+              displayedPages.push(pages.at(nextPageNum));
             }
-          });
-        return nextPromise;
+          }
+          return Promise.fulfilled<void>(null);
+        });
       });
     }
-    promise.then(() => {
-      if (deferred.state() === 'rejected') { return; }
+    this._previousUpdatePromise = promise.then(() => {
       this._pages = displayedPages;
       this.updateContent(newPageContents);
       this.setStatus(_Screen.Status.Success);
-      deferred.resolve({});
-      this._deferred = null;
-    }).fail(() => {
-      if (deferred.state() === 'rejected') { return; }
+    }).catch((reason: any) => {
+      if (reason && 'name' in reason && reason.name === 'CancellationError') {
+        return Promise.rejected(reason);
+      }
+
       this._pages = displayedPages;
       if (successFirstPage) {
         this.updateContent(newPageContents);
@@ -171,9 +163,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
       } else {
         this.setStatus(_Screen.Status.Error);
       }
-      deferred.resolve({});
-      this._deferred = null;
     });
-    return deferred.promise();
+    return this._previousUpdatePromise;
   }
 }

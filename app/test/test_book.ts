@@ -1,4 +1,3 @@
-import $ = require('jquery');
 import Promise = require('promise');
 import Book = require('models/book');
 import Unarchiver = require('models/unarchiver');
@@ -11,11 +10,11 @@ describe('Book', function () {
     var unarchiver: Unarchiver.Unarchiver = {
       archiveName: () => 'archive',
       filenames: () => ['01', '02', '03'],
-      unpack: (name: string) => $.Deferred<any>().resolve(undefined).promise(),
+      unpack: (name: string) => Promise.fulfilled(null),
       close: () => {},
     };
     var unarchiverFactory: Unarchiver.Factory = <any>{
-      getUnarchiverFromURL: () => $.Deferred().resolve(unarchiver).promise(),
+      getUnarchiverFromURL: () => Promise.fulfilled(unarchiver),
       getUnarchiverFromFile: () => <any>undefined,
     }
 

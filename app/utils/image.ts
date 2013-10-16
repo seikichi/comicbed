@@ -1,4 +1,5 @@
-import $ = require('jquery');
+import Promise = require('promise');
+import PromiseUtil = require('utils/promise');
 
 export = ImageUtil;
 
@@ -13,10 +14,9 @@ module ImageUtil {
   }
 
   export function createImageElementFromArrayBuffer(buffer: ArrayBuffer)
-  : JQueryPromise<HTMLImageElement> {
+  : Promise<HTMLImageElement> {
     var data = new Uint8Array(buffer);
-    var deferred = $.Deferred<HTMLImageElement>();
-    if (!isImageData(data)) { return deferred.reject().promise(); }
+    if (!isImageData(data)) { return Promise.rejected('invalid image'); }
 
     var format = '';
     if (isJPEG(data)) {
@@ -28,18 +28,9 @@ module ImageUtil {
     } else if (isGIF(data)) {
       format = 'gif';
     } else if (isTIFF(data)) {
-      format = 'tiff';
-    }
-    if (format === 'tiff') {
-      require(['tiff'], (Tiff: typeof Tiff) => {
-        var dataURL = new Tiff(data).toDataURL();
-        loadImageFromURL(dataURL).then((image: HTMLImageElement) => {
-          deferred.resolve(image);
-        }).fail(() => {
-          deferred.reject();
-        })
+      return PromiseUtil.require<typeof Tiff>('tiff').then((Tiff: typeof Tiff) => {
+        return loadImageFromURL(new Tiff(data).toDataURL());
       });
-      return deferred.promise();
     }
 
     var base64data = arrayBufferTobase64String(buffer);
@@ -48,7 +39,7 @@ module ImageUtil {
   }
 
   export function pixelDataToImageElement(data: Uint8Array, width: number, height: number)
-  : JQueryPromise<HTMLImageElement> {
+  : Promise<HTMLImageElement> {
     var canvas = document.createElement('canvas');
     var context = canvas.getContext('2d');
     canvas.width = width;
@@ -66,19 +57,19 @@ module ImageUtil {
     return ImageUtil.loadImageFromURL(canvas.toDataURL());
   }
 
-  export function loadImageFromURL(url: string): JQueryPromise<HTMLImageElement> {
-    var deferred = $.Deferred<HTMLImageElement>();
-    var image: HTMLImageElement = new Image();
-    image.onload = () => {
-      deferred.resolve(image);
-      image = null;
-    };
-    image.onerror = () => {
-      deferred.reject();
-      image = null;
-    };
-    image.src = url;
-    return deferred.promise();
+  export function loadImageFromURL(url: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      var image: HTMLImageElement = new Image();
+      image.onload = () => {
+        resolve(image);
+        image = null;
+      };
+      image.onerror = () => {
+        reject('invalid image url');
+        image = null;
+      };
+      image.src = url;
+    });
   }
 
   export function imageElementToCanvas(image: HTMLImageElement): HTMLCanvasElement {

@@ -1,4 +1,3 @@
-import $ = require('jquery');
 import Promise = require('promise');
 import Backbone = require('backbone');
 import Reader = require('models/reader');
@@ -22,7 +21,7 @@ describe('Reader', function () {
       return {
         name: () => 'page',
         pageNum: () => i + 1,
-        content: () => $.Deferred<Page.Content>().resolve(pageContents[i]).promise()
+        content: () => Promise.fulfilled(pageContents[i]),
       };
     }
   };
@@ -131,7 +130,7 @@ describe('Reader', function () {
         .withExactArgs(pages, {
           currentPageNum: newPageNum,
           readingDirection: reader.readingDirection()})
-        .returns($.Deferred<void>().resolve().promise());
+        .returns(Promise.fulfilled(null));
       reader.on('change:currentPageNum', () => {
         assert.strictEqual(newPageNum, reader.currentPageNum());
         mock.verify();

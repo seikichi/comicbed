@@ -1,4 +1,5 @@
 import Backbone = require('backbone');
+import Promise = require('promise');
 import Screen = require('models/screen');
 import Page = require('models/page');
 import Pages = require('collections/pages');
@@ -146,7 +147,7 @@ class CacheScreenModel extends Backbone.Model implements Screen.Screen {
   private _innerScreen: Screen.Screen;
   private _cache: ScreenCache;
   private _factory: Screen.Factory;
-  private _deferred: JQueryDeferred<Screen.UpdateResult>;
+  private _previousUpdatePromise: Promise<Screen.UpdateResult>;
 
   constructor(size: Screen.Size,
               factory: Screen.Factory,
@@ -154,7 +155,7 @@ class CacheScreenModel extends Backbone.Model implements Screen.Screen {
     this._size = size;
     this._cache = cache;
     this._factory = factory;
-    this._deferred = null;
+    this._previousUpdatePromise = Promise.fulfilled({});
     this.updateInnerModel(factory.create(size));
     super();
   }
@@ -176,30 +177,26 @@ class CacheScreenModel extends Backbone.Model implements Screen.Screen {
   }
 
   update(pages: Pages.Collection, params: Screen.UpdateParams)
-  : JQueryPromise<Screen.UpdateResult> {
-    if (this._deferred !== null && this._deferred.state() === 'pending') {
-      this._deferred.reject();
-    }
+  : Promise<Screen.UpdateResult> {
+    this._previousUpdatePromise.cancel();
 
     var cachedScreen = this._cache.find(pages, params);
     if (cachedScreen !== null) {
       this.updateInnerModel(cachedScreen);
       this.resize(this._size.width, this._size.height);
       this.trigger('change:status');
-      return $.Deferred<Screen.UpdateResult>().resolve({}).promise();
+      return Promise.fulfilled({});
     } else {
-      var deferred = this._deferred = $.Deferred<Screen.UpdateResult>();
-
       this.updateInnerModel(this._factory.create(this._size));
-      this._innerScreen.update(pages, params)
+
+      this._previousUpdatePromise = this._innerScreen.update(pages, params)
         .then((result: Screen.UpdateResult) => {
-          if (deferred.state() === 'rejected') { return result; }
           if (this.status() === Screen.Status.Success) {
             this._cache.update(this._innerScreen, params);
           }
-          deferred.resolve(result);
+          return result;
         });
-      return deferred.promise();
+      return this._previousUpdatePromise;
     }
   }
 }

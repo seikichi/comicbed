@@ -1,4 +1,4 @@
-import $ = require('jquery');
+import Promise = require('promise');
 import Backbone = require('backbone');
 import Screen = require('models/screen');
 import Screens = require('collections/screens');
@@ -13,7 +13,7 @@ class ScreenStub extends Backbone.Model {
   content() { return <Screen.Content>undefined; }
   pages() { return <Page.Page[]>[undefined]; }
   update(pages: Pages.Collection, params: Screen.UpdateParams) {
-    return $.Deferred<any>().resolve().promise();
+    return Promise.fulfilled(null);
   }
   resize(width: number, height: number) {}
 }
@@ -33,7 +33,7 @@ describe('Screens', () => {
       return {
         name: () => 'page',
         pageNum: () => i + 1,
-        content: () => $.Deferred<Page.Content>().resolve(pageContents[i]).promise()
+        content: () => Promise.fulfilled(pageContents[i]),
       };
     }
   };
@@ -45,7 +45,7 @@ describe('Screens', () => {
           it('updates the currentScreen', (done) => {
             var current = screens.currentScreen();
             var mock = sinon.mock(current);
-            mock.expects('update').once().returns($.Deferred<any>().resolve().promise());
+            mock.expects('update').once().returns(Promise.fulfilled(null))
             screens.update(pages, {
               currentPageNum: 0,
               readingDirection: Screen.ReadingDirection.Forward,
@@ -82,7 +82,7 @@ describe('Screens', () => {
             var mock = sinon.mock(prev);
             mock.expects('update').once()
               .withExactArgs(pages, { currentPageNum: 0, readingDirection: Screen.ReadingDirection.Backward})
-              .returns($.Deferred<any>().resolve().promise());;
+              .returns(Promise.fulfilled(null));
             screens.update(pages, {
               currentPageNum: 1,
               readingDirection: Screen.ReadingDirection.Forward,

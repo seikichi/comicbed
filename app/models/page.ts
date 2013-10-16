@@ -9,10 +9,10 @@ module Page {
   export interface Page {
     name(): string;
     pageNum(): number;
-    content(): JQueryPromise<Content>;
+    content(): Promise<Content>;
   }
 
-  export function createPage(name: string, pageNum: number, content: () => JQueryPromise<Content>)
+  export function createPage(name: string, pageNum: number, content: () => Promise<Content>)
   : Page {
     return {
       name: () => { return name; },

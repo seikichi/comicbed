@@ -40,24 +40,10 @@ class ZipUnarchiver implements Unarchiver.Unarchiver {
 
   archiveName(): string { return this._name; }
   filenames(): string[] { return this._filenames; }
-  unpack(name: string): JQueryPromise<Unarchiver.Content> {
-    var deferred = $.Deferred<Unarchiver.Content>();
-    this._reader.getFileAsBlob(name).done((blob: Blob) => {
-      var fileReader = new FileReader();
-      fileReader.onload = () => {
-        var buffer: ArrayBuffer = fileReader.result;
-        ImageUtil.createImageElementFromArrayBuffer(buffer)
-          .then((image: HTMLImageElement) => {
-            deferred.resolve(image);
-          }).fail(() => {
-            deferred.reject();
-          });
-      }
-      fileReader.readAsArrayBuffer(blob);
-    }).fail(() => {
-      deferred.reject();
-    });
-    return deferred.promise();
+  unpack(name: string): Promise<Unarchiver.Content> {
+    return Promise.cast<Blob>(this._reader.getFileAsBlob(name))
+      .then(PromiseUtil.readFileAsArrayBuffer)
+      .then(ImageUtil.createImageElementFromArrayBuffer);
   }
   close(): void { this._reader = null; }
 }

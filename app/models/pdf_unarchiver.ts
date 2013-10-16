@@ -3,7 +3,6 @@ import PDFJS = require('pdfjs');
 import sprintf = require('sprintf');
 import ImageUtil = require('utils/image');
 import Promise = require('promise');
-import PromiseUtil = require('utils/promise');
 
 // TODO(seikichi): move to unarchiver.setting
 PDFJS.workerSrc = 'assets/app/pdfjs/js/pdf.worker.js';
@@ -30,9 +29,9 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
   private _names: string[];
   private _nameToPageNum: {[name: string]: number;};
 
-  private _renderTask: PDFJS.RenderTask;
-  private _deferred: JQueryDeferred<Unarchiver.Content>;
   private _canvas: HTMLCanvasElement;
+  private _previousUnpackPromise: Promise<Unarchiver.Content>;
+  private _previousUnpackName: string;
 
   constructor(pdfDocument: PDFJS.PDFDocumentProxy, setting: Unarchiver.Setting) {
     this._document = pdfDocument;
@@ -40,9 +39,9 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
     this._archiveName = (<any>this._document).pdfInfo.info.Title;
     this._names = [];
     this._nameToPageNum = {};
-    this._renderTask = null;
-    this._deferred = null;
     this._canvas = document.createElement('canvas');
+    this._previousUnpackName = null;
+    this._previousUnpackPromise = Promise.fulfilled(null);
 
     var numOfDigits = 1 + Math.floor(Math.log(this._document.numPages) / Math.log(10));
     var pageNameformat = sprintf('pdf-page-%%0%dd', numOfDigits);
@@ -61,94 +60,80 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
     return this._names;
   }
 
-  renderPage(page: PDFJS.PDFPageProxy, scale: number): PDFJS.Promise<PDFJS.PDFPageProxy> {
+  renderPage(page: PDFJS.PDFPageProxy, scale: number): Promise<HTMLCanvasElement> {
     var canvas = this._canvas;
     var viewport = page.getViewport(scale);
     var context = canvas.getContext('2d');
     canvas.height = viewport.height;
     canvas.width = viewport.width;
-
     var renderContext = { canvasContext: context, viewport: viewport, };
-    if (this._renderTask !== null) {
-      this._renderTask.cancel();
-    }
-    this._renderTask = page.render(renderContext);
-    var promise = this._renderTask.then(() => {
-      this._renderTask = null;
-      return page;
-    });
-    return promise;
+
+    var renderTask = page.render(renderContext);
+    return Promise.cast<void>(renderTask)
+      .then(() => {
+        return canvas;
+      }).catch(Promise.CancellationError, (reason: any) => {
+        renderTask.cancel();
+        return Promise.rejected(reason);
+      });
   }
 
-  unpack(name: string): JQueryPromise<Unarchiver.Content> {
+  getContent(page: PDFJS.PDFPageProxy): Promise<Unarchiver.Content> {
+    return this.renderPage(page, this._setting.pdfjsCanvasScale())
+      .then((canvas: HTMLCanvasElement) => ImageUtil.loadImageFromURL(canvas.toDataURL()));
+  }
+
+  getXObjectContent(page: PDFJS.PDFPageProxy): Promise<Unarchiver.Content> {
+    var viewport = page.getViewport(1);
+    var pageAspectRatio = viewport.width / viewport.height;
+    return this.renderPage(page, 0).then((canvas: HTMLCanvasElement) => {
+      var objs = page.objs.objs;
+      for (var key in objs) if (objs.hasOwnProperty(key)) {
+        if (key.indexOf('img_') !== 0) { continue; }
+        var data: any = page.objs.getData(key)
+        var imageAspectRatio = data.width / data.height;
+        if (Math.abs(pageAspectRatio - imageAspectRatio) >= 1e-3) { continue; }
+
+        page.destroy();
+        if (!('data' in data)) {
+          return Promise.fulfilled(<HTMLImageElement>data);
+        } else {
+          return ImageUtil.pixelDataToImageElement(data.data, data.width, data.height);
+        }
+      }
+      return this.getContent(page);
+    });
+  }
+
+  unpack(name: string): Promise<Unarchiver.Content> {
     // if the previous unpacking task exists, reject it
-    if (this._deferred !== null && this._deferred.state() === 'pending') {
-      this._deferred.reject();
+    if (name === this._previousUnpackName) {
+      return this._previousUnpackPromise;
     }
-    var deferred = this._deferred = $.Deferred<Unarchiver.Content>();
+
+    this._previousUnpackName = name;
+    this._previousUnpackPromise.cancel();
 
     // reject if the page name is invalid
     var pageNum = this._nameToPageNum[name];
     if (pageNum <= 0 || this._document.numPages < pageNum) {
-      deferred.reject();
-      return this._deferred.promise();
+      return Promise.rejected('invalid filename:' +  name);
     }
 
-    var existsImageXObject = false;
-    var pageAspectRatio = 0;
-    var promise = this._document.getPage(pageNum);
-
+    var promise = Promise.cast<PDFJS.PDFPageProxy>(this._document.getPage(pageNum));
     if (this._setting.detectsImageXObjectPageInPdf()) {
-      // if detectsImageXObjectPageInPdf is true,
-      // first, render the page with size 0 (scale === 0), and find a XObject
-      promise = promise.then((page: PDFJS.PDFPageProxy) => {
-        if (deferred.state() === 'rejected') { return page; }
-        var viewport = page.getViewport(1);
-        pageAspectRatio = viewport.width / viewport.height;
-        return this.renderPage(page, 0);
-      }).then((page: PDFJS.PDFPageProxy) => {
-        if (deferred.state() === 'rejected') { return page; }
-        // find XObject
-        var objs = page.objs.objs;
-        for (var key in objs) if (objs.hasOwnProperty(key)) {
-          if (key.indexOf('img_') !== 0) { continue; }
-          var data: any = page.objs.getData(key)
-          var imageAspectRatio = data.width / data.height;
-          if (Math.abs(pageAspectRatio - imageAspectRatio) >= 1e-3) { continue; }
-
-          existsImageXObject = true;
-          if (!('data' in data)) {
-            deferred.resolve(<HTMLImageElement>data);
-          } else {
-            ImageUtil.pixelDataToImageElement(data.data, data.width, data.height)
-              .then((image: HTMLImageElement) => {
-                deferred.resolve(image);
-              }).fail(() => {
-                deferred.reject();
-              });
-          }
-          page.destroy();
-          break;
-        }
-        return page;
+      this._previousUnpackPromise = promise.then((page: PDFJS.PDFPageProxy) => {
+        return this.getXObjectContent(page);
+      });
+    } else {
+      this._previousUnpackPromise = promise.then((page: PDFJS.PDFPageProxy) => {
+        return this.getContent(page);
       });
     }
-    promise.then((page: PDFJS.PDFPageProxy) => {
-      if (deferred.state() !== 'pending' || existsImageXObject) { return page; }
-      return this.renderPage(page, this._setting.pdfjsCanvasScale());
-    }).then((page: PDFJS.PDFPageProxy) => {
-      page.destroy();
-      if (deferred.state() !== 'pending' || existsImageXObject) { return page; }
-      // do not mix the PDFJS.Promise and JQueryPromise
-      ImageUtil.loadImageFromURL(this._canvas.toDataURL()).then((image: HTMLImageElement) => {
-        deferred.resolve(image);
-      }).fail(() => {
-        deferred.reject();
-      });
-    });
-    return deferred.promise();
+    return this._previousUnpackPromise;
   }
   close(): void {
+    this._previousUnpackPromise.cancel();
     this._document.destroy();
   }
 }

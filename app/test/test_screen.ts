@@ -1,4 +1,4 @@
-import $ = require('jquery');
+import Promise = require('promise');
 import Screen = require('models/screen');
 import Page = require('models/page');
 import Pages = require('collections/pages');
@@ -19,7 +19,7 @@ describe('Screen', () => {
       return {
         name: () => 'page',
         pageNum: () => i + 1,
-        content: () => $.Deferred<Page.Content>().resolve(pageContents[i]).promise()
+        content: () => Promise.fulfilled(pageContents[i]),
       };
     }
   };
@@ -46,7 +46,7 @@ describe('Screen', () => {
       mock.expects('at').atLeast(1).withExactArgs(0).returns({
         name: () => 'page',
         pageNum: () => 0,
-        content: () => $.Deferred<Page.Content>().reject().promise(),
+        content: () => Promise.rejected(null),
       });
       var screen = Screen.createScreen(size, builder, setting);
       screen.update(pages, {
@@ -68,11 +68,11 @@ describe('Screen', () => {
             name: () => 'page',
             pageNum: () => i + 1,
             content: () => {
-              var d = $.Deferred<Page.Content>();
-              if (first) { d.resolve(pageContents[i]); }
-              else { d.reject(); }
-              if (first) { first = false; }
-              return d.promise();
+              if (first) {
+                first = false;
+                return Promise.fulfilled(pageContents[i]);
+              }
+              return Promise.rejected(null);
             }
           }
         }
@@ -145,27 +145,6 @@ describe('Screen', () => {
         mock.verify();
         done();
       });
-    });
-    it('makes screen.content() from Page.Content', (done) => {
-      var deferred = $.Deferred<any>();
-      var promise = deferred.promise();
-      var builder: Scaler.Scaler = {
-        scale: (pages: Page.Content[], params: Scaler.ScaleParams) => pages[0],
-      };
-      var screen = Screen.createScreen(size, builder, setting);
-      for (var i = 0, len = pages.length; i < len; ++i) {
-        ((index: number) => {
-          promise = promise
-            .then(() => screen.update(pages, {
-              currentPageNum: index, 
-              readingDirection: Screen.ReadingDirection.Forward
-            })).then(() => {
-              assert.strictEqual(pageContents[index], screen.content());
-            });
-        }(i));
-      }
-      promise.then(() => { done(); });
-      deferred.resolve();
     });
   });
   describe('the update function, when viewMode is TwoPage, detectsSpreadPage is false', () => {

@@ -1,4 +1,3 @@
-import $ = require('jquery');
 import Promise = require('promise');
 import PromiseUtil = require('utils/promise');
 import Events = require('events');
@@ -11,7 +10,7 @@ module Unarchiver {
   export interface Unarchiver {
     archiveName(): string;
     filenames(): string[];
-    unpack(name: string): JQueryPromise<Content>;
+    unpack(name: string): Promise<Content>;
     close(): void;
   }
   export interface Content extends HTMLElement {
