@@ -1,4 +1,4 @@
-import Promise = require('bluebird');
+import Promise = require('promise');
 
 export = PromiseUtil;
 

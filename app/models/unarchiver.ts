@@ -3,7 +3,6 @@ import Events = require('events');
 import Task = require('models/task');
 import Progress = require('models/progress');
 
-
 // public
 export = Unarchiver;
 
