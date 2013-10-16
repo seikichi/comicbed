@@ -1,4 +1,5 @@
 import $ = require('jquery');
+import Promise = require('promise');
 import Book = require('models/book');
 import Unarchiver = require('models/unarchiver');
 
@@ -28,10 +29,9 @@ describe('Book', function () {
 
     it('fails when unarchiverFactory.getUnarchiverFromURL fails', (done) => {
       var mock = sinon.mock(unarchiverFactory);
-      var promise = $.Deferred<any>().reject().promise();
-      mock.expects('getUnarchiverFromURL').once().returns(promise);
+      mock.expects('getUnarchiverFromURL').once().returns(Promise.rejected(''));
       var factory = Book.createFactory(unarchiverFactory);
-      factory.createFromURL('').fail(() => {
+      factory.createFromURL('').catch(() => {
         mock.verify();
         done();
       });

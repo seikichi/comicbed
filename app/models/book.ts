@@ -1,7 +1,8 @@
+import Promise = require('promise');
+import PromiseUtil = require('utils/promise');
 import Unarchiver = require('models/unarchiver');
 import Page = require('models/page');
 import Pages = require('collections/pages');
-import Task = require('models/task');
 import Progress = require('models/progress');
 
 export = Book;
@@ -16,7 +17,7 @@ module Book {
   export interface Options extends Unarchiver.Options {}
 
   export interface Factory {
-    createFromURL(url: string, options?: Options): Task<Book>;
+    createFromURL(url: string, options?: Options): Promise<Book>;
   }
 
   export function createFactory(unarchiverFactory: Unarchiver.Factory): Factory {
@@ -33,29 +34,24 @@ class BookFactory implements Book.Factory {
     this.unarchiverFactory = unarchiverFactory;
   }
 
-  createFromURL(url: string, options?: Book.Options): Task<Book.Book> {
-    var innerTask = this.unarchiverFactory.getUnarchiverFromURL(url, options);
-    var promise = innerTask.then((unarchiver: Unarchiver.Unarchiver) => {
-      var filenames = unarchiver.filenames();
-      var pages: Page.Page[] = [];
-      for (var i = 0, len = filenames.length; i < len; ++i) {
-        ((name: string) => {
-          pages.push(Page.createPage(name, i + 1, () => {
-            return unarchiver.unpack(name);
-          }));
-        }(filenames[i]));
-      }
-      var pageCollection = Pages.createCollection(pages);
-      return {
-        title: () => unarchiver.archiveName(),
-        close: () => { unarchiver.close(); },
-        pages: () => pageCollection,
-      };
-    });
-    var task = new Task(promise);
-    task.oncancel = () => {
-      innerTask.cancel();
-    };
-    return task;
+  createFromURL(url: string, options?: Book.Options): Promise<Book.Book> {
+    return this.unarchiverFactory.getUnarchiverFromURL(url, options)
+      .then((unarchiver: Unarchiver.Unarchiver) => {
+        var filenames = unarchiver.filenames();
+        var pages: Page.Page[] = [];
+        for (var i = 0, len = filenames.length; i < len; ++i) {
+          ((name: string) => {
+            pages.push(Page.createPage(name, i + 1, () => {
+              return unarchiver.unpack(name);
+            }));
+          }(filenames[i]));
+        }
+        var pageCollection = Pages.createCollection(pages);
+        return {
+          title: () => unarchiver.archiveName(),
+          close: () => { unarchiver.close(); },
+          pages: () => pageCollection,
+        };
+      });
   }
 }

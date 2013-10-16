@@ -1,4 +1,5 @@
 import $ = require('jquery');
+import Promise = require('promise');
 import Backbone = require('backbone');
 import Reader = require('models/reader');
 import Page = require('models/page');
@@ -7,7 +8,6 @@ import Book = require('models/book');
 import Screen = require('models/screen');
 import Screens = require('collections/screens');
 import Unarchiver = require('models/unarchiver');
-import Task = require('models/task');
 import Sort = require('models/sort');
 
 declare var sinon: any;
@@ -37,8 +37,7 @@ describe('Reader', function () {
   var screens: Screens.Screens;
   beforeEach(() => {
     bookFactory = {
-      createFromURL: (url: string)
-        => new Task($.Deferred<Book.Book>().resolve(book).promise()),
+      createFromURL: (url: string) => Promise.fulfilled(book),
     };
     screens = {
       currentScreen: () => <any>undefined,
@@ -65,11 +64,11 @@ describe('Reader', function () {
     assert.strictEqual(Reader.Status.Closed, reader.status());
     var url = 'dummy url';
     var factoryMock = sinon.mock(bookFactory);
-    var deferred = $.Deferred<Book.Book>();
+    var resolver = Promise.pending();
     factoryMock.expects('createFromURL')
       .once()
       .withExactArgs(url, undefined)
-      .returns(deferred.promise());
+      .returns(resolver.promise);
     reader.openURL(url).then(() => {
       assert.strictEqual(Reader.Status.Opened, reader.status());
       assert.strictEqual(pages.length, reader.totalPageNum());
@@ -77,35 +76,39 @@ describe('Reader', function () {
       done();
     });
     assert.strictEqual(Reader.Status.Opening, reader.status());
-    deferred.resolve(book);
+    resolver.fulfill(book);
   });
   it('the status should become Error when failed to open a book', (done) => {
     assert.strictEqual(Reader.Status.Closed, reader.status());
     var url = 'dummy url';
     var factoryMock = sinon.mock(bookFactory);
-    var deferred = $.Deferred<Book.Book>();
+    var resolver = Promise.pending();
     factoryMock.expects('createFromURL')
       .once()
       .withExactArgs(url, undefined)
-      .returns(deferred.promise());
-    reader.openURL(url).fail(() => {
+      .returns(resolver.promise);
+    reader.openURL(url).catch((reason: any) => {
       assert.strictEqual(Reader.Status.Error, reader.status());
       factoryMock.verify();
       done();
     });
     assert.strictEqual(Reader.Status.Opening, reader.status());
-    deferred.reject();
+    resolver.reject('');
   });
   it('reject the promsie if open a new book while opening the previous book', (done) => {
     var url = 'AAAAA';
     var factoryMock = sinon.mock(bookFactory);
-    var deferred = $.Deferred<Book.Book>();
+    var resolver = Promise.pending();
+
     factoryMock.expects('createFromURL')
-      .once()
+      .twice()
       .withExactArgs(url, undefined)
-      .returns(new Task(deferred.promise()));
-    reader.openURL(url).fail(() => { factoryMock.verify(); done(); });
-    reader.openURL('new book url');
+      .returns(resolver.promise);
+    reader.openURL(url).catch((error: any) => {
+      factoryMock.verify();
+      done();
+     });
+    reader.openURL(url);
   });
 
   it('the status should become Closed when the method close is called', (done) => {

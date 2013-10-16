@@ -3,7 +3,8 @@ import Events = require('models/events');
 import Screen = require('models/screen');
 import Screens = require('collections/screens');
 import Book = require('models/book');
-import Task = require('models/task');
+import Promise = require('promise');
+import PromiseUtil = require('utils/promise');
 import Progress = require('models/progress');
 import Setting = require('models/setting');
 import Sort = require('models/sort');
@@ -17,8 +18,8 @@ module Reader {
 
   export interface Reader extends Events.Events {
     // open/close
-    openURL(url: string, options?: Options): JQueryPromise<Reader>;
-    openFile(file: File): JQueryPromise<Reader>;
+    openURL(url: string, options?: Options): Promise<Reader>;
+    openFile(file: File): Promise<Reader>;
     close(): void;
     // properties
     status(): Status;
@@ -56,7 +57,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   private _setting: Setting.Setting;
   // mutable members
   private _book: Book.Book;
-  private _task: Task<Reader.Reader>;
+  private _promise: Promise<Reader.Reader>;
 
   // ctor & initializer (TODO);
   constructor(bookFactory: Book.Factory,
@@ -68,7 +69,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     this._pageSorter = pageSorter;
     this._setting = setting;
     this._book = null;
-    this._task = null;
+    this._promise = null;
     super();
   }
 
@@ -104,7 +105,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   }
 
   // open/close;
-  openFile(file: File): Task<Reader.Reader> {
+  openFile(file: File): Promise<Reader.Reader> {
     var url: string = (<any>window).URL.createObjectURL(file);
     return this.openURL(url, {
       name: file.name,
@@ -112,43 +113,29 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     });
   }
 
-  openURL(url: string, options?: Reader.Options): Task<Reader.Reader> {
+  openURL(url: string, options?: Reader.Options): Promise<Reader.Reader> {
     this.close();
     this.setStatus(Reader.Status.Opening);
-    var deferred = $.Deferred<Reader.Reader>();
-    var task = this._task = new Task(deferred.promise());
 
-    var innerTask = this._bookFactory.createFromURL(url, options);
-    innerTask.progress((progress: Progress.Progress) => {
-      deferred.notify(progress);
-    }).then((book: Book.Book) => {
-      return this._pageSorter.sort(book, this._setting.sortSetting());
-    }).then((book: Book.Book) => {
-      if (deferred.state() === 'rejected') { return; }
-      this._book = book;
+    this._promise = this._bookFactory.createFromURL(url, options).then((book: Book.Book) => {
+      this._book = this._pageSorter.sort(book, this._setting.sortSetting());
       this.resetReadingInfo();
       this.setStatus(Reader.Status.Opened);
       this.goToPage(this.currentPageNum());
-      deferred.resolve(this);
-    }).fail(() => {
-      if (!task.canceled) {
-        this.setStatus(Reader.Status.Error);
-      } else {
-        this.setStatus(Reader.Status.Closed);
-      }
-      deferred.reject();
+      return this;
+    }).catch((reason: any) => {
+      if (reason.name === 'CancellationError') { throw reason; }
+      this.setStatus(Reader.Status.Error);
+      return Promise.rejected(reason);
     });
 
-    task.oncancel = () => {
-      innerTask.cancel();
-      deferred.reject();
-    };
-    return task;
+    return this._promise.uncancellable();
   }
+
   close(): void {
     this._book = null;
-    if (this._task !== null) {
-      this._task.cancel();
+    if (this._promise !== null) {
+      this._promise.cancel();
     }
     this.setStatus(Reader.Status.Closed);
   }

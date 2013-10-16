@@ -2,7 +2,8 @@ import Unarchiver = require('models/unarchiver');
 import PDFJS = require('pdfjs');
 import sprintf = require('sprintf');
 import ImageUtil = require('utils/image');
-import Task = require('models/task');
+import Promise = require('promise');
+import PromiseUtil = require('utils/promise');
 
 // TODO(seikichi): move to unarchiver.setting
 PDFJS.workerSrc = 'assets/app/pdfjs/js/pdf.worker.js';
@@ -15,17 +16,11 @@ export = PdfUnarchiver;
 class PdfUnarchiver implements Unarchiver.Unarchiver {
 
   static createFromURL(url: string, setting: Unarchiver.Setting, options: Unarchiver.Options)
-  : JQueryPromise<Unarchiver.Unarchiver> {
-    var deferred = $.Deferred<Unarchiver.Unarchiver>();
-    var task = new Task(deferred.promise());
-    PDFJS.getDocument({url: url}).then((doc: PDFJS.PDFDocumentProxy) => {
-      if (task.canceled) { doc.destroy(); return; }
-      deferred.resolve(new PdfUnarchiver(doc, setting));
-    }, () => {
-      deferred.reject();
-    });
-    task.oncancel = () => { deferred.reject(); }
-    return task;
+  : Promise<Unarchiver.Unarchiver> {
+    return Promise.cast<PDFJS.PDFDocumentProxy>(PDFJS.getDocument({url: url}))
+      .then((doc: PDFJS.PDFDocumentProxy) => {
+        return new PdfUnarchiver(doc, setting);
+      });
   }
 
   private _document: PDFJS.PDFDocumentProxy;

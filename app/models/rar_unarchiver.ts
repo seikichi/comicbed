@@ -1,14 +1,16 @@
+import Promise = require('promise');
+import PromiseUtil = require('utils/promise');
 import Unarchiver = require('models/unarchiver');
 import Unrar = require('unrar');
 import ImageUtil = require('utils/image');
-import Task = require('models/task');
+
 
 export = RarUnarchiver;
 
 class RarUnarchiver implements Unarchiver.Unarchiver {
 
   static createFromURL(url: string, setting: Unarchiver.Setting, options: Unarchiver.Options)
-  : Task<Unarchiver.Unarchiver> {
+  : Promise<Unarchiver.Unarchiver> {
     var name = '';
     if ('name' in options) {
       name = options.name;
@@ -16,28 +18,9 @@ class RarUnarchiver implements Unarchiver.Unarchiver {
       name = url.split(/(\#|\?)/).shift().split('/').pop();
     }
 
-    var deferred = $.Deferred<Unarchiver.Unarchiver>();
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url);
-    xhr.responseType = 'arraybuffer';
-    xhr.onload = (e: Event) => {
-      var buffer: ArrayBuffer = xhr.response;
-      deferred.resolve(new RarUnarchiver(name, new Unrar(buffer), setting));
-      xhr = null;
-    };
-    xhr.onprogress = (ev: ProgressEvent) => {
-      if (ev.lengthComputable) {
-        var progress = Math.round((ev.loaded / ev.total) * 100);
-        deferred.notify({ message: 'downloading ...', progress: progress });
-      }
-    };
-    xhr.send();
-    var task = new Task(deferred.promise());
-    task.oncancel = () => {
-      deferred.reject();
-      if (xhr !== null) { xhr.abort(); }
-    };
-    return task;
+    return PromiseUtil.getArrayBufferByXHR(url).then((buffer: ArrayBuffer) => {
+      return new RarUnarchiver(name, new Unrar(buffer), setting);
+    });
   }
 
   private _filenames: string[];

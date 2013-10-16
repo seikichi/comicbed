@@ -19,12 +19,6 @@ import ScreenCollectionView = require('views/screens');
 
 import templates = require('templates');
 
-import Promise = require('bluebird');
-
-(<any>window).Promise = Promise;
-
-(<any>window).promiseUtil = PromiseUtil;
-
 enum KeyCode {
   Space = 32,
   Left = 37,
@@ -32,6 +26,8 @@ enum KeyCode {
   Right = 39,
   Down = 40,
 };
+
+(<any>window).promiseUtil = PromiseUtil;
 
 $(() => {
   // var URL = 'tmp/yuyushiki04.pdf';
@@ -103,7 +99,7 @@ $(() => {
       return;
     }
     var file = files[0];
-    reader.openFile(file).progress((progress: Progress.Progress) => {
+    reader.openFile(file).progressed((progress: Progress.Progress) => {
       console.log(progress);
     }).then(() => {
       console.log('opened!');

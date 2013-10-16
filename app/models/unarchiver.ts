@@ -1,6 +1,7 @@
 import $ = require('jquery');
+import Promise = require('promise');
+import PromiseUtil = require('utils/promise');
 import Events = require('events');
-import Task = require('models/task');
 import Progress = require('models/progress');
 
 // public
@@ -31,8 +32,8 @@ module Unarchiver {
 
   export interface Factory {
     getUnarchiverFromURL(url: string,
-                         options?: Options): Task<Unarchiver>;
-    getUnarchiverFromFile(file: File): Task<Unarchiver>;
+                         options?: Options): Promise<Unarchiver>;
+    getUnarchiverFromFile(file: File): Promise<Unarchiver>;
   }
 
   export function createFactory(setting: Setting): Factory {
@@ -43,10 +44,16 @@ module Unarchiver {
 // private
 enum FileType { Pdf, Zip, Rar, Other };
 
+interface UnarchiverModule {
+  createFromURL(url: string,
+                setting: Unarchiver.Setting,
+                options: Unarchiver.Options): Promise<Unarchiver.Unarchiver>;
+}
+
 class FactoryImpl implements Unarchiver.Factory {
   constructor(private _setting: Unarchiver.Setting) {}
 
-  getUnarchiverFromFile(file: File) : Task<Unarchiver.Unarchiver> {
+  getUnarchiverFromFile(file: File) : Promise<Unarchiver.Unarchiver> {
     var url: string = (<any>window).URL.createObjectURL(file);
     var options = {
       mimeType: file.type
@@ -55,7 +62,7 @@ class FactoryImpl implements Unarchiver.Factory {
   }
 
   getUnarchiverFromURL(url: string, options: Unarchiver.Options = {})
-  : Task<Unarchiver.Unarchiver> {
+  : Promise<Unarchiver.Unarchiver> {
     // detects archive filetype
     var fileType = FileType.Other;
     if ('mimeType' in options) {
@@ -95,9 +102,6 @@ class FactoryImpl implements Unarchiver.Factory {
     }
 
     // load specific unarchiver module dynamically
-    var deferred = $.Deferred<Unarchiver.Unarchiver>();
-    var task = new Task(deferred.promise());
-
     var moduleName = '';
     switch (fileType) {
     case FileType.Pdf:
@@ -110,33 +114,13 @@ class FactoryImpl implements Unarchiver.Factory {
       var moduleName = 'models/rar_unarchiver';
       break;
     default:
-      deferred.reject();
-      return task;
+      return Promise.rejected({ message: 'uknown filetype: ' + url});
       break;
     }
 
-    var innerTask: Task<Unarchiver.Unarchiver> = null;
-
-    require([moduleName], (factory: {
-      createFromURL: (url: string, setting: Unarchiver.Setting, options: Unarchiver.Options)
-        => Task<Unarchiver.Unarchiver>;
-    }) => {
-      if (task.canceled) { return; }
-      innerTask = factory.createFromURL(url, this._setting, options);
-      innerTask.progress((progress: Progress.Progress) => {
-        deferred.notify(progress);
-      }).then((unarchiver: Unarchiver.Unarchiver) => {
-        deferred.resolve(unarchiver);
-      }).fail(() => {
-        deferred.reject();
+    return PromiseUtil.require<UnarchiverModule>(moduleName)
+      .then((factory: UnarchiverModule) => {
+        return factory.createFromURL(url, this._setting, options);
       });
-    });
-
-    var task = new Task(deferred.promise());
-    task.oncancel = () => {
-      if (innerTask !== null) { innerTask.cancel(); }
-      deferred.reject();
-    };
-    return task;
   }
 }
