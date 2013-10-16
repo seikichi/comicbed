@@ -1,9 +1,7 @@
 import Promise = require('promise');
-import PromiseUtil = require('utils/promise');
 import Unarchiver = require('models/unarchiver');
 import Page = require('models/page');
 import Pages = require('collections/pages');
-import Progress = require('models/progress');
 
 export = Book;
 

@@ -7,7 +7,6 @@ import ImageUtil = require('utils/image');
 export = ZipUnarchiver;
 
 class ZipUnarchiver implements Unarchiver.Unarchiver {
-
   static createFromURL(url: string, setting: Unarchiver.Setting, options: Unarchiver.Options)
   : Promise<Unarchiver.Unarchiver> {
     var name = '';

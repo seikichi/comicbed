@@ -54,10 +54,9 @@ module PromiseUtil {
     xhr.send();
 
     var promise: Promise<ArrayBuffer> = resolver.promise
-      .catch(Promise.CancellationError, (error) => {
+      .catch(Promise.CancellationError, (error: any) => {
         xhr.abort();
-        throw error;
-        return <ArrayBuffer>undefined;  // for type checking
+        return Promise.rejected<ArrayBuffer>(error);
       });
 
     return promise;

@@ -21,6 +21,7 @@ module Sort {
   }
 }
 
+// private
 function dictionaryCompare(a: string, b: string): number {
   return a > b ? 1 : a < b ? -1 : 0;
 }
@@ -46,7 +47,6 @@ function naturalCompare(a: string, b: string): number {
   return 0;
 }
 
-// // private
 class PageSorterImpl implements Sort.PageSorter {
   sort(book: Book.Book, setting: Sort.Setting): Book.Book {
     var pages: Page.Page[] = [];

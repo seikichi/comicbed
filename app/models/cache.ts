@@ -19,7 +19,7 @@ module Cache {
   }
 }
 
-// screen
+// private
 class CacheScreenFactory implements Screen.Factory {
   private _cache: ScreenCache;
 
