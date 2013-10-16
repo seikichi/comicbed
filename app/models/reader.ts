@@ -124,8 +124,11 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
       this.goToPage(this.currentPageNum());
       return this;
     }).catch((reason: any) => {
-      if (reason.name === 'CancellationError') { throw reason; }
-      this.setStatus(Reader.Status.Error);
+      if (reason.name === 'CancellationError') {
+        this.setStatus(Reader.Status.Closed);
+      } else {
+        this.setStatus(Reader.Status.Error);
+      }
       return Promise.rejected(reason);
     });
 
