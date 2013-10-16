@@ -17,16 +17,27 @@ module Setting {
     setPageDirection(direction: Screen.PageDirection): void;
   }
 
-  export interface Setting {
-    screenSetting(): ScreenSetting;
-    unarchiverSetting(): Unarchiver.Setting;
-    scalerSetting(): Scaler.Setting;
-    cacheSetting(): Cache.Setting;
-    sortSetting(): Sort.Setting;
+  export interface UnarchiverSetting extends Unarchiver.Setting {
+    setPdfjsCanvasScale(scale: number): void;
+    setDetectsImageXObjectPageInPdf(value: boolean): void;
   }
 
-  export function createFromQueryString(queryString: string): Setting {
-    return new SettingImpl(queryString);
+  export interface SortSetting extends Sort.Setting {
+    setOrder(order: Sort.Order): void;
+    setReverse(value: boolean): void;
+  }
+
+  export interface Setting {
+    screenSetting(): ScreenSetting;
+    unarchiverSetting(): UnarchiverSetting;
+    sortSetting(): SortSetting;
+
+    scalerSetting(): Scaler.Setting;
+    cacheSetting(): Cache.Setting;
+  }
+
+  export function create(params: {[key: string]:string;}): Setting {
+    return new SettingImpl(params);
   }
 }
 
@@ -62,30 +73,82 @@ class UnarchiverSettingModel extends Backbone.Model implements Unarchiver.Settin
   pageFileExtensions(): string[] {
     return ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'tif', 'tiff'];
   }
-  pdfjsCanvasScale(): number { return 2; }
-  detectsImageXObjectPageInPdf(): boolean { return true; }
+  pdfjsCanvasScale(): number { return <number>this.get('pdfjsCanvasScale'); }
+  detectsImageXObjectPageInPdf(): boolean { return <boolean>this.get('detectsImageXObjectPageInPdf'); }
+
+  setPdfjsCanvasScale(scale: number) { this.set('pdfjsCanvasScale', scale); }
+  setDetectsImageXObjectPageInPdf(value: boolean) { this.set('detectsImageXObjectPageInPdf', value); }
 }
 
 
 class SortSettingModel extends Backbone.Model implements Sort.Setting {
-  order() { return Sort.Order.NameNatural; } 
-  reverse() { return false; }
+  defaults() {
+    return {
+      order: Sort.Order.NameNatural,
+      reverse: false,
+    };
+  }
+  order() { return <Sort.Order>this.get('order'); }
+  reverse() { return <boolean>this.get('reverse'); }
+
+  setOrder(order: Sort.Order) { this.set('order', order); }
+  setReverse(value: boolean) { this.set('reverse', value); }
 }
 
 
 class SettingImpl implements Setting.Setting {
   private _screenSetting: Setting.ScreenSetting;
-  private _unarchiverSetting: Unarchiver.Setting;
+  private _unarchiverSetting: UnarchiverSettingModel;
   private _scalerSetting: Scaler.Setting;
   private _cacheSetting: Cache.Setting;
-  private _sortSetting: Sort.Setting;
+  private _sortSetting: SortSettingModel;
 
-  constructor(queryString: string) {
+  constructor(urlParams: {[key: string]:string;}) {
     this._screenSetting = new ScreenSettingModel();
     this._scalerSetting = new ScalerSettingModel();
     this._unarchiverSetting = new UnarchiverSettingModel();
     this._cacheSetting = new CacheSettingModel();
     this._sortSetting = new SortSettingModel();
+
+    // sort
+    if ('sort.reverse' in urlParams
+        && urlParams['sort.reverse'] !== 'false') {
+      this._sortSetting.setReverse(true);
+    }
+    if ('sort.order' in urlParams) {
+      var order = Sort.Order[urlParams['sort.order']];
+      if (typeof order !== 'undefined') {
+        this._sortSetting.setOrder(order);
+      }
+    }
+    // unarchiver
+    if ('unarchiver.pdfjsCanvasScale' in urlParams) {
+      var scale = urlParams['unarchiver.pdfjsCanvasScale'] || 1;
+      this._unarchiverSetting.setPdfjsCanvasScale(scale);
+    }
+    if ('unarchiver.detectsImageXObjectPageInPdf' in urlParams
+        && urlParams['unarchiver.detectsImageXObjectPageInPdf'] !== 'false') {
+      this._unarchiverSetting.setDetectsImageXObjectPageInPdf(true);
+    }
+    // screen
+    if ('screen.detectsSpreadPage' in urlParams &&
+        urlParams['screen.detectsSpreadPage'] !== 'false') {
+      this._screenSetting.setDetectsSpreadPage(true);
+    }
+    if ('screen.viewMode' in urlParams) {
+      var mode = Screen.ViewMode[urlParams['screen.viewMode']];
+      if (typeof mode !== 'undefined') {
+        this._screenSetting.setViewMode(mode);
+      }
+    }
+    if ('screen.pageDirection' in urlParams) {
+      var direction = Screen.PageDirection[urlParams['screen.pageDirection']];
+      if (typeof direction !== 'undefined') {
+        this._screenSetting.setPageDirection(direction);
+      }
+    }
+    // cache (TODO)
+    // scaler (TODO)
   }
 
   screenSetting() { return this._screenSetting; }

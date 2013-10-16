@@ -20,7 +20,7 @@
     "jquery-ui": "*",
     "spin.js": "*",
     "iscroll": "*",
-    "bluebird": "https://raw.github.com/petkaantonov/bluebird/master/js/bluebird_debug.js",
+    "bluebird": "https://raw.github.com/petkaantonov/bluebird/master/js/bluebird.js",
     "chai": "*",
     "mocha": "*",
     "sinon": "http://sinonjs.org/releases/sinon-1.7.3.js"

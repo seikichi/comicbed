@@ -27,7 +27,7 @@ enum KeyCode {
   Down = 40,
 };
 
-(<any>window).promiseUtil = PromiseUtil;
+// (<any>window).promiseUtil = PromiseUtil;
 
 $(() => {
   // var URL = 'tmp/yuyushiki04.pdf';
@@ -38,7 +38,7 @@ $(() => {
   var $flowerpot = $('#flowerpot');
 
   var size = { width: $flowerpot.width(), height: $flowerpot.height() };
-  var setting = Setting.createFromQueryString('');
+  var setting = Setting.create({});
   setting.screenSetting().setViewMode(Screen.ViewMode.OnePage);
 
   var bookFactory = Book.createFactory(Unarchiver.createFactory(setting.unarchiverSetting()));

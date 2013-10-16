@@ -76,6 +76,13 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     this.listenTo(this._setting.screenSetting(), 'change', () => {
       this.update(this.currentPageNum(), this.readingDirection());
     });
+
+    // this.listenTo(this._setting.unarchiverSetting(), 'change', () => {
+    //   this.update(this.currentPageNum(), this.readingDirection());
+    // });
+    // this.listenTo(this._setting.sortSetting(), 'change', () => {
+    //   this.update(this.currentPageNum(), this.readingDirection());
+    // });
   }
 
   // properties
