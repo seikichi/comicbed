@@ -18,6 +18,7 @@ module Reader {
   export interface Reader extends Events.Events {
     // open/close
     openURL(url: string, options?: Options): JQueryPromise<Reader>;
+    openFile(file: File): JQueryPromise<Reader>;
     close(): void;
     // properties
     status(): Status;
@@ -103,6 +104,14 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   }
 
   // open/close;
+  openFile(file: File): Task<Reader.Reader> {
+    var url: string = (<any>window).URL.createObjectURL(file);
+    return this.openURL(url, {
+      name: file.name,
+      mimeType: file.type,
+    });
+  }
+
   openURL(url: string, options?: Reader.Options): Task<Reader.Reader> {
     this.close();
     this.setStatus(Reader.Status.Opening);

@@ -45,7 +45,29 @@ class ScreenCollectionView extends BaseView {
     this.listenTo(this._prevs, 'add remove reset sort', this.render);
     this.listenTo(this._nexts, 'add remove reset sort', this.render);
 
-    $(window).on('resize', () => { this.render(); });
+    $(window).on('resize', () => { this.onResize(); });
+  }
+
+  onResize(): void {
+    var width = this.$el.width();
+    var height = this.$el.height();
+    var length = this._childViews.length;
+    this.$('ul').width(width * length);
+    for (var i = 0; i < length; ++i) {
+      this._childViews[i].resize(width, height);
+    }
+    if (this._scroll !== null) {
+      this._scroll.refresh();
+      this.goCenterPage();
+    }
+  }
+
+  goCenterPage(): void {
+    var newCenterPageIndex = this._nexts.length;
+    if (this._setting.pageDirection() === Screen.PageDirection.L2R) {
+      newCenterPageIndex = this._prevs.length;
+    }
+    this._scroll.goToPage(newCenterPageIndex, 0, 0);
   }
 
   render() {
@@ -69,8 +91,7 @@ class ScreenCollectionView extends BaseView {
         tagName: 'li',
         screen: screens[i]
       });
-      view.$el.width(this.$el.width());
-      view.$el.height(this.$el.height());
+      view.resize(this.$el.width(), this.$el.height());
       this.$('ul').append(view.render().el)
       this._childViews.push(view);
     }
@@ -105,11 +126,11 @@ class ScreenCollectionView extends BaseView {
       snapThreshold: 0.1,
       snapSpeed: 100,
     });
-    this._scroll.goToPage(centerPageIndex, 0, 0);
+    this.goCenterPage();
 
     this._scroll.on('scrollStart', () => {
+      this.goCenterPage();
       this._scroll.zoom(1, 0, 0, undefined);
-      this._scroll.goToPage(centerPageIndex, 0, 0);
     });
 
     this._scroll.on('scrollEnd', () => {
@@ -127,12 +148,7 @@ class ScreenCollectionView extends BaseView {
         // go backward
         this._mover.goPrevScreen();
       }
-
-      var newCenterPageIndex = this._nexts.length;
-      if (this._setting.pageDirection() === Screen.PageDirection.L2R) {
-        newCenterPageIndex = this._prevs.length;
-      }
-      this._scroll.goToPage(newCenterPageIndex, 0, 0);
+      this.goCenterPage();
     });
   }
 

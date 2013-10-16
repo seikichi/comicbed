@@ -18,7 +18,6 @@ import ScreenCollectionView = require('views/screens');
 import templates = require('templates');
 
 import Promise = require('Promise');
-console.log(Promise);
 
 enum KeyCode {
   Space = 32,
@@ -63,7 +62,7 @@ $(() => {
     reader.resize($flowerpot.width(), $flowerpot.height());
   });
 
-  reader.openURL(URL);
+  // reader.openURL(URL);
 
   (<any>window).reader = reader;
   var screenSetting = setting.screenSetting();
@@ -98,11 +97,7 @@ $(() => {
       return;
     }
     var file = files[0];
-    var url: string = (<any>window).URL.createObjectURL(file);
-    reader.openURL(url, {
-      name: file.name,
-      mimeType: file.type,
-    }).progress((progress: Progress.Progress) => {
+    reader.openFile(file).progress((progress: Progress.Progress) => {
       console.log(progress);
     }).then(() => {
       console.log('opened!');
@@ -114,4 +109,29 @@ $(() => {
     event.stopPropagation();
     event.preventDefault();
   });
+
+  var videoElement: any = document.body;
+
+  function toggleFullScreen() {
+    var doc = <any>document;
+    if (!doc.mozFullScreen && !doc.webkitFullScreen) {
+      if (videoElement.mozRequestFullScreen) {
+        videoElement.mozRequestFullScreen();
+      } else {
+        videoElement.webkitRequestFullScreen((<any>Element).ALLOW_KEYBOARD_INPUT);
+      }
+    } else {
+      if (doc.mozCancelFullScreen) {
+        doc.mozCancelFullScreen();
+      } else {
+        doc.webkitCancelFullScreen();
+      }
+    }
+  }
+
+  document.addEventListener("keydown", function(e: any) {
+    if (e.keyCode == 13) {
+      toggleFullScreen();
+    }
+  }, false);
 });

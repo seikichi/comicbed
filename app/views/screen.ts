@@ -15,6 +15,12 @@ class ScreenView extends BaseView {
     this.listenTo(this._screen, 'change', this.render);
   }
 
+  resize(width: number, height: number): void {
+    this._screen.resize(width, height);
+    this.$el.width(width);
+    this.$el.height(height);
+  }
+
   render() {
     this.$el.empty();
     if (this._screen.status() === Screen.Status.Success) {
