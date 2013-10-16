@@ -1,6 +1,8 @@
 import $ = require('jquery');
 import IScroll = require('iscroll');
 
+import PromiseUtil = require('utils/promise');
+
 import Setting = require('models/setting');
 import Unarchiver = require('models/unarchiver');
 import Reader = require('models/reader');
@@ -17,7 +19,11 @@ import ScreenCollectionView = require('views/screens');
 
 import templates = require('templates');
 
-import Promise = require('Promise');
+import Promise = require('bluebird');
+
+(<any>window).Promise = Promise;
+
+(<any>window).promiseUtil = PromiseUtil;
 
 enum KeyCode {
   Space = 32,

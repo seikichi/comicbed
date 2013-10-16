@@ -121,7 +121,7 @@ interface PromiseInspection<T> {
 }
 
 declare module Promise {
-  class CancellationError {}
+  export class CancellationError {}
 }
 
 interface GenericPromise<T> {
@@ -135,7 +135,7 @@ interface GenericPromise<T> {
           onReject?: (reason: any) => U): GenericPromise<U>;
 }
 
-declare module "Promise" {
+declare module "bluebird" {
   export = Promise;
 }
 

@@ -11,7 +11,7 @@ require.config({
     jsziptools: '../assets/vendor/jsziptools/js/jsziptools.min',
     spin: '../assets/vendor/spin.js/js/spin',
     iscroll: '../assets/vendor/iscroll/js/iscroll-zoom-min',
-    Promise: '../assets/vendor/bluebird/js/promise',
+    bluebird: '../assets/vendor/bluebird/index',
 
     pdfjs: '../assets/app/pdfjs/js/pdf',
     unrar: '../assets/app/unrarlib/js/unrar.min',
