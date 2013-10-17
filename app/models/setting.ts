@@ -83,6 +83,12 @@ class UnarchiverSettingModel extends Backbone.Model implements Unarchiver.Settin
   pageFileExtensions(): string[] {
     return ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'tif', 'tiff'];
   }
+  defaults() {
+    return {
+      pdfjsCanvasScale: 2,
+      detectsImageXObjectPageInPdf: true,
+    };
+  }
   pdfjsCanvasScale(): number { return <number>this.get('pdfjsCanvasScale'); }
   detectsImageXObjectPageInPdf(): boolean { return <boolean>this.get('detectsImageXObjectPageInPdf'); }
 
