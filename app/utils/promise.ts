@@ -35,7 +35,9 @@ module PromiseUtil {
     xhr.responseType = 'arraybuffer';
 
     xhr.onload = (e: Event) => {
-      if (xhr.status !== 200) {
+      // checking xhr.status === 200 failed in Firefox
+      // when the url is created from URL.createObjectURL(file: File)
+      if (xhr.readyState !== 4 || !xhr.response) {
         resolver.reject({ status: xhr.status, statusText: xhr.statusText });
         return;
       }
