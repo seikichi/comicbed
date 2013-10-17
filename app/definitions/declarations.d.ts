@@ -77,12 +77,10 @@ declare module "templates" {
   var JST: {
     flowerpot: HTMLTemplate;
     content: HTMLTemplate;
-    input: HTMLTemplate;
     footer: HTMLTemplate;
     footercontent: HTMLTemplate;
     header: HTMLTemplate;
     headercontent: HTMLTemplate;
-
     screens: (data: {[key:string]: any;}) => string;
   };
   export = JST;
