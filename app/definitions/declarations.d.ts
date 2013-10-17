@@ -77,6 +77,7 @@ declare module "templates" {
   var JST: {
     flowerpot: HTMLTemplate;
     modal: HTMLTemplate;
+    progress: HTMLTemplate;
     content: HTMLTemplate;
     footer: HTMLTemplate;
     footercontent: HTMLTemplate;

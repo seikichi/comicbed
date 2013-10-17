@@ -60,7 +60,7 @@ class ModalView extends CompositeView {
       var text = buttonTexts[i];
       buttons.push({
         text: text,
-        click: () => { this.close(); this.trigger(text); }
+        click: () => { this.trigger(text); }
       });
     }
 
@@ -76,7 +76,9 @@ class ModalView extends CompositeView {
   }
 
   close() {
-    if (this._$dialog !== null) { this._$dialog.dialog('destroy'); }
+    if (this._$dialog !== null) {
+      this._$dialog.dialog('destroy');
+    }
     super.close();
   }
 }

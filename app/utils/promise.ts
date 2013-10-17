@@ -51,6 +51,7 @@ module PromiseUtil {
         resolver.reject({ status: xhr.status, statusText: xhr.statusText });
         return;
       }
+      resolver.progress({ message: 'downloading ...', progress: 100 });
       var buffer: ArrayBuffer = xhr.response;
       resolver.fulfill(buffer);
     };

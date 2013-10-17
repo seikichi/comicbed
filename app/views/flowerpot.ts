@@ -3,6 +3,8 @@ import Reader = require('models/reader');
 import Setting = require('models/setting');
 import CompositeView = require('views/composite');
 import ScreenCollectionView = require('views/screens');
+import ModalView = require('views/modal');
+import ProgressView = require('views/progress');
 
 import templates = require('templates');
 import strings = require('utils/strings');
@@ -15,6 +17,7 @@ class FlowerpotView extends CompositeView {
 
   private _reader: Reader.Reader;
   private _setting: Setting.Setting;
+  private _modal: ModalView;
 
   events: {[event:string]: any};
 
@@ -22,6 +25,7 @@ class FlowerpotView extends CompositeView {
               options: {[field:string]:string;}) {
     this._template = template;
     this._queryOptions = options;
+    this._modal = null;
 
     this.events = {
       'drop': 'onDrop',
@@ -38,7 +42,9 @@ class FlowerpotView extends CompositeView {
     }, this._setting);
 
     this.listenTo(this._reader, 'change:status', () => {
-      if (this._reader.status() === Reader.Status.Opened) {
+      // TODO(seikichi): fix those ugly code ...
+      var status = this._reader.status();
+      if (status === Reader.Status.Opened) {
         this.assign('#content', new ScreenCollectionView({
           el: this.$('#content'),
           screens: this._reader.screens(),
@@ -46,9 +52,28 @@ class FlowerpotView extends CompositeView {
           mover: this._reader,
           template: templates.screens,
         }));
+
+        this.dissociate('#modal');
         this.render();
       } else {
         this.dissociate('#content');
+
+        if (status === Reader.Status.Opening) {
+          this._modal = new ModalView({
+            title: 'Opening a new book',
+            el: this.$('#modal'),
+            template: templates.modal,
+            innerView: new ProgressView({reader: this._reader}),
+            buttonTexts: ['Cancel']
+          });
+          this.assign('#modal', this._modal);
+          this._modal.on('Cancel', () => {
+            console.log('cancel');
+            this._reader.close();
+          });
+        } else {
+          this.dissociate('#modal');
+        }
         this.render();
       }
     });

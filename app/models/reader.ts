@@ -20,6 +20,7 @@ module Reader {
     openURL(url: string, options?: Options): Promise<Reader>;
     openFile(file: File): Promise<Reader>;
     close(): void;
+    progress(): Progress.Progress;
     // properties
     status(): Status;
     currentPageNum(): number;
@@ -57,6 +58,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   // mutable members
   private _book: Book.Book;
   private _promise: Promise<Reader.Reader>;
+  private _progress: Progress.Progress;
 
   // ctor & initializer (TODO);
   constructor(bookFactory: Book.Factory,
@@ -69,6 +71,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     this._setting = setting;
     this._book = null;
     this._promise = null;
+    this._progress = Progress.create();
     super();
   }
 
@@ -110,6 +113,8 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     this.set('readingDirection', readingDirection);
   }
 
+  progress(): Progress.Progress { return this._progress; }
+
   // open/close;
   openFile(file: File): Promise<Reader.Reader> {
     var url: string = (<any>window).URL.createObjectURL(file);
@@ -122,13 +127,21 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   openURL(url: string, options?: Reader.Options): Promise<Reader.Reader> {
     this.close();
     this.setStatus(Reader.Status.Opening);
+    this._progress.update({
+      message: 'opening the book ...',
+      progress: 0,
+      done: false,
+    });
 
     this._promise = this._bookFactory.createFromURL(url, options).then((book: Book.Book) => {
+      this._progress.update({ progress: 100 });
       this._book = this._pageSorter.sort(book, this._setting.sortSetting());
       this.resetReadingInfo();
       this.setStatus(Reader.Status.Opened);
       this.goToPage(this.currentPageNum());
       return this;
+    }).progressed((progression: Progress.Progression) => {
+      this._progress.update(progression);
     }).catch((reason: any) => {
       if (reason.name === 'CancellationError') {
         this.setStatus(Reader.Status.Closed);
