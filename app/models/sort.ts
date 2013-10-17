@@ -30,11 +30,11 @@ function naturalCompare(a: string, b: string): number {
   var x: { num: number; str: string; }[] = [];
   var y: { num: number; str: string; }[] = [];
   a.replace(/(\d+)|(\D+)/g, ($0: string, num: any, str: any) => {
-    x.push({ num: num || 0, str: str || 0 });
+    x.push({ num: num || 0, str: str || '' });
     return '';
   });
   b.replace(/(\d+)|(\D+)/g, ($0: string, num: any, str: any) => {
-    y.push({ num: num || 0, str: str || 0 });
+    y.push({ num: num || 0, str: str || '' });
     return '';
   });
   while (x.length > 0 && y.length > 0) {
