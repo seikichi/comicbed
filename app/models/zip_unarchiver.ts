@@ -40,8 +40,11 @@ class ZipUnarchiver implements Unarchiver.Unarchiver {
   archiveName(): string { return this._name; }
   filenames(): string[] { return this._filenames; }
   unpack(name: string): Promise<Unarchiver.Content> {
-    return Promise.cast<Blob>(this._reader.getFileAsBlob(name))
+    return PromiseUtil.wait<void>(1)(null)
+      .then(() => Promise.cast<Blob>(this._reader.getFileAsBlob(name)))
+      .then(PromiseUtil.wait(1))
       .then(PromiseUtil.readFileAsArrayBuffer)
+      .then(PromiseUtil.wait(1))
       .then(ImageUtil.createImageElementFromArrayBuffer);
   }
   close(): void { this._reader = null; }

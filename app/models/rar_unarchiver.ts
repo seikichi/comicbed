@@ -39,8 +39,10 @@ class RarUnarchiver implements Unarchiver.Unarchiver {
   archiveName(): string { return this._name; }
   filenames(): string[] { return this._filenames; }
   unpack(name: string): Promise<Unarchiver.Content> {
-    var data = this._unrar.decompress(name);
-    return ImageUtil.createImageElementFromArrayBuffer(data);
+    return PromiseUtil.wait<void>(1)(null)
+      .then(() => this._unrar.decompress(name))
+      .then(PromiseUtil.wait<ArrayBuffer>(1))
+      .then(ImageUtil.createImageElementFromArrayBuffer);
   }
   close(): void { this._unrar.close(); }
 }

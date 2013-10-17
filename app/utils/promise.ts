@@ -3,6 +3,16 @@ import Promise = require('promise');
 export = PromiseUtil;
 
 module PromiseUtil {
+  export function wait<T>(second: number): (value: T) => Promise<T> {
+    return (value: T) => {
+      return new Promise<T>((resolve, reject) => {
+        setTimeout(() => {
+          resolve(value);
+        }, second);
+      });
+    };
+  }
+
   export function require<M>(moduleName: string): Promise<M> {
     return new Promise<M>((resolve, reject) => {
       (<any>requirejs)([moduleName], (m: M) => {

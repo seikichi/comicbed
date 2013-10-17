@@ -62,7 +62,7 @@ class FactoryImpl implements Unarchiver.Factory {
 
   getUnarchiverFromURL(url: string, options: Unarchiver.Options = {})
   : Promise<Unarchiver.Unarchiver> {
-    // detects archive filetype
+     // detects archive filetype
     var fileType = FileType.Other;
     if ('mimeType' in options) {
       switch (options.mimeType) {
