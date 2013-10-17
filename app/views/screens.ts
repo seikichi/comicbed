@@ -174,10 +174,18 @@ class ScreenCollectionView extends BaseView {
     this._childViews = [];
   }
 
+  goNext(): void {
+    this._mover.goNextScreen();
+  }
+
+  goPrev(): void {
+    this._mover.goPrevScreen();
+  }
+
   onLeftClick(): void {
     this.$el.focus();
     if (this._scroll !== null && !this._scroll.moved) {
-      this._mover.goNextScreen();
+      this.goNext();
     }
   }
 
@@ -185,7 +193,7 @@ class ScreenCollectionView extends BaseView {
     this.$el.focus();
     event.preventDefault();
     if (this._scroll !== null && !this._scroll.moved) {
-      this._mover.goPrevScreen();
+      this.goPrev();
     }
   }
 
@@ -200,16 +208,16 @@ class ScreenCollectionView extends BaseView {
       break;
     case KeyCode.Left:
       if (this._setting.pageDirection() === Screen.PageDirection.R2L) {
-        this._mover.goNextScreen();
+        this.goNext();
       } else {
-        this._mover.goPrevScreen();
+        this.goPrev();
       }
       break;
     case KeyCode.Right:
       if (this._setting.pageDirection() === Screen.PageDirection.L2R) {
-        this._mover.goNextScreen();
+        this.goNext();
       } else {
-        this._mover.goPrevScreen();
+        this.goPrev();
       }
       break;
     }
