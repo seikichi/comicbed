@@ -116,6 +116,7 @@ class ScreenCollectionView extends BaseView {
 
   close(): void {
     super.close();
+    $(window).off('resize');
     this.removeChildViews();
     if (this._scroll !== null) {
       this._scroll.destroy();
