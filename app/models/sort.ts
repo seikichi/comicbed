@@ -37,14 +37,13 @@ function naturalCompare(a: string, b: string): number {
     y.push({ num: num || 0, str: str || 0 });
     return '';
   });
-
-  while (x || y) {
+  while (x.length > 0 && y.length > 0) {
     var xi = x.shift();
     var yi = y.shift();
     var n = (xi.num - yi.num) || dictionaryCompare(xi.str, yi.str);
     if (n) { return n; }
   }
-  return 0;
+  return x.length - y.length;
 }
 
 class PageSorterImpl implements Sort.PageSorter {

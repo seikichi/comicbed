@@ -38,7 +38,6 @@ class FlowerpotView extends CompositeView {
     }, this._setting);
 
     this.listenTo(this._reader, 'change:status', () => {
-      console.log(Reader.Status[this._reader.status()]);
       if (this._reader.status() === Reader.Status.Opened) {
         this.assign('#content', new ScreenCollectionView({
           el: this.$('#content'),
