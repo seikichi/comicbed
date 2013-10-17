@@ -188,6 +188,7 @@ class CacheScreenModel extends Backbone.Model implements Screen.Screen {
       return Promise.fulfilled({});
     } else {
       this.updateInnerModel(this._factory.create(this._size));
+      this.trigger('change');
 
       this._previousUpdatePromise = this._innerScreen.update(pages, params)
         .then((result: Screen.UpdateResult) => {

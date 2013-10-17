@@ -1,13 +1,16 @@
 import BaseView = require('views/base');
 import Screen = require('models/screen');
+import Spinner = require('spin');
 
 export = ScreenView;
 
 class ScreenView extends BaseView {
   private _screen: Screen.Screen;
+  private _spinner: Spinner;
 
   constructor(options: ScreenView.Options) {
     this._screen = options.screen;
+    this._spinner = new Spinner();
     super(options);
   }
 
@@ -23,8 +26,19 @@ class ScreenView extends BaseView {
 
   render() {
     this.$el.empty();
-    if (this._screen.status() === Screen.Status.Success) {
+    switch (this._screen.status()) {
+    case Screen.Status.Success:
+    case Screen.Status.Interrupted:
+      if (this._spinner !== null) {
+        this._spinner.stop();
+      }
       this.$el.append(this._screen.content());
+      break;
+    case Screen.Status.Loading:
+      this._spinner.spin(this.$el.get(0));
+      break;
+    case Screen.Status.Error:
+      break;
     }
     return this;
   }
