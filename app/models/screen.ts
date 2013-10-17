@@ -14,7 +14,7 @@ module _Screen {
   export enum Status { Success, Error, Interrupted, Loading, }
   export enum ViewMode { OnePage = 1, TwoPage = 2, }
   export enum ReadingDirection { Forward = +1, Backward = -1 }
-  export enum PageDirection { L2R, R2L, }
+  export enum PageDirection { L2R = +1, R2L = -1, }
 
   export interface Setting extends Events.Events {
     detectsSpreadPage(): boolean;
@@ -105,7 +105,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
     this._size = { width: width, height: height };
     if (this.status() !== _Screen.Status.Success) { return; }
     this.updateContent(this._pageContents);
-    this.trigger('change:status');
+    this.trigger('change');
   }
 
   update(pages: Pages.Collection, params: _Screen.UpdateParams) : Promise<_Screen.UpdateResult> {
@@ -152,7 +152,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
       this.updateContent(newPageContents);
       this.setStatus(_Screen.Status.Success);
     }).catch((reason: any) => {
-      if (reason && 'name' in reason && reason.name === 'CancellationError') {
+      if (reason && reason && 'name' in reason && reason.name === 'CancellationError') {
         return Promise.rejected(reason);
       }
 

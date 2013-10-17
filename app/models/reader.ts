@@ -197,6 +197,8 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     this._screens.update(this._book.pages(), {
       currentPageNum: pageNum,
       readingDirection: direction,
+    }).catch(Promise.CancellationError, (error: any) => {
+      // pass
     });
     this.setCurrentPageNum(pageNum);
     this.setReadingDirection(direction);

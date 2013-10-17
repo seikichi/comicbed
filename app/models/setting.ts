@@ -15,6 +15,8 @@ module Setting {
     setDetectsSpreadPage(value: boolean): void;
     setViewMode(mode: Screen.ViewMode): void;
     setPageDirection(direction: Screen.PageDirection): void;
+
+    toggleViewMode(): void;
   }
 
   export interface UnarchiverSetting extends Unarchiver.Setting {
@@ -59,6 +61,14 @@ class ScreenSettingModel extends Backbone.Model implements Setting.ScreenSetting
   setDetectsSpreadPage(value: boolean) { this.set('detectsSpreadPage', value); }
   setViewMode(mode: Screen.ViewMode) { this.set('viewMode', mode); }
   setPageDirection(direction: Screen.PageDirection) { this.set('pageDirection', direction); }
+
+  toggleViewMode(): void {
+    if (this.viewMode() === Screen.ViewMode.OnePage) {
+      this.set('viewMode', Screen.ViewMode.TwoPage);
+    } else {
+      this.set('viewMode', Screen.ViewMode.OnePage);
+    }
+  }
 }
 
 class CacheSettingModel extends Backbone.Model implements Cache.Setting {
