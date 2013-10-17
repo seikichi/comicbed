@@ -40,7 +40,6 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
     this._names = [];
     this._nameToPageNum = {};
     this._canvas = document.createElement('canvas');
-    this._previousUnpackName = null;
     this._previousUnpackPromise = Promise.fulfilled(null);
 
     var numOfDigits = 1 + Math.floor(Math.log(this._document.numPages) / Math.log(10));
@@ -106,12 +105,6 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
   }
 
   unpack(name: string): Promise<Unarchiver.Content> {
-    // if the previous unpacking task exists, reject it
-    if (name === this._previousUnpackName) {
-      return this._previousUnpackPromise;
-    }
-
-    this._previousUnpackName = name;
     this._previousUnpackPromise.cancel();
 
     // reject if the page name is invalid

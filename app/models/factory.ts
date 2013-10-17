@@ -18,7 +18,7 @@ module Factory {
   export function createReader(size: Screen.Size, setting: Setting.Setting): Reader.Reader {
     var bookFactory = Book.createFactory(Unarchiver.createFactory(setting.unarchiverSetting()));
     var scaler = Scaler.create(setting.scalerSetting());
-    var screenFactory = Screen.createFactory(scaler, setting.screenSetting());
+    // var screenFactory = Screen.createFactory(scaler, setting.screenSetting());
     var screenFactory = Cache.createScreenFactory(
       Screen.createFactory(scaler, setting.screenSetting()),
       setting.screenSetting(),
