@@ -48,6 +48,11 @@ body {
     height: 100%;
 }
 
+/* for jquery mobile dialog */
+.no-close .ui-dialog-titlebar-close {
+    display: none;
+}
+
 /* /\* TODO(seikichi): fix me! *\/ */
 /* body > div:first-child { */
 /*     width: 100%; */

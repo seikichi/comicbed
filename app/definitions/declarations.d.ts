@@ -76,6 +76,7 @@ interface HTMLTemplate {
 declare module "templates" {
   var JST: {
     flowerpot: HTMLTemplate;
+    modal: HTMLTemplate;
     content: HTMLTemplate;
     footer: HTMLTemplate;
     footercontent: HTMLTemplate;
