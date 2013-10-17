@@ -69,15 +69,19 @@ declare module "storage" {
     export = LocalStorage;
 }
 
+interface HTMLTemplate {
+  (data: {[key:string]: any;}): string;
+}
+
 declare module "templates" {
   var JST: {
-    flowerpot: (data: {[key:string]: any;}) => string;
-    content: (data: {[key:string]: any;}) => string;
-    input: (data: {[key:string]: any;}) => string;
-    footer: (data: {[key:string]: any;}) => string;
-    footercontent: (data: {[key:string]: any;}) => string;
-    header: (data: {[key:string]: any;}) => string;
-    headercontent: (data: {[key:string]: any;}) => string;
+    flowerpot: HTMLTemplate;
+    content: HTMLTemplate;
+    input: HTMLTemplate;
+    footer: HTMLTemplate;
+    footercontent: HTMLTemplate;
+    header: HTMLTemplate;
+    headercontent: HTMLTemplate;
 
     screens: (data: {[key:string]: any;}) => string;
   };
