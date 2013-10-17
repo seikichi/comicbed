@@ -128,7 +128,7 @@ class ScreenCollectionView extends BaseView {
     if (this._scroll !== null) {
       this._scroll.destroy();
     }
-    this._scroll = new IScroll('#screen-scroller', {
+    this._scroll = new IScroll(this.$('#screen-scroller').get(0), {
       zoom: true,
       mouseWheel: true,
       wheelAction: 'zoom',

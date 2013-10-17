@@ -25,6 +25,14 @@ class CompositeView extends BaseView {
     this.subViews[selector] = view;
   }
 
+  dissociate(selector: string): void {
+    var view = this.subViews[selector];
+    if (view) {
+      view.close();
+    }
+    delete this.subViews[selector];
+  }
+
   close(): void {
     super.close();
     _.each(this.subViews, (view, selector) => {

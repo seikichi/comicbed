@@ -18,35 +18,41 @@ class FlowerpotView extends CompositeView {
 
   events: {[event:string]: any};
 
-  constructor($el: JQuery,
-              template: HTMLTemplate,
+  constructor(template: HTMLTemplate,
               options: {[field:string]:string;}) {
     this._template = template;
     this._queryOptions = options;
-    this._setting = Factory.createSetting(this._queryOptions);
-    this._reader = Factory.createReader({
-      width: $el.width(),
-      height: $el.height()
-    }, this._setting);
-
-    (<any>window).reader = this._reader;
 
     this.events = {
       'drop': 'onDrop',
       'dragover': 'onDragOver',
     };
-    this.el = $el;
     super({});
   }
 
   initialize(): void {
-    this.assign('#content', new ScreenCollectionView({
-      el: this.$('#content'),
-      screens: this._reader.screens(),
-      setting: this._setting.screenSetting(),
-      mover: this._reader,
-      template: templates.screens,
-    }));
+    this._setting = Factory.createSetting(this._queryOptions);
+    this._reader = Factory.createReader({
+      width: this.$el.width(),
+      height: this.$el.height()
+    }, this._setting);
+
+    this.listenTo(this._reader, 'change:status', () => {
+      console.log(Reader.Status[this._reader.status()]);
+      if (this._reader.status() === Reader.Status.Opened) {
+        this.assign('#content', new ScreenCollectionView({
+          el: this.$('#content'),
+          screens: this._reader.screens(),
+          setting: this._setting.screenSetting(),
+          mover: this._reader,
+          template: templates.screens,
+        }));
+        this.render();
+      } else {
+        this.dissociate('#content');
+        this.render();
+      }
+    });
 
     if ('url' in this._queryOptions) {
       // TODO(seikichi): is this safe?

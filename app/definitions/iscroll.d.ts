@@ -7,6 +7,7 @@ interface IScrollPage {
 
 declare class IScroll {
   constructor(el: string, options: IScrollOption);
+  constructor(el: HTMLElement, options: IScrollOption);
   destroy(): void;
   resetPosition(time: number): boolean;
   disable(): void;
