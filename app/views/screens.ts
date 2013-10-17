@@ -2,16 +2,29 @@ import IScroll = require('iscroll');
 
 import BaseView = require('views/base');
 import ScreenView = require('views/screen');
+import Setting = require('models/setting');
 import Screen = require('models/screen');
 import Screens = require('collections/screens');
 import Reader = require('models/reader');
+import fullscreen = require('utils/fullscreen');
 
 export = ScreenCollectionView;
+
+// TODO (seikichi): move keybord event handler to another class
+// this ScreenCollectionView class has too many work ...
+enum KeyCode {
+  Enter = 13,
+  Space = 32,
+  Left = 37,
+  Up = 38,
+  Right = 39,
+  Down = 40,
+};
 
 class ScreenCollectionView extends BaseView {
   events: {[event:string]:string;};
 
-  private _setting: Screen.Setting;
+  private _setting: Setting.ScreenSetting;
   private _screens: Screens.Screens;
   private _childViews: ScreenView[];
 
@@ -37,6 +50,7 @@ class ScreenCollectionView extends BaseView {
     this.events = {
       'click': 'onLeftClick',
       'contextmenu': 'onRightClick',
+      'keydown': 'onKeyDown',
     };
     super(options);
   }
@@ -160,22 +174,50 @@ class ScreenCollectionView extends BaseView {
   }
 
   onLeftClick(): void {
+    this.$el.focus();
     if (this._scroll !== null && !this._scroll.moved) {
       this._mover.goNextScreen();
     }
   }
 
   onRightClick(event: Event): void {
+    this.$el.focus();
     event.preventDefault();
     if (this._scroll !== null && !this._scroll.moved) {
       this._mover.goPrevScreen();
+    }
+  }
+
+  onKeyDown(jqEvent: any) {
+    this.$el.focus();
+    switch (jqEvent.keyCode) {
+    case KeyCode.Enter:
+      fullscreen.toggle(document.body);
+      break;
+    case KeyCode.Space:
+      this._setting.toggleViewMode();
+      break;
+    case KeyCode.Left:
+      if (this._setting.pageDirection() === Screen.PageDirection.R2L) {
+        this._mover.goNextScreen();
+      } else {
+        this._mover.goPrevScreen();
+      }
+      break;
+    case KeyCode.Right:
+      if (this._setting.pageDirection() === Screen.PageDirection.L2R) {
+        this._mover.goNextScreen();
+      } else {
+        this._mover.goPrevScreen();
+      }
+      break;
     }
   }
 }
 
 module ScreenCollectionView {
   export interface Options extends Backbone.ViewOptions {
-    setting: Screen.Setting;
+    setting: Setting.ScreenSetting;
     screens: Screens.Screens;
     mover: Reader.ScreenMover;
     template: (data: {[key:string]: any;}) => string;
