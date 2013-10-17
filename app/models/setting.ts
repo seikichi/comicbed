@@ -29,13 +29,18 @@ module Setting {
     setReverse(value: boolean): void;
   }
 
+  export interface CacheSetting extends Cache.Setting {
+    setCacheScreenNum(value: number): void;
+    setCachePageNum(value: number): void;
+  }
+
   export interface Setting {
     screenSetting(): ScreenSetting;
     unarchiverSetting(): UnarchiverSetting;
     sortSetting(): SortSetting;
+    cacheSetting(): CacheSetting;
 
     scalerSetting(): Scaler.Setting;
-    cacheSetting(): Cache.Setting;
   }
 
   export function create(params: {[key: string]:string;}): Setting {
@@ -71,8 +76,18 @@ class ScreenSettingModel extends Backbone.Model implements Setting.ScreenSetting
   }
 }
 
-class CacheSettingModel extends Backbone.Model implements Cache.Setting {
-  cacheScreenNum() { return 7; }
+class CacheSettingModel extends Backbone.Model implements Setting.CacheSetting {
+  defaults() {
+    return {
+      cacheScreenNum: 7,
+      cachePageNum: 20,
+    };
+  }
+  cacheScreenNum() { return <number>this.get('cacheScreenNum'); }
+  cachePageNum() { return <number>this.get('cachePageNum'); }
+
+  setCacheScreenNum(value: number): void { this.set('cacheScreenNum', value)}
+  setCachePageNum(value: number): void { this.set('cachePageNum', value)}
 }
 
 class ScalerSettingModel extends Backbone.Model implements Scaler.Setting {
@@ -115,9 +130,9 @@ class SortSettingModel extends Backbone.Model implements Sort.Setting {
 class SettingImpl implements Setting.Setting {
   private _screenSetting: Setting.ScreenSetting;
   private _unarchiverSetting: UnarchiverSettingModel;
-  private _scalerSetting: Scaler.Setting;
-  private _cacheSetting: Cache.Setting;
+  private _cacheSetting: CacheSettingModel;
   private _sortSetting: SortSettingModel;
+  private _scalerSetting: Scaler.Setting;
 
   constructor(urlParams: {[key: string]:string;}) {
     this._screenSetting = new ScreenSettingModel();
@@ -163,7 +178,20 @@ class SettingImpl implements Setting.Setting {
         this._screenSetting.setPageDirection(direction);
       }
     }
-    // cache (TODO)
+    // cache
+    if ('cache.cachePageNum' in urlParams) {
+      var value = parseInt(urlParams['cache.cachePageNum'], 10);
+      if (value) {
+        this._cacheSetting.setCachePageNum(value);
+      }
+    }
+    if ('cache.cacheScreenNum' in urlParams) {
+      var value = parseInt(urlParams['cache.cacheScreenNum'], 10);
+      if (value) {
+        this._cacheSetting.setCacheScreenNum(value);
+      }
+    }
+
     // scaler (TODO)
   }
 

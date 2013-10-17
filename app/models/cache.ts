@@ -3,12 +3,14 @@ import Promise = require('promise');
 import Screen = require('models/screen');
 import Page = require('models/page');
 import Pages = require('collections/pages');
+import Unarchiver = require('models/unarchiver');
 
 export = Cache;
 
 module Cache {
   export interface Setting {
     cacheScreenNum(): number;
+    cachePageNum(): number;
   }
 
   export function createScreenFactory(factory: Screen.Factory,
@@ -17,9 +19,113 @@ module Cache {
   : Screen.Factory {
     return new CacheScreenFactory(factory, screenSetting, cacheSetting);
   }
+
+  export function createUnarchiverFactory(factory: Unarchiver.Factory,
+                                          unarchiverSetting: Unarchiver.Setting,
+                                          cacheSetting: Setting)
+  : Unarchiver.Factory {
+    return new CacheUnarchiverFactory(factory, unarchiverSetting, cacheSetting);
+  }
 }
 
 // private
+//// Cache
+class UnarchiverContentCache {
+  private _cache: {[name: string]: Unarchiver.Content};
+  private _updateNames: string[];
+
+  constructor(private _cacheSetting: Cache.Setting) {
+    this._cache = {};
+    this._updateNames = [];
+  }
+
+  find(name: string): Unarchiver.Content {
+    if (name in this._cache) {
+      return this._cache[name];
+    }
+    return null;
+  }
+
+  update(name: string, content: Unarchiver.Content): void {
+    var cache = this._cache;
+    var updateNames = this._updateNames;
+    cache[name] = content;
+
+    var index = updateNames.indexOf(name);
+    if (index !== -1) {
+      updateNames.splice(index, 1);
+    }
+
+    updateNames.unshift(name);
+    updateNames = updateNames.slice(0, this._cacheSetting.cachePageNum());
+    this._updateNames = updateNames;
+
+    var removeNames: string[] = [];
+    for (var p in cache) {
+      if (cache.hasOwnProperty(p) &&
+          updateNames.indexOf(p) === -1) {
+        removeNames.push(p);
+      }
+    }
+    for (var i = 0, len = removeNames.length; i < len; ++i) {
+      delete cache[removeNames[i]];
+    }
+  }
+
+  clean(): void {
+    this._cache = {};
+  }
+}
+
+class CacheUnarchiver implements Unarchiver.Unarchiver {
+  private _cache: UnarchiverContentCache;
+
+  constructor(private _inner: Unarchiver.Unarchiver,
+              private _unarchiverSetting: Unarchiver.Setting,
+              private _cacheSetting: Cache.Setting) {
+    this._cache = new UnarchiverContentCache(this._cacheSetting);
+    this._unarchiverSetting.on('change', this._cache.clean, this);
+  }
+
+  archiveName(): string { return this._inner.archiveName(); }
+  filenames(): string[] { return this._inner.filenames(); }
+  unpack(name: string): Promise<Unarchiver.Content> {
+    var cachedContent = this._cache.find(name);
+    if (cachedContent) {
+      this._cache.update(name, cachedContent);
+      return Promise.fulfilled(cachedContent);
+    }
+    return this._inner.unpack(name).then((content: Unarchiver.Content) => {
+      this._cache.update(name, content);
+      return content;
+    });
+  }
+  close(): void {
+    this._cache.clean();
+    this._unarchiverSetting.off('change', this._cache.clean, this);
+    this._inner.close();
+  }
+}
+
+class CacheUnarchiverFactory implements Unarchiver.Factory {
+  constructor(private _factory: Unarchiver.Factory,
+              private _unarchiverSetting: Unarchiver.Setting,
+              private _cacheSetting: Cache.Setting) {
+  }
+
+  getUnarchiverFromURL(url: string, options?: Unarchiver.Options) : Promise<Unarchiver.Unarchiver> {
+    return this._factory.getUnarchiverFromURL(url, options)
+      .then((unarchiver: Unarchiver.Unarchiver)
+            => new CacheUnarchiver(unarchiver, this._unarchiverSetting, this._cacheSetting));
+  }
+  getUnarchiverFromFile(file: File): Promise<Unarchiver.Unarchiver> {
+    return this._factory.getUnarchiverFromFile(file)
+      .then((unarchiver: Unarchiver.Unarchiver)
+            => new CacheUnarchiver(unarchiver, this._unarchiverSetting, this._cacheSetting));
+  }
+}
+
+//// Screen
 class CacheScreenFactory implements Screen.Factory {
   private _cache: ScreenCache;
 
