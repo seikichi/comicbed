@@ -1,108 +1,112 @@
-import _ = require('underscore');
-import BaseView = require('views/base');
+import Backbone = require('backbone');
+import BaseView = require('views/composite');
 import CompositeView = require('views/composite');
-// import Book = require('models/book');
-// import Setting = require('models/setting');
-// import JQueryUI = require('jqueryui');
-// import logger = require('utils/logger');
-// import templates = require('templates');
+import Reader = require('models/reader');
+import templates = require('templates');
+import Screen = require('models/screen');
 
 export = FooterView;
 
-class FooterView extends CompositeView {}
-//   private _book: Book.ModelInterface;
-//   private _template: (data: {[attr:string]:any;}) => string;
-//   events: {[event:string]:string;};
-//   private _mouseover: boolean;
+class FooterView extends CompositeView {
+  private _reader: Reader.Reader;
+  private _template: HTMLTemplate;
+  private _setting: Screen.Setting;
+
+  private _options: FooterView.Options;
+  events: {[event:string]:string;};
+
+  constructor(options: FooterView.Options) {
+    this._options = options;
+    this._reader = options.reader;
+    this._template = options.template;
+    this._setting = options.setting;
+    super(options);
+  }
+
+  show() {
+    this.$('#footer-content-wrapper').slideDown();
+  }
+  hide() {
+    this.$('#footer-content-wrapper').slideUp();
+  }
+
+  initialize() {
+    this.assign('#footer-content', new FooterContentView({
+      reader: this._reader,
+      template: templates.footercontent,
+      setting: this._setting,
+    }));
+  }
+
+  presenter() {
+    return this._template({});
+  }
+}
+
+module FooterView {
+  export interface Options extends Backbone.ViewOptions {
+    reader: Reader.Reader;
+    template: HTMLTemplate;
+    setting: Screen.Setting;
+  }
+}
+
+class FooterContentView extends BaseView {
+  private _reader: Reader.Reader;
+  private _template: HTMLTemplate;
+  private _setting: Screen.Setting;
+  private _$slider: JQuery;
 
 
-//   constructor(book: Book.ModelInterface,
-//               template: (data: {[attr:string]:any;}) => string) {
-//     this._book = book;
-//     this._template = template;
-//     this.events = {
-//       'mouseenter #footer-active-area': 'show',
-//       'mouseleave #footer-active-area': 'hide',
-//     };
-//     this._mouseover = false;
-//     super();
-//   }
+  private _options: FooterView.Options;
+  events: {[event:string]:string;};
 
-//   initialize() {
-//     this.assign('#footer-content', new FooterContentView(this._book, templates.footercontent));
-//   }
+  constructor(options: FooterView.Options) {
+    this._options = options;
+    this._reader = options.reader;
+    this._template = options.template;
+    this._setting = options.setting;
+    super(options);
+  }
 
-//   show() {
-//     this._mouseover = true;
-//     logger.info('mouse enters the footer are: footer show');
-//     this.$('#footer-content-area').slideDown();
-//   }
-//   hide() {
-//     this._mouseover = false;
-//     logger.info('mouse leaves the footer are: footer hide');
-//     // this.$('#footer-content-area').slideUp();
-//     setTimeout(() => { if (!this._mouseover) { this.$('#footer-content-area').slideUp(); } }, 1000);
-//   }
+  initialize() {
+    this.listenTo(this._reader, 'change:currentPageNum', this.render);
+  }
 
-//   presenter() {
-//     return this._template({});
-//   }
+  presenter() {
+    return this._template({
+      currentPageNum: this._reader.currentPageNum() + 1,
+      totalPageNum: this._reader.totalPageNum(),
+    });
+  }
 
-//   render() {
-//     super.render();
-//     setTimeout(() => { if (!this._mouseover) { this.hide(); } }, 2000);
-//     return this;
-//   }
-// }
+  render() {
+    super.render();
+    this.createSlider();
+    return this;
+  }
 
-// class FooterContentView extends BaseView {
-//   private _book: Book.ModelInterface;
-//   private _template: (data: {[attr:string]:any;}) => string;
-//   private _$slider: JQuery;
+  private createSlider() {
+    var value = this._reader.currentPageNum() + 1;
+    if (this._setting.pageDirection() === Screen.PageDirection.R2L) {
+      value = this._reader.totalPageNum() - value + 1;
+    }
+    this._$slider = this.$('.slider');
+    this._$slider.slider({
+      min: 1,
+      max: this._reader.totalPageNum(),
+      step: 1,
+      value: value,
+      change: (event: any, ui: any) => {
+        this.onSliderChange(ui.value);
+      }
+    });
+  }
 
-//   constructor(book: Book.ModelInterface,
-//               template: (data: {[attr:string]:any;}) => string) {
-//     this._book = book;
-//     this._template = template;
-//     super();
-//   }
-
-//   initialize() {
-//     this.listenTo(this._book, 'change', this.render);
-//   }
-
-//   presenter() {
-//     return this._template(this._book.toJSON());
-//   }
-
-//   render() {
-//     super.render();
-//     this.createSlider();
-//     return this;
-//   }
-
-//   private createSlider() {
-//     var value = this._book.currentPageNum();
-//     if (this._book.setting().pageDirection() === Setting.PageDirection.R2L) {
-//       value = this._book.totalPageNum() - value + 1;
-//     }
-//     this._$slider = this.$('.slider');
-//     this._$slider.slider({
-//       min: 1,
-//       max: this._book.totalPageNum(),
-//       step: 1,
-//       value: value,
-//       change: (event: any, ui: any) => {
-//         this.onSliderChange(ui.value);
-//       }
-//     });
-//   }
-
-//   private onSliderChange(value: number) {
-//     if (this._book.setting().pageDirection() === Setting.PageDirection.R2L) {
-//       value = this._book.totalPageNum() - value + 1;
-//     }
-//     logger.info('move to page: ' + value);
-//     this._book.goTo(value);
-//   }
-// }
+  private onSliderChange(value: number) {
+    if (this._setting.pageDirection() === Screen.PageDirection.R2L) {
+      value = this._reader.totalPageNum() - value + 1;
+    }
+    this._reader.goToPage(value - 1);
+  }
+}

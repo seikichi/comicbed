@@ -24,10 +24,10 @@ class HeaderView extends CompositeView {
   }
 
   show() {
-    this.$('#header-content').slideDown();
+    this.$('#header-content-wrapper').slideDown();
   }
   hide() {
-    this.$('#header-content').slideUp();
+    this.$('#header-content-wrapper').slideUp();
   }
 
   initialize() {

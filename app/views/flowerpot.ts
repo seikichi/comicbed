@@ -6,6 +6,7 @@ import ScreenCollectionView = require('views/screens');
 import ModalView = require('views/modal');
 import ProgressView = require('views/progress');
 import HeaderView = require('views/header');
+import FooterView = require('views/footer');
 
 import templates = require('templates');
 import strings = require('utils/strings');
@@ -20,8 +21,7 @@ class FlowerpotView extends CompositeView {
   private _setting: Setting.Setting;
   private _modal: ModalView;
   private _header: HeaderView;
-
-  private _mouseOnMenu: boolean;
+  private _footer: FooterView;
 
   events: {[event:string]: any};
 
@@ -30,13 +30,12 @@ class FlowerpotView extends CompositeView {
     this._template = template;
     this._queryOptions = options;
     this._modal = null;
-    this._mouseOnMenu = false;
 
     this.events = {
       'drop': 'onDrop',
       'dragover': 'onDragOver',
-      'mouseenter #header': 'onEnterMenu',
-      'mouseleave #header': 'onLeaveMenu',
+      'mouseenter #content': 'onLeaveMenu',
+      'mouseleave #content': 'onEnterMenu',
     };
     super({});
   }
@@ -53,6 +52,13 @@ class FlowerpotView extends CompositeView {
       reader: this._reader,
     });
     this.assign('#header', this._header);
+
+    this._footer = new FooterView({
+      template: templates.footer,
+      reader: this._reader,
+      setting: this._setting.screenSetting(),
+    });
+    this.assign('#footer', this._footer);
 
     // Note: for debug
     (<any>window).reader = this._reader;
@@ -108,24 +114,21 @@ class FlowerpotView extends CompositeView {
   }
 
   onEnterMenu() {
-    this._mouseOnMenu = true;
     this.showMenu();
-    setTimeout(() => {
-      if (!this._mouseOnMenu) { this.hideMenu(); }
-    }, 5000);
   }
 
   onLeaveMenu() {
-    this._mouseOnMenu = false;
     this.hideMenu();
   }
 
   showMenu(): void {
     this._header.show();
+    this._footer.show();
   }
 
   hideMenu(): void {
     this._header.hide();
+    this._footer.hide();
   }
 
   presenter(): string {
