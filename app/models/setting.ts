@@ -7,6 +7,7 @@ import Page = require('models/page');
 import Screen = require('models/screen');
 import Scaler = require('models/scaler');
 import Unarchiver = require('models/unarchiver');
+import Prefetch = require('models/prefetch');
 
 export = Setting;
 
@@ -41,6 +42,7 @@ module Setting {
     cacheSetting(): CacheSetting;
 
     scalerSetting(): Scaler.Setting;
+    prefetchSetting(): Prefetch.Setting;
   }
 
   export function create(params: {[key: string]:string;}): Setting {
@@ -80,7 +82,7 @@ class CacheSettingModel extends Backbone.Model implements Setting.CacheSetting {
   defaults() {
     return {
       cacheScreenNum: 7,
-      cachePageNum: 20,
+      cachePageNum: 25,
     };
   }
   cacheScreenNum() { return <number>this.get('cacheScreenNum'); }
@@ -88,6 +90,10 @@ class CacheSettingModel extends Backbone.Model implements Setting.CacheSetting {
 
   setCacheScreenNum(value: number): void { this.set('cacheScreenNum', value)}
   setCachePageNum(value: number): void { this.set('cachePageNum', value)}
+}
+
+class PrefetchSettingModel extends Backbone.Model implements Prefetch.Setting {
+  pagePrefetchNum() { return 10; }
 }
 
 class ScalerSettingModel extends Backbone.Model implements Scaler.Setting {
@@ -133,6 +139,7 @@ class SettingImpl implements Setting.Setting {
   private _cacheSetting: CacheSettingModel;
   private _sortSetting: SortSettingModel;
   private _scalerSetting: Scaler.Setting;
+  private _prefetchSetting: Prefetch.Setting;
 
   constructor(urlParams: {[key: string]:string;}) {
     this._screenSetting = new ScreenSettingModel();
@@ -140,6 +147,7 @@ class SettingImpl implements Setting.Setting {
     this._unarchiverSetting = new UnarchiverSettingModel();
     this._cacheSetting = new CacheSettingModel();
     this._sortSetting = new SortSettingModel();
+    this._prefetchSetting = new PrefetchSettingModel();
 
     // sort
     if ('sort.reverse' in urlParams
@@ -200,4 +208,5 @@ class SettingImpl implements Setting.Setting {
   scalerSetting() { return this._scalerSetting; }
   cacheSetting() { return this._cacheSetting; }
   sortSetting() { return this._sortSetting; }
+  prefetchSetting() { return this._prefetchSetting; }
 }

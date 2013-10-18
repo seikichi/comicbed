@@ -28,7 +28,8 @@ module Factory {
       setting.screenSetting(),
       setting.cacheSetting());
     var screens = Prefetch.createPagePrefetchScreens(
-      Screens.create(size, screenFactory));
+      Screens.create(size, screenFactory),
+      setting.prefetchSetting());
     var pageSorter = Sort.createPageSorter();
 
     var reader = Reader.create(bookFactory, screens, pageSorter, setting);
