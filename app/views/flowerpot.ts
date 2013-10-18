@@ -5,6 +5,7 @@ import CompositeView = require('views/composite');
 import ScreenCollectionView = require('views/screens');
 import ModalView = require('views/modal');
 import ProgressView = require('views/progress');
+import HeaderView = require('views/header');
 
 import templates = require('templates');
 import strings = require('utils/strings');
@@ -18,6 +19,9 @@ class FlowerpotView extends CompositeView {
   private _reader: Reader.Reader;
   private _setting: Setting.Setting;
   private _modal: ModalView;
+  private _header: HeaderView;
+
+  private _mouseOnMenu: boolean;
 
   events: {[event:string]: any};
 
@@ -26,10 +30,13 @@ class FlowerpotView extends CompositeView {
     this._template = template;
     this._queryOptions = options;
     this._modal = null;
+    this._mouseOnMenu = false;
 
     this.events = {
       'drop': 'onDrop',
       'dragover': 'onDragOver',
+      'mouseenter #header': 'onEnterMenu',
+      'mouseleave #header': 'onLeaveMenu',
     };
     super({});
   }
@@ -40,6 +47,15 @@ class FlowerpotView extends CompositeView {
       width: this.$el.width(),
       height: this.$el.height()
     }, this._setting);
+
+    this._header = new HeaderView({
+      template: templates.header,
+      reader: this._reader,
+    });
+    this.assign('#header', this._header);
+
+    // Note: for debug
+    (<any>window).reader = this._reader;
 
     this.listenTo(this._reader, 'change:status', () => {
       // TODO(seikichi): fix those ugly code ...
@@ -89,6 +105,27 @@ class FlowerpotView extends CompositeView {
 
       this._reader.openURL(url);
     }
+  }
+
+  onEnterMenu() {
+    this._mouseOnMenu = true;
+    this.showMenu();
+    setTimeout(() => {
+      if (!this._mouseOnMenu) { this.hideMenu(); }
+    }, 5000);
+  }
+
+  onLeaveMenu() {
+    this._mouseOnMenu = false;
+    this.hideMenu();
+  }
+
+  showMenu(): void {
+    this._header.show();
+  }
+
+  hideMenu(): void {
+    this._header.hide();
   }
 
   presenter(): string {

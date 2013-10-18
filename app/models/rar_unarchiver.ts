@@ -17,7 +17,7 @@ class RarUnarchiver implements Unarchiver.Unarchiver {
       name = url.split(/(\#|\?)/).shift().split('/').pop();
     }
 
-    return PromiseUtil.getArrayBufferByXHR(url).then((buffer: ArrayBuffer) => {
+    return PromiseUtil.getArrayBufferByXHR(url, options.httpHeaders).then((buffer: ArrayBuffer) => {
       return new RarUnarchiver(name, new Unrar(buffer), setting);
     });
   }

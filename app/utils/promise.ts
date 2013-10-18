@@ -23,7 +23,7 @@ module PromiseUtil {
     });
   }
 
-  export function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
+  export function readFileAsArrayBuffer(file: File) : Promise<ArrayBuffer> {
     return new Promise<ArrayBuffer>((resolve, reject) => {
       var fileReader = new FileReader();
       fileReader.onload = () => {
@@ -37,12 +37,17 @@ module PromiseUtil {
     });
   }
 
-  export function getArrayBufferByXHR(url: string): Promise<ArrayBuffer> {
+  export function getArrayBufferByXHR(url: string, httpHeaders: {[key:string]:string} = {})
+  : Promise<ArrayBuffer> {
     var resolver = Promise.pending<ArrayBuffer>();
 
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url);
     xhr.responseType = 'arraybuffer';
+
+    for (var key in httpHeaders) if (httpHeaders.hasOwnProperty(key)) {
+      xhr.setRequestHeader(key, httpHeaders[key]);
+    }
 
     xhr.onload = (e: Event) => {
       // checking xhr.status === 200 failed in Firefox

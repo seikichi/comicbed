@@ -16,7 +16,7 @@ class ZipUnarchiver implements Unarchiver.Unarchiver {
       name = url.split(/(\#|\?)/).shift().split('/').pop();
     }
 
-    return PromiseUtil.getArrayBufferByXHR(url).then((buffer: ArrayBuffer) => {
+    return PromiseUtil.getArrayBufferByXHR(url, options.httpHeaders).then((buffer: ArrayBuffer) => {
       return Promise.cast<jz.zip.ZipArchiveReader>(jz.zip.unpack({buffer: buffer}))
     }).then((reader: jz.zip.ZipArchiveReader) => {
       return new ZipUnarchiver(name, reader, setting);

@@ -16,10 +16,12 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
 
   static createFromURL(url: string, setting: Unarchiver.Setting, options: Unarchiver.Options)
   : Promise<Unarchiver.Unarchiver> {
-    return Promise.cast<PDFJS.PDFDocumentProxy>(PDFJS.getDocument({url: url}))
-      .then((doc: PDFJS.PDFDocumentProxy) => {
-        return new PdfUnarchiver(doc, setting);
-      });
+    return Promise.cast<PDFJS.PDFDocumentProxy>(PDFJS.getDocument({
+      url: url,
+      httpHeaders: options.httpHeaders,
+    })).then((doc: PDFJS.PDFDocumentProxy) => {
+      return new PdfUnarchiver(doc, setting);
+    });
   }
 
   private _document: PDFJS.PDFDocumentProxy;

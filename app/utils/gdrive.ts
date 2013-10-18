@@ -28,7 +28,7 @@ module GoogleDriveStorage {
   }
 
   export function createPicker(): Picker.FilePicker {
-    return <any>{
+    return {
       pick: () => {
         var gapi: any = null;
         return PromiseUtil.require('gapi').then((_gapi: typeof gapi) => {
@@ -63,6 +63,26 @@ module GoogleDriveStorage {
               })
               .build();
             picker.setVisible(true);
+          });
+        }).then((response: any) => {
+          return new Promise((resolve, reject) => {
+            var file = response.docs[0];
+            var file_id = file.id;
+            var request = (<any>gapi.client).drive.files.get({
+              fileId: file_id
+            });
+            request.execute((resp: any) => {
+              var downloadUrl = resp.downloadUrl;
+              var httpHeaders = {
+                'Authorization': 'Bearer ' + gapi.auth.getToken().access_token
+              };
+              console.log(downloadUrl);
+              resolve({
+                url: downloadUrl,
+                httpHeaders: httpHeaders,
+                mimeType: file.mimeType
+              })
+            });
           });
         });
       }

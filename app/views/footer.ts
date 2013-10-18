@@ -1,15 +1,15 @@
 import _ = require('underscore');
 import BaseView = require('views/base');
 import CompositeView = require('views/composite');
-import Book = require('models/book');
-import Setting = require('models/setting');
-import JQueryUI = require('jqueryui');
-import logger = require('utils/logger');
-import templates = require('templates');
+// import Book = require('models/book');
+// import Setting = require('models/setting');
+// import JQueryUI = require('jqueryui');
+// import logger = require('utils/logger');
+// import templates = require('templates');
 
 export = FooterView;
 
-class FooterView extends CompositeView {
+class FooterView extends CompositeView {}
 //   private _book: Book.ModelInterface;
 //   private _template: (data: {[attr:string]:any;}) => string;
 //   events: {[event:string]:string;};
@@ -105,4 +105,4 @@ class FooterView extends CompositeView {
 //     logger.info('move to page: ' + value);
 //     this._book.goTo(value);
 //   }
-}
+// }
