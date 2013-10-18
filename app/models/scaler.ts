@@ -17,7 +17,7 @@ module Scaler {
   }
 
   export interface Scaler {
-    scale(pages: Page.Content[], params: ScaleParams): Content;
+    scale(pages: Page.Content[], params: ScaleParams): void;
   }
 
   export function create(setting: Setting): Scaler {
@@ -33,18 +33,16 @@ class ContentScaler implements Scaler.Scaler {
     this._setting = setting;
   }
 
-  scale(pages: Page.Content[], params: Scaler.ScaleParams): Scaler.Content {
+  scale(pages: Page.Content[], params: Scaler.ScaleParams) {
     if (pages.length === 1) {
-      return this.scaleOnePage(pages, params);
+      this.scaleOnePage(pages, params);
     } else {
-      return this.scaleTwoPage(pages, params);
+      this.scaleTwoPage(pages, params);
     }
   }
 
-  scaleOnePage(pages: Page.Content[], params: Scaler.ScaleParams): Scaler.Content {
-    var div = document.createElement('div');
+  scaleOnePage(pages: Page.Content[], params: Scaler.ScaleParams) {
     var content = pages[0];
-    div.appendChild(content);
 
     var width = content.width;
     var height = content.height;
@@ -55,22 +53,15 @@ class ContentScaler implements Scaler.Scaler {
     var newTop = Math.floor((params.height - newHeight) / 2);
     var newLeft = Math.floor((params.width - newWidth) / 2);
 
-    div.style.cssText =
-      'position: relative;' +
-      'width: ' + params.width + 'px;' +
-      'height: ' + params.height + 'px;';
     content.style.cssText =
       'position: absolute;' +
       'top: ' + newTop + 'px;' +
       'left: ' + newLeft + 'px;' +
       'width: ' + newWidth + 'px;' +
       'height: ' + newHeight + 'px;';
-    return div;
   }
 
-  scaleTwoPage(pages: Page.Content[], params: Scaler.ScaleParams): Scaler.Content {
-    var div = document.createElement('div');
-
+  scaleTwoPage(pages: Page.Content[], params: Scaler.ScaleParams) {
     var leftContent = pages[1];
     var rightContent =  pages[0];
 
@@ -96,10 +87,6 @@ class ContentScaler implements Scaler.Scaler {
     var rightTop = Math.floor((params.height - newRightHeight) / 2);
     var rightLeft = Math.floor(leftLeft + newLeftWidth);
 
-    div.style.cssText =
-      'position: relative;' +
-      'width: ' + params.width + 'px;' +
-      'height: ' + params.height + 'px;';
     leftContent.style.cssText =
       'position: absolute;' +
       'top: ' + leftTop + 'px;' +
@@ -112,8 +99,5 @@ class ContentScaler implements Scaler.Scaler {
       'left: ' + rightLeft + 'px;' +
       'width: ' + newRightWidth + 'px;' +
       'height: ' + newRightHeight + 'px;';
-    div.appendChild(leftContent);
-    div.appendChild(rightContent);
-    return div;
   }
 }

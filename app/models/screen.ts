@@ -67,6 +67,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
   private _pages: Page.Page[];
   private _pageContents: Page.Content[];
   private _previousUpdatePromise: Promise<_Screen.UpdateResult>;
+  private _div: HTMLDivElement;
 
   constructor(size: _Screen.Size, builder: Scaler.Scaler, setting: _Screen.Setting) {
     this._builder = builder;
@@ -75,7 +76,15 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
     this._pages = [];
     this._pageContents = [];
     this._previousUpdatePromise = Promise.fulfilled({});
+    this._div = document.createElement('div');
     super();
+  }
+
+  resizeDiv() {
+    this._div.style.cssText =
+      'position: relative;' +
+      'width: ' + this._size.width + 'px;' +
+      'height: ' + this._size.height + 'px;';
   }
 
   defaults() {
@@ -91,21 +100,25 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
       contents = contents.slice(0);
       contents.reverse();
     }
-    this.setContent(this._builder.scale(contents, this._size));
+    this._builder.scale(contents, this._size);
+    this._div.innerHTML = '';
+    for (var i = 0, len = this._pageContents.length; i < len; ++i) {
+      this._div.appendChild(this._pageContents[i]);
+    }
+    this.trigger('change:content');
   }
 
   status() { return <_Screen.Status>this.get('status'); }
-  content() { return <_Screen.Content>this.get('content'); }
+  content() { return this._div; }
   setStatus(status: _Screen.Status) { this.set('status', status); }
-  setContent(content: _Screen.Content) { this.set('content', content); }
   pages() { return this._pages; }
   setPages(pages: Page.Page[]) { this._pages = pages; }
 
   resize(width: number, height: number): void {
     this._size = { width: width, height: height };
     if (this.status() !== _Screen.Status.Success) { return; }
+    this.resizeDiv();
     this.updateContent(this._pageContents);
-    this.trigger('change');
   }
 
   update(pages: Pages.Collection, params: _Screen.UpdateParams) : Promise<_Screen.UpdateResult> {
