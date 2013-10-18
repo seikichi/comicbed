@@ -153,6 +153,7 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
       this.setStatus(_Screen.Status.Success);
     }).catch((reason: any) => {
       if (reason && reason && 'name' in reason && reason.name === 'CancellationError') {
+        this.setStatus(_Screen.Status.Error);
         return Promise.rejected(reason);
       }
 
@@ -164,6 +165,6 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
         this.setStatus(_Screen.Status.Error);
       }
     });
-    return this._previousUpdatePromise.uncancellable();
+    return this._previousUpdatePromise;
   }
 }

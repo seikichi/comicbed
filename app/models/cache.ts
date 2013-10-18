@@ -109,10 +109,11 @@ class CacheUnarchiver implements Unarchiver.Unarchiver {
     }
     this._previousUnpackName = name;
     this._previousUnpackPromise.cancel();
-    this._previousUnpackPromise =  this._inner.unpack(name).then((content: Unarchiver.Content) => {
-      this._cache.update(name, content);
-      return content;
-    });
+    this._previousUnpackPromise =  this._inner.unpack(name)
+      .then((content: Unarchiver.Content) => {
+        this._cache.update(name, content);
+        return content;
+      });
     return this._previousUnpackPromise.uncancellable();
   }
   close(): void {
@@ -147,7 +148,7 @@ class CacheScreenFactory implements Screen.Factory {
   constructor(private _innerFactory: Screen.Factory,
               private _screenSetting: Screen.Setting,
               private _cacheSetting: Cache.Setting) {
-    this._cache = new ScreenCache(this._screenSetting, this._cacheSetting);
+    (<any>window).cache = this._cache = new ScreenCache(this._screenSetting, this._cacheSetting);
   }
 
   create(size: Screen.Size) {
@@ -187,12 +188,17 @@ class ScreenCache {
     }
     pages.unshift(pageNum);
     this._cacheUsedPages = pages.slice(0, this._cacheSetting.cacheScreenNum());
+
+    var removeNums: string[] = [];
     for (var p in this._cache) {
-      if (this._cache.hasOwnProperty(p)) {
-        if (this._cacheUsedPages.indexOf(Number(p)) === -1) {
-          delete this._cache[p];
-        }
+      if (this._cache.hasOwnProperty(p)
+          && this._cacheUsedPages.indexOf(Number(p)) === -1) {
+        removeNums.push(p);
       }
+    }
+
+    for (var i = 0, len = removeNums.length; i < len; ++i) {
+      delete this._cache[removeNums[i]];
     }
   }
 
@@ -201,6 +207,7 @@ class ScreenCache {
     if (this._pages !== pages) {
       this.initialize(pages);
     }
+
     var pageNum = params.currentPageNum;
     var direction = params.readingDirection;
 
