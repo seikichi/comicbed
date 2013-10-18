@@ -7,6 +7,7 @@ import Screen = require('models/screen');
 import Cache = require('models/cache');
 import Screens = require('collections/screens');
 import Sort = require('models/sort');
+import Prefetch = require('models/prefetch');
 
 export = Factory;
 
@@ -16,19 +17,18 @@ module Factory {
   }
 
   export function createReader(size: Screen.Size, setting: Setting.Setting): Reader.Reader {
-    // var unarchiverFactory = Unarchiver.createFactory(setting.unarchiverSetting());
     var unarchiverFactory = Cache.createUnarchiverFactory(
       Unarchiver.createFactory(setting.unarchiverSetting()),
       setting.unarchiverSetting(),
       setting.cacheSetting());
     var bookFactory = Book.createFactory(unarchiverFactory);
     var scaler = Scaler.create(setting.scalerSetting());
-    // var screenFactory = Screen.createFactory(scaler, setting.screenSetting());
     var screenFactory = Cache.createScreenFactory(
       Screen.createFactory(scaler, setting.screenSetting()),
       setting.screenSetting(),
       setting.cacheSetting());
-    var screens = Screens.create(size, screenFactory);
+    var screens = Prefetch.createPagePrefetchScreens(
+      Screens.create(size, screenFactory));
     var pageSorter = Sort.createPageSorter();
 
     var reader = Reader.create(bookFactory, screens, pageSorter, setting);
