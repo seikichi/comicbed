@@ -34156,10 +34156,14 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
             return;
           }
 
-          var length = fullRequestXhr.getResponseHeader('Content-Length');
-          length = parseInt(length, 10);
-          if (!isInt(length)) {
-            return;
+          if ('bytes' in source && source.bytes) {
+            var length = source.bytes;
+          } else {
+            var length = fullRequestXhr.getResponseHeader('Content-Length');
+            length = parseInt(length, 10);
+            if (!isInt(length)) {
+              return;
+            }
           }
 
           // NOTE: by cancelling the full request, and then issuing range

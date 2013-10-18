@@ -22,6 +22,7 @@ module Unarchiver {
     name?: string;
     mimeType?: string;
     httpHeaders?: {[key: string]:string};
+    bytes?: number;
   }
 
   export interface Setting extends Events.Events {

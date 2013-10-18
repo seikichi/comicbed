@@ -19,6 +19,7 @@ module DropboxStorage {
                   resolver({
                     name: file.name,
                     url: file.link,
+                    bytes: file.bytes,
                   });
                 },
                 cancel: () => {

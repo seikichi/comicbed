@@ -81,9 +81,7 @@ class HeaderContentView extends BaseView {
       .createPicker()
       .pick()
       .then((result: Picker.Result) => {
-        this._reader.openURL(result.url, {
-          name: result.name
-        });
+        this._reader.openURL(result.url, result);
       });
   }
 
@@ -92,11 +90,7 @@ class HeaderContentView extends BaseView {
       .createPicker()
       .pick()
       .then((result: Picker.Result) => {
-        this._reader.openURL(result.url, {
-          name: result.name,
-          mimeType: result.mimeType,
-          httpHeaders: result.httpHeaders,
-        });
+        this._reader.openURL(result.url, result);
       });
   }
 

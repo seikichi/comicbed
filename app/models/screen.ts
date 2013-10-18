@@ -164,6 +164,6 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
         this.setStatus(_Screen.Status.Error);
       }
     });
-    return this._previousUpdatePromise;
+    return this._previousUpdatePromise.uncancellable();
   }
 }

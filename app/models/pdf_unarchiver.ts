@@ -19,6 +19,7 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
     return Promise.cast<PDFJS.PDFDocumentProxy>(PDFJS.getDocument({
       url: url,
       httpHeaders: options.httpHeaders,
+      bytes: options.bytes,
     })).then((doc: PDFJS.PDFDocumentProxy) => {
       return new PdfUnarchiver(doc, setting);
     });
