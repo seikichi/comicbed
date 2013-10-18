@@ -74,7 +74,6 @@ module GoogleDriveStorage {
               var httpHeaders = {
                 'Authorization': 'Bearer ' + gapi.auth.getToken().access_token
               };
-              console.log(downloadUrl);
               resolve({
                 url: downloadUrl,
                 httpHeaders: httpHeaders,
