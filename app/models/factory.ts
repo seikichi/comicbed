@@ -16,11 +16,11 @@ module Factory {
   }
 
   export function createReader(size: Screen.Size, setting: Setting.Setting): Reader.Reader {
-    var unarchiverFactory = Unarchiver.createFactory(setting.unarchiverSetting());
-    // var unarchiverFactory = Cache.createUnarchiverFactory(
-    //   Unarchiver.createFactory(setting.unarchiverSetting()),
-    //   setting.unarchiverSetting(),
-    //   setting.cacheSetting());
+    // var unarchiverFactory = Unarchiver.createFactory(setting.unarchiverSetting());
+    var unarchiverFactory = Cache.createUnarchiverFactory(
+      Unarchiver.createFactory(setting.unarchiverSetting()),
+      setting.unarchiverSetting(),
+      setting.cacheSetting());
     var bookFactory = Book.createFactory(unarchiverFactory);
     var scaler = Scaler.create(setting.scalerSetting());
     // var screenFactory = Screen.createFactory(scaler, setting.screenSetting());

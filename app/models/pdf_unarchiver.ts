@@ -33,7 +33,6 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
 
   private _canvas: HTMLCanvasElement;
   private _previousUnpackPromise: Promise<Unarchiver.Content>;
-  private _previousUnpackName: string;
 
   constructor(pdfDocument: PDFJS.PDFDocumentProxy, setting: Unarchiver.Setting) {
     this._document = pdfDocument;
@@ -70,13 +69,12 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
     var renderContext = { canvasContext: context, viewport: viewport, };
 
     var renderTask = page.render(renderContext);
-    return Promise.cast<void>(renderTask)
-      .then(() => {
-        return canvas;
-      }).catch(Promise.CancellationError, (reason: any) => {
-        renderTask.cancel();
-        return Promise.rejected(reason);
-      });
+    return Promise.cast<void>(renderTask).then(() => {
+      return canvas;
+    }).catch(Promise.CancellationError, (reason: any) => {
+      renderTask.cancel();
+      return Promise.rejected(reason);
+    });
   }
 
   getContent(page: PDFJS.PDFPageProxy): Promise<Unarchiver.Content> {
@@ -125,7 +123,7 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
         return this.getContent(page);
       });
     }
-    return this._previousUnpackPromise;
+    return this._previousUnpackPromise.uncancellable();
   }
   close(): void {
     this._previousUnpackPromise.cancel();

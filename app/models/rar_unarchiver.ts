@@ -23,6 +23,8 @@ class RarUnarchiver implements Unarchiver.Unarchiver {
   }
 
   private _filenames: string[];
+  private _previousUnpackPromise: Promise<Unarchiver.Content>;
+
   constructor(private _name: string,
               private _unrar: Unrar,
               private _setting: Unarchiver.Setting) {
@@ -34,15 +36,19 @@ class RarUnarchiver implements Unarchiver.Unarchiver {
         this._filenames.push(filenames[i]);
       }
     }
+    this._previousUnpackPromise = Promise.fulfilled(null);
   }
 
   archiveName(): string { return this._name; }
   filenames(): string[] { return this._filenames; }
   unpack(name: string): Promise<Unarchiver.Content> {
-    return PromiseUtil.wait<void>(1)(null)
+    this._previousUnpackPromise.cancel();
+
+    this._previousUnpackPromise = PromiseUtil.wait<void>(1)(null)
       .then(() => this._unrar.decompress(name))
       .then(PromiseUtil.wait<ArrayBuffer>(1))
       .then(ImageUtil.createImageElementFromArrayBuffer);
+    return this._previousUnpackPromise.uncancellable();
   }
   close(): void { this._unrar.close(); }
 }

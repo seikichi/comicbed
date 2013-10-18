@@ -80,25 +80,40 @@ class UnarchiverContentCache {
 class CacheUnarchiver implements Unarchiver.Unarchiver {
   private _cache: UnarchiverContentCache;
 
+  private _previousUnpackName: string;
+  private _previousUnpackPromise: Promise<Unarchiver.Content>;
+
   constructor(private _inner: Unarchiver.Unarchiver,
               private _unarchiverSetting: Unarchiver.Setting,
               private _cacheSetting: Cache.Setting) {
     this._cache = new UnarchiverContentCache(this._cacheSetting);
     this._unarchiverSetting.on('change', this._cache.clean, this);
+    this._previousUnpackName = null;
+    this._previousUnpackPromise = Promise.fulfilled(null);
   }
 
   archiveName(): string { return this._inner.archiveName(); }
   filenames(): string[] { return this._inner.filenames(); }
   unpack(name: string): Promise<Unarchiver.Content> {
+    // if a cache exists, use and update the cache
     var cachedContent = this._cache.find(name);
     if (cachedContent) {
       this._cache.update(name, cachedContent);
       return Promise.fulfilled(cachedContent);
     }
-    return this._inner.unpack(name).then((content: Unarchiver.Content) => {
+
+    // if the request equals to the one before unpack requests,
+    // return the previous promise
+    if (name === this._previousUnpackName) {
+      return this._previousUnpackPromise;
+    }
+    this._previousUnpackName = name;
+    this._previousUnpackPromise.cancel();
+    this._previousUnpackPromise =  this._inner.unpack(name).then((content: Unarchiver.Content) => {
       this._cache.update(name, content);
       return content;
     });
+    return this._previousUnpackPromise.uncancellable();
   }
   close(): void {
     this._cache.clean();

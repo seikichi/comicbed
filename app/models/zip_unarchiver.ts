@@ -24,6 +24,8 @@ class ZipUnarchiver implements Unarchiver.Unarchiver {
   }
 
   private _filenames: string[];
+  private _previousUnpackPromise: Promise<Unarchiver.Content>;
+
   constructor(private _name: string,
               private _reader: jz.zip.ZipArchiveReader,
               private _setting: Unarchiver.Setting) {
@@ -35,17 +37,21 @@ class ZipUnarchiver implements Unarchiver.Unarchiver {
         this._filenames.push(filenames[i]);
       }
     }
+    this._previousUnpackPromise = Promise.fulfilled(null);
   }
 
   archiveName(): string { return this._name; }
   filenames(): string[] { return this._filenames; }
   unpack(name: string): Promise<Unarchiver.Content> {
-    return PromiseUtil.wait<void>(1)(null)
+    this._previousUnpackPromise.cancel();
+
+    this._previousUnpackPromise = PromiseUtil.wait<void>(1)(null)
       .then(() => Promise.cast<Blob>(this._reader.getFileAsBlob(name)))
       .then(PromiseUtil.wait(1))
       .then(PromiseUtil.readFileAsArrayBuffer)
       .then(PromiseUtil.wait(1))
       .then(ImageUtil.createImageElementFromArrayBuffer);
+    return this._previousUnpackPromise.uncancellable();
   }
   close(): void { this._reader = null; }
 }
