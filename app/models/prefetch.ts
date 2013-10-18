@@ -1,4 +1,5 @@
 import Promise = require('promise');
+import PromiseUtil = require('utils/promise');
 import Page = require('models/page');
 import Pages = require('collections/pages');
 import Screen = require('models/screen');
@@ -42,7 +43,8 @@ class PagePrefetchScreensImpl implements Screens.Screens {
       ((index: number) => {
         this._prefetchPromise = this._prefetchPromise.then(() => {
           return pages.at(index).content();
-        }).then<void>((content: Page.Content) => {});
+        }).then<void>((content: Page.Content) => {
+        }).then(PromiseUtil.wait(1));
       }(i));
     }
     // ignore errors (includes cancel)
