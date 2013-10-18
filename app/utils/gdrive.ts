@@ -54,9 +54,7 @@ module GoogleDriveStorage {
               .enableFeature(google.picker.Feature.NAV_HIDDEN)
               .setOAuthToken(gapi.auth.getToken().access_token)
               .setDeveloperKey(developerKey)
-
-              .addView(google.picker.ViewId.FOLDERS)
-              .addView(google.picker.ViewId.PDFS)
+              .addView(google.picker.ViewId.DOCS)
               .setCallback((data: any) => {
                 if (data.action !== google.picker.Action.PICKED) { return; }
                 resolve(data);
