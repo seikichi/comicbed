@@ -7,6 +7,7 @@ import Screen = require('models/screen');
 import Screens = require('collections/screens');
 import Reader = require('models/reader');
 import fullscreen = require('utils/fullscreen');
+import templates = require('templates');
 
 export = ScreenCollectionView;
 
@@ -103,7 +104,8 @@ class ScreenCollectionView extends BaseView {
     for (var i = 0, len = screens.length; i < len; ++i) {
       var view = new ScreenView({
         tagName: 'li',
-        screen: screens[i]
+        screen: screens[i],
+        template: templates.screen,
       });
       view.resize(this.$el.width(), this.$el.height());
       this.$('ul').append(view.render().el)
@@ -190,11 +192,11 @@ class ScreenCollectionView extends BaseView {
   }
 
   onRightClick(event: Event): void {
-    this.$el.focus();
-    event.preventDefault();
-    if (this._scroll !== null && !this._scroll.moved) {
-      this.goPrev();
-    }
+    // this.$el.focus();
+    // event.preventDefault();
+    // if (this._scroll !== null && !this._scroll.moved) {
+    //   this.goPrev();
+    // }
   }
 
   onKeyDown(jqEvent: any) {

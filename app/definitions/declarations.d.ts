@@ -83,7 +83,8 @@ declare module "templates" {
     footercontent: HTMLTemplate;
     header: HTMLTemplate;
     headercontent: HTMLTemplate;
-    screens: (data: {[key:string]: any;}) => string;
+    screens: HTMLTemplate;
+    screen: HTMLTemplate;
   };
   export = JST;
 }

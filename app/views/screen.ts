@@ -7,10 +7,12 @@ export = ScreenView;
 class ScreenView extends BaseView {
   private _screen: Screen.Screen;
   private _spinner: Spinner;
+  private _template: HTMLTemplate;
 
   constructor(options: ScreenView.Options) {
     this._screen = options.screen;
     this._spinner = new Spinner();
+    this._template = options.template;
     super(options);
   }
 
@@ -24,15 +26,21 @@ class ScreenView extends BaseView {
     this.$el.height(height);
   }
 
+  presenter() {
+    return this._template({});
+  }
+
   render() {
-    this.$el.empty();
+    super.render();
+    var $screen = this.$('.screen');
+
     switch (this._screen.status()) {
     case Screen.Status.Success:
     case Screen.Status.Interrupted:
       if (this._spinner !== null) {
         this._spinner.stop();
       }
-      this.$el.append(this._screen.content());
+      $screen.append(this._screen.content());
       break;
     case Screen.Status.Loading:
       this._spinner.spin(this.$el.get(0));
@@ -47,5 +55,6 @@ class ScreenView extends BaseView {
 module ScreenView {
   export interface Options extends Backbone.ViewOptions {
     screen: Screen.Screen;
+    template: HTMLTemplate;
   }
 }
