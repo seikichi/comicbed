@@ -141,7 +141,7 @@ class ScreenCollectionView extends BaseView {
       click: false,
       bounce: false,
       snapThreshold: 0.1,
-      snapSpeed: 100,
+      // snapSpeed: 100,
     });
     this.goCenterPage();
 
@@ -192,11 +192,11 @@ class ScreenCollectionView extends BaseView {
   }
 
   onRightClick(event: Event): void {
-    // this.$el.focus();
-    // event.preventDefault();
-    // if (this._scroll !== null && !this._scroll.moved) {
-    //   this.goPrev();
-    // }
+    this.$el.focus();
+    event.preventDefault();
+    if (this._scroll !== null && !this._scroll.moved) {
+      this.goPrev();
+    }
   }
 
   onKeyDown(jqEvent: any) {
