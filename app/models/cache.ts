@@ -290,6 +290,7 @@ class CacheScreenModel extends Backbone.Model implements Screen.Screen {
 
   cancel(): void {
     this._innerScreen.cancel();
+    this._previousUpdatePromise.cancel();
   }
 
   updateInnerModel(screen: Screen.Screen) {
@@ -329,7 +330,7 @@ class CacheScreenModel extends Backbone.Model implements Screen.Screen {
           }
           return result;
         });
-      return this._previousUpdatePromise;
+      return this._previousUpdatePromise.uncancellable();
     }
   }
 }
