@@ -58,6 +58,10 @@ declare module "jqueryui" {
   export = $;
 }
 
+declare module "jquerymobile" {
+  export = $;
+}
+
 declare module "jsziptools" {
   export = jz;
 }

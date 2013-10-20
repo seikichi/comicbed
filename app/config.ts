@@ -16,6 +16,7 @@ require.config({
     pdfjs: '../assets/app/pdfjs/js/pdf',
     unrar: '../assets/app/unrarlib/js/unrar.min',
     tiff: '../assets/app/tiff/js/tiff.min',
+    jquerymobile: '../assets/app/jquery-mobile/js/jquery.mobile-1.4.0-beta.1.min.js',
 
     dropbox: 'https://www.dropbox.com/static/api/1/dropins',
     gapi: 'https://apis.google.com/js/api',
@@ -42,6 +43,10 @@ require.config({
       exports: 'sprintf'
     },
     jqueryui: {
+      deps: ['jquery'],
+      exports: '$'
+    },
+    jquerymobile: {
       deps: ['jquery'],
       exports: '$'
     },
