@@ -61,6 +61,13 @@ class ScreenWithOnePrevNext implements Screens.Screens {
 
   update(pages: Pages.Collection, params: Screen.UpdateParams): Promise<void> {
     this._previousUpdatePromise.cancel();
+    this._currentScreen.cancel();
+    for (var i = 0, len = this._prevScreens.length; i < len; ++i) {
+      this._prevScreens.at(i).cancel();
+    }
+    for (var i = 0, len = this._nextScreens.length; i < len; ++i) {
+      this._nextScreens.at(i).cancel();
+    }
 
     var prevPageNum = params.currentPageNum - 1;
     var nextPageNum = params.currentPageNum + 1;

@@ -288,6 +288,10 @@ class CacheScreenModel extends Backbone.Model implements Screen.Screen {
     super();
   }
 
+  cancel(): void {
+    this._innerScreen.cancel();
+  }
+
   updateInnerModel(screen: Screen.Screen) {
     this.stopListening(this._innerScreen);
     this._innerScreen = screen;

@@ -38,6 +38,7 @@ module _Screen {
   export interface Screen extends Events.Events {
     status(): Status;
     content(): Content;
+    cancel(): void;
 
     pages(): Page.Page[];
     update(pages: Pages.Collection, params: UpdateParams): Promise<UpdateResult>;
@@ -83,6 +84,10 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
       status: _Screen.Status.Loading,
       content: null,
     };
+  }
+
+  cancel(): void {
+    this._previousUpdatePromise.cancel();
   }
 
   updateContent(contents: Page.Content[]): void {
@@ -170,6 +175,6 @@ class ScreenModel extends Backbone.Model implements _Screen.Screen {
         this.setStatus(_Screen.Status.Error);
       }
     });
-    return this._previousUpdatePromise;
+    return this._previousUpdatePromise.uncancellable();
   }
 }

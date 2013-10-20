@@ -9,6 +9,7 @@ var assert = chai.assert;
 declare var sinon: any;
 
 class ScreenStub extends Backbone.Model {
+  cancel() {}
   status() { return Screen.Status.Loading; }
   content() { return <Screen.Content>undefined; }
   pages() { return <Page.Page[]>[undefined]; }
