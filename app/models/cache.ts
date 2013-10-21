@@ -105,7 +105,7 @@ class CacheUnarchiver implements Unarchiver.Unarchiver {
     // if the request equals to the one before unpack requests,
     // return the previous promise
     if (name === this._previousUnpackName) {
-      return this._previousUnpackPromise;
+      return this._previousUnpackPromise.uncancellable();
     }
     this._previousUnpackName = name;
     this._previousUnpackPromise.cancel();

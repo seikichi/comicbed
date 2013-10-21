@@ -114,7 +114,16 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
       return Promise.rejected('invalid filename:' +  name);
     }
 
-    var promise = Promise.cast<PDFJS.PDFPageProxy>(this._document.getPage(pageNum));
+    var promise = new Promise((resolve, reject) => {
+      this._document.getPage(pageNum)
+        .then((page: PDFJS.PDFPageProxy) => {
+          console.log('unpack getPage done:', name);
+          resolve(page);
+        }, (reason: any) => {
+          console.log('unpack getPage failed:', reason);
+          reject(reason);
+        });
+    });
     if (this._setting.detectsImageXObjectPageInPdf()) {
       this._previousUnpackPromise = promise.then((page: PDFJS.PDFPageProxy) => {
         return this.getXObjectContent(page);
