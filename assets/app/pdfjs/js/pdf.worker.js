@@ -4011,6 +4011,34 @@ var Page = (function PageClosure() {
       }.bind(this));
       return promise;
     },
+    loadXObject: function Page_loadXObject(handler) {
+      var self = this;
+      var promise = new Promise();
+
+      function reject(e) {
+        promise.reject(e);
+      }
+
+      var pdfManager = this.pdfManager;
+      var contentStreamPromise = pdfManager.ensure(this, 'getContentStream',
+                                                   []);
+      var resourcesPromise = this.loadResources(['XObject']);
+
+      var partialEvaluator = new PartialEvaluator(
+            pdfManager, this.xref, handler,
+            this.pageIndex, 'p' + this.pageIndex + '_',
+            this.idCounters);
+
+      var dataPromises = Promise.all(
+          [contentStreamPromise, resourcesPromise], reject);
+      dataPromises.then(function(data) {
+        var contentStream = data[0];
+        var opList = new OperatorList(handler, self.pageIndex);
+        partialEvaluator.getOperatorList(contentStream, self.resources, opList);
+        promise.resolve();
+      });
+      return promise;
+    },
     getOperatorList: function Page_getOperatorList(handler) {
       var self = this;
       var promise = new Promise();
@@ -34407,6 +34435,18 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
           promise.resolve(textContent);
           log('text indexing: page=%d - time=%dms', pageNum,
               Date.now() - start);
+        }, function (e) {
+          // Skip errored pages
+          promise.reject(e);
+        });
+      });
+    });
+
+    handler.on('LoadXObject', function wphLoadXObject(data, promise) {
+      pdfManager.getPage(data.pageIndex).then(function(page) {
+        var pageNum = data.pageIndex + 1;
+        page.loadXObject(handler).then(function() {
+          promise.resolve();
         }, function (e) {
           // Skip errored pages
           promise.reject(e);

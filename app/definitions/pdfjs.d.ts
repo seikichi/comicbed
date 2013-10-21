@@ -80,6 +80,9 @@ declare module PDFJS {
     getTextContent(): Promise<TextContent>;
     render(context: RenderContext): RenderTask;
     destroy(): void;
+
+    // this method is added by seikichi
+    loadXObject(): Promise<void>;
   }
 }
 
