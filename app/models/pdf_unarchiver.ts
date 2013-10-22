@@ -64,12 +64,17 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
   }
 
   renderPage(page: PDFJS.PDFPageProxy, scale: number): Promise<HTMLCanvasElement> {
+    var CSS_UNITS = 96.0 / 72.0;
     var canvas = this._canvas;
-    var viewport = page.getViewport(scale);
+    var viewport = page.getViewport(scale * CSS_UNITS);
     var context = canvas.getContext('2d');
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
-    var renderContext = { canvasContext: context, viewport: viewport, };
+    canvas.height = Math.floor(viewport.height);
+    canvas.width = Math.floor(viewport.width);
+    console.log(viewport);
+    var renderContext = {
+      canvasContext: context,
+      viewport: viewport,
+    };
 
     var renderTask = page.render(renderContext);
     return Promise.cast<void>(renderTask).then(() => {

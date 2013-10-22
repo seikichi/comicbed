@@ -106,7 +106,7 @@ class UnarchiverSettingModel extends Backbone.Model implements Unarchiver.Settin
   }
   defaults() {
     return {
-      pdfjsCanvasScale: 1,
+      pdfjsCanvasScale: 2,
       detectsImageXObjectPageInPdf: true,
     };
   }
