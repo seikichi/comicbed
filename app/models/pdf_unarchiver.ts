@@ -34,6 +34,7 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
 
   private _canvas: HTMLCanvasElement;
   private _previousUnpackPromise: Promise<Unarchiver.Content>;
+  private _nextResolver: PromiseResolver<void>;
 
   constructor(pdfDocument: PDFJS.PDFDocumentProxy, setting: Unarchiver.Setting) {
     this._document = pdfDocument;
@@ -43,6 +44,7 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
     this._nameToPageNum = {};
     this._canvas = document.createElement('canvas');
     this._previousUnpackPromise = Promise.fulfilled(null);
+    this._nextResolver = null;
 
     var numOfDigits = 1 + Math.floor(Math.log(this._document.numPages) / Math.log(10));
     var pageNameformat = sprintf('pdf-page-%%0%dd', numOfDigits);
@@ -106,33 +108,52 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
     });
   }
 
-  unpack(name: string): Promise<Unarchiver.Content> {
-    this._previousUnpackPromise.cancel();
-
+  unpackPromise(name: string): Promise<Unarchiver.Content> {
     // reject if the page name is invalid
     var pageNum = this._nameToPageNum[name];
     if (pageNum <= 0 || this._document.numPages < pageNum) {
       return Promise.rejected('invalid filename:' +  name);
     }
 
-    var promise = new Promise((resolve, reject) => {
-      this._document.getPage(pageNum)
-        .then((page: PDFJS.PDFPageProxy) => {
-          resolve(page);
-        }, (reason: any) => {
-          reject(reason);
-        });
-    });
+    var promise = this._nextResolver.promise
+      .then(() => new Promise((resolve, reject) => {
+        this._document.getPage(pageNum)
+          .then((page: PDFJS.PDFPageProxy) => {
+            resolve(page);
+          }, (reason: any) => {
+            reject(reason);
+          });
+      }));
+    var unpackPromise: Promise<Unarchiver.Content> = null;
     if (this._setting.detectsImageXObjectPageInPdf()) {
-      this._previousUnpackPromise = promise.then((page: PDFJS.PDFPageProxy) => {
+      unpackPromise = promise.then((page: PDFJS.PDFPageProxy) => {
         return this.getXObjectContent(page);
       });
     } else {
-      this._previousUnpackPromise = promise.then((page: PDFJS.PDFPageProxy) => {
+      unpackPromise = promise.then((page: PDFJS.PDFPageProxy) => {
         return this.getContent(page);
       });
     }
-    return this._previousUnpackPromise.uncancellable();
+    unpackPromise.finally(() => {
+      if (this._nextResolver !== null) {
+        var resolver = this._nextResolver;
+        this._nextResolver = null;
+        resolver.fulfill(null);
+      }
+    });
+    return unpackPromise.uncancellable();
+  }
+
+  unpack(name: string): Promise<Unarchiver.Content> {
+    if (this._nextResolver !== null) {
+      this._nextResolver.reject(null);
+      this._nextResolver = Promise.pending<void>();
+    } else {
+      this._nextResolver = Promise.pending<void>();
+      this._nextResolver.fulfill(null);
+    }
+    var promise = this.unpackPromise(name);
+    return promise;
   }
   close(): void {
     this._previousUnpackPromise.cancel();
