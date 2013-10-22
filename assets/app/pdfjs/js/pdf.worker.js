@@ -4022,19 +4022,37 @@ var Page = (function PageClosure() {
       var pdfManager = this.pdfManager;
       var contentStreamPromise = pdfManager.ensure(this, 'getContentStream',
                                                    []);
-      var resourcesPromise = this.loadResources(['XObject']);
-
       var partialEvaluator = new PartialEvaluator(
             pdfManager, this.xref, handler,
             this.pageIndex, 'p' + this.pageIndex + '_',
             this.idCounters);
+      var opList = new OperatorList(handler, self.pageIndex);
+
+      var resourcesPromise = this.loadResources(['XObject']);
 
       var dataPromises = Promise.all(
           [contentStreamPromise, resourcesPromise], reject);
       dataPromises.then(function(data) {
         var contentStream = data[0];
-        var opList = new OperatorList(handler, self.pageIndex);
-        partialEvaluator.getOperatorList(contentStream, self.resources, opList);
+        var xobjs = self.resources.get('XObject');
+        var parser = new Parser(new Lexer(contentStream), true, null);
+        var obj;
+        while (!isEOF(obj = parser.getObj())) {
+          if (isName(obj)) {
+            var name = obj.name;
+            obj = parser.getObj();
+            if (isEOF(obj)) { break; }
+
+            if (isCmd(obj) && obj.cmd === 'Do') {
+              var xobj = xobjs.get(name);
+              var type = xobj.dict.get('Subtype');
+              if ('Image' === type.name) {
+                partialEvaluator.buildPaintImageXObject(self.resources, xobj, false, opList);
+                break;
+              }
+            }
+          }
+        }
         promise.resolve();
       });
       return promise;

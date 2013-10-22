@@ -82,13 +82,15 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
 
   getContent(page: PDFJS.PDFPageProxy): Promise<Unarchiver.Content> {
     return this.renderPage(page, this._setting.pdfjsCanvasScale())
-      .then((canvas: HTMLCanvasElement) => ImageUtil.loadImageFromURL(canvas.toDataURL()));
+      .then((canvas: HTMLCanvasElement) => {
+        page.destroy();
+        return ImageUtil.loadImageFromURL(canvas.toDataURL());
+      });
   }
 
   getXObjectContent(page: PDFJS.PDFPageProxy): Promise<Unarchiver.Content> {
     var viewport = page.getViewport(1);
     var pageAspectRatio = viewport.width / viewport.height;
-    // return this.renderPage(page, 0).then((canvas: HTMLCanvasElement) => {
     return Promise.cast<void>(page.loadXObject()).then(() => {
       var objs = page.objs.objs;
       for (var key in objs) if (objs.hasOwnProperty(key)) {
