@@ -70,7 +70,6 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
     var context = canvas.getContext('2d');
     canvas.height = Math.floor(viewport.height);
     canvas.width = Math.floor(viewport.width);
-    console.log(viewport);
     var renderContext = {
       canvasContext: context,
       viewport: viewport,
