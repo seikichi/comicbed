@@ -10,15 +10,17 @@ require.config({
     jqueryui: '../assets/vendor/jquery-ui/js/jquery-ui',
     jsziptools: '../assets/vendor/jsziptools/js/jsziptools.min',
     spin: '../assets/vendor/spin.js/js/spin',
+    iscroll: '../assets/vendor/iscroll/js/iscroll-zoom-min',
+    promise: '../assets/vendor/bluebird/index',
 
     pdfjs: '../assets/app/pdfjs/js/pdf',
     unrar: '../assets/app/unrarlib/js/unrar.min',
     tiff: '../assets/app/tiff/js/tiff.min',
+    jquerymobile: '../assets/app/jquery-mobile/js/jquery.mobile-1.4.0-beta.1.min',
 
-    // gapi: 'https://apis.google.com/js/api',
-    // gclient: 'https://apis.google.com/js/client',
-    gapi: '../assets/app/google/js/api',
-    gclient: '../assets/app/google/js/client',
+    dropbox: 'https://www.dropbox.com/static/api/1/dropins',
+    gapi: 'https://apis.google.com/js/api',
+    gclient: 'https://apis.google.com/js/client',
   },
   shim: {
     underscore: {
@@ -44,12 +46,19 @@ require.config({
       deps: ['jquery'],
       exports: '$'
     },
+    jquerymobile: {
+      deps: ['jquery'],
+      exports: '$'
+    },
     jsziptools: {
       exports: 'jz'
     },
-    // unrarlib: {
-    //   exports: 'Module'
-    // },
+    iscroll: {
+      exports: 'IScroll'
+    },
+    dropbox: {
+      exports: 'Dropbox'
+    },
     gapi: {
       exports: 'gapi'
     },
@@ -58,5 +67,3 @@ require.config({
     }
   }
 });
-
-require(['main'], (main: () => void) => { main(); });

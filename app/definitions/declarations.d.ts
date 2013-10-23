@@ -1,6 +1,3 @@
-/// <reference path="./DefinitelyTyped/jquery/jquery.d.ts"/>
-/// <reference path="./backbone.d.ts"/>
-
 declare module "unrarlib" {
   var Module: {
     cwrap: (name: string, retType: string, argTypes: string[]) => (...data: any[]) => any;
@@ -18,11 +15,16 @@ declare module "unrarlib" {
   export = Module;
 }
 
+declare module "iscroll" {
+  export = IScroll;
+}
+
+declare class Tiff {
+  constructor(buffer: ArrayBuffer);
+  toDataURL(): string;
+}
+
 declare module "tiff" {
-  class Tiff {
-    constructor(buffer: ArrayBuffer);
-    toDataURL(): string;
-  }
   export = Tiff;
 }
 
@@ -56,6 +58,10 @@ declare module "jqueryui" {
   export = $;
 }
 
+declare module "jquerymobile" {
+  export = $;
+}
+
 declare module "jsziptools" {
   export = jz;
 }
@@ -67,15 +73,22 @@ declare module "storage" {
     export = LocalStorage;
 }
 
+interface HTMLTemplate {
+  (data: {[key:string]: any;}): string;
+}
+
 declare module "templates" {
   var JST: {
-    flowerpot: (data: {[key:string]: any;}) => string;
-    content: (data: {[key:string]: any;}) => string;
-    input: (data: {[key:string]: any;}) => string;
-    footer: (data: {[key:string]: any;}) => string;
-    footercontent: (data: {[key:string]: any;}) => string;
-    header: (data: {[key:string]: any;}) => string;
-    headercontent: (data: {[key:string]: any;}) => string;
+    flowerpot: HTMLTemplate;
+    modal: HTMLTemplate;
+    progress: HTMLTemplate;
+    content: HTMLTemplate;
+    footer: HTMLTemplate;
+    footercontent: HTMLTemplate;
+    header: HTMLTemplate;
+    headercontent: HTMLTemplate;
+    screens: HTMLTemplate;
+    screen: HTMLTemplate;
   };
   export = JST;
 }

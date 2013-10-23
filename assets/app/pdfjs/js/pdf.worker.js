@@ -4011,6 +4011,52 @@ var Page = (function PageClosure() {
       }.bind(this));
       return promise;
     },
+    loadXObject: function Page_loadXObject(handler) {
+      var self = this;
+      var promise = new Promise();
+
+      function reject(e) {
+        promise.reject(e);
+      }
+
+      var pdfManager = this.pdfManager;
+      var contentStreamPromise = pdfManager.ensure(this, 'getContentStream',
+                                                   []);
+      var partialEvaluator = new PartialEvaluator(
+            pdfManager, this.xref, handler,
+            this.pageIndex, 'p' + this.pageIndex + '_',
+            this.idCounters);
+      var opList = new OperatorList(handler, self.pageIndex);
+
+      var resourcesPromise = this.loadResources(['XObject']);
+
+      var dataPromises = Promise.all(
+          [contentStreamPromise, resourcesPromise], reject);
+      dataPromises.then(function(data) {
+        var contentStream = data[0];
+        var xobjs = self.resources.get('XObject');
+        var parser = new Parser(new Lexer(contentStream), true, null);
+        var obj;
+        while (!isEOF(obj = parser.getObj())) {
+          if (isName(obj)) {
+            var name = obj.name;
+            obj = parser.getObj();
+            if (isEOF(obj)) { break; }
+
+            if (isCmd(obj) && obj.cmd === 'Do') {
+              var xobj = xobjs.get(name);
+              var type = xobj.dict.get('Subtype');
+              if ('Image' === type.name) {
+                partialEvaluator.buildPaintImageXObject(self.resources, xobj, false, opList);
+                break;
+              }
+            }
+          }
+        }
+        promise.resolve();
+      });
+      return promise;
+    },
     getOperatorList: function Page_getOperatorList(handler) {
       var self = this;
       var promise = new Promise();
@@ -34156,10 +34202,14 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
             return;
           }
 
-          var length = fullRequestXhr.getResponseHeader('Content-Length');
-          length = parseInt(length, 10);
-          if (!isInt(length)) {
-            return;
+          if ('bytes' in source && source.bytes) {
+            var length = source.bytes;
+          } else {
+            var length = fullRequestXhr.getResponseHeader('Content-Length');
+            length = parseInt(length, 10);
+            if (!isInt(length)) {
+              return;
+            }
           }
 
           // NOTE: by cancelling the full request, and then issuing range
@@ -34403,6 +34453,18 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
           promise.resolve(textContent);
           log('text indexing: page=%d - time=%dms', pageNum,
               Date.now() - start);
+        }, function (e) {
+          // Skip errored pages
+          promise.reject(e);
+        });
+      });
+    });
+
+    handler.on('LoadXObject', function wphLoadXObject(data, promise) {
+      pdfManager.getPage(data.pageIndex).then(function(page) {
+        var pageNum = data.pageIndex + 1;
+        page.loadXObject(handler).then(function() {
+          promise.resolve();
         }, function (e) {
           // Skip errored pages
           promise.reject(e);

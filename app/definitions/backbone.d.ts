@@ -5,7 +5,7 @@
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
 
-/// <reference path="./DefinitelyTyped/jquery/jquery.d.ts" />
+/// <reference path="./jquery.d.ts" />
 
 declare module Backbone {
 
@@ -90,16 +90,16 @@ declare module Backbone {
     //     defaults?(): _Attributes;
     // }
 
-    class Model<_Attributes> extends Events {
+    class Model extends Events {
 
         static extend(properties: any, classProperties?: any): any; // do not use, prefer TypeScript's extend functionality
 
         url(): string;
         parse(response: any, options?: any): any;
-        toJSON(): _Attributes;
+        toJSON(): any;
         sync(...arg: any[]): JQueryXHR;
 
-        defaults(): _Attributes;
+        defaults(): any;
 
         // attributes: _Attributes;
         // changed: _Attributes
@@ -109,30 +109,30 @@ declare module Backbone {
         validationError: string;
         urlRoot(): string;
 
-        constructor(attributes?: _Attributes, options?: any);
-        initialize(attributes?: _Attributes): void;
+        constructor(attributes?: any, options?: any);
+        initialize(attributes?: any): void;
 
         fetch(options?: ModelFetchOptions): JQueryXHR;
 
         get(attributeName: string): any;
-        set(attributeName: string, value: any, options?: ModelSetOptions): Model<_Attributes>;
-        set(obj: _Attributes, options?: ModelSetOptions): Model<_Attributes>;
+        set(attributeName: string, value: any, options?: ModelSetOptions): Model;
+        set(obj: any, options?: ModelSetOptions): Model;
 
         // change(): any;
-        changedAttributes(attributes?: _Attributes): any;
-        clear(options?: Silenceable): Model<_Attributes>;
-        clone(): Model<_Attributes>;
-        destroy(options?: ModelDestroyOptions): Model<_Attributes>;
+        changedAttributes(attributes?: any): any;
+        clear(options?: Silenceable): Model;
+        clone(): Model;
+        destroy(options?: ModelDestroyOptions): Model;
         escape(attribute: string): string;
         has(attribute: string): boolean;
         hasChanged(attribute?: string): boolean;
         isNew(): boolean;
         isValid(): boolean;
-        previous(attribute: string): _Attributes;
-        previousAttributes(): _Attributes;
-        save(attributes?: _Attributes, options?: ModelSaveOptions): JQueryXHR;
-        unset(attribute: string, options?: Silenceable): Model<_Attributes>;
-        validate(attributes: _Attributes, options?: any): string;
+        previous(attribute: string): any;
+        previousAttributes(): any;
+        save(attributes?: any, options?: ModelSaveOptions): JQueryXHR;
+        unset(attribute: string, options?: Silenceable): Model;
+        validate(attributes: any, options?: any): string;
 
         // _validate(attrs: any, options: any): boolean;
 
@@ -148,16 +148,16 @@ declare module Backbone {
         omit(...keys: string[]): any;
     }
 
-  class Collection<_Model extends Model<_Attributes>, _Attributes> {
+  class Collection<_Model> extends Events {
 
         static extend(properties: any, classProperties?: any): any; // do not use, prefer TypeScript's extend functionality
 
         url(): string;
         parse(response: any, options?: any): any;
-        toJSON(): _Attributes[];
+        toJSON(): any;
         sync(...arg: any[]): JQueryXHR;
 
-        model: { new(attributes?: _Attributes, options?: any): _Model; };
+        model: { new(attributes?: any, options?: any): _Model; };
         models: _Model[];
         // collection: Model;
         length: number;
@@ -171,22 +171,22 @@ declare module Backbone {
         // comparator(compare: _Model, to?: _Model): number;
         comparator(compare: _Model, to: _Model): number;
 
-        add(model: _Model, options?: AddOptions): Collection<_Model, _Attributes>;
-        add(models: _Model[], options?: AddOptions): Collection<_Model, _Attributes>;
+        add(model: _Model, options?: AddOptions): Collection<_Model>;
+        add(models: _Model[], options?: AddOptions): Collection<_Model>;
         at(index: number): _Model;
         get(id: any): _Model;
-        create(attributes: _Attributes, options?: ModelSaveOptions): _Model;
+        create(attributes: any, options?: ModelSaveOptions): _Model;
         pluck(attribute: string): any[];
         push(model: _Model, options?: AddOptions): _Model;
         pop(options?: Silenceable): _Model;
-        remove(model: _Model, options?: Silenceable): Collection<_Model, _Attributes>;
-        remove(models: _Model[], options?: Silenceable): Collection<_Model, _Attributes>;
-        reset(models?: _Model[], options?: Silenceable): Collection<_Model, _Attributes>;
+        remove(model: _Model, options?: Silenceable): Collection<_Model>;
+        remove(models: _Model[], options?: Silenceable): Collection<_Model>;
+        reset(models?: _Model[], options?: Silenceable): Collection<_Model>;
         shift(options?: Silenceable): _Model;
-        sort(options?: Silenceable): Collection<_Model, _Attributes>;
+        sort(options?: Silenceable): Collection<_Model>;
         unshift(model: _Model, options?: AddOptions): _Model;
-        where(properies: _Attributes): _Model[];
-        findWhere(properies: _Attributes): _Model;
+        where(properies: any): _Model[];
+        findWhere(properies: any): _Model;
 
         // _prepareModel(attrs?: any, options?: any): any;
         // _removeReference(model: _Model): void;
@@ -294,8 +294,8 @@ declare module Backbone {
     }
 
     interface ViewOptions {
-        model?: Backbone.Model<any>;
-        collection?: Backbone.Collection<Model<{}>, {}>;
+        model?: Backbone.Model;
+        collection?: Backbone.Collection<Model>;
         el?: any;
         $el?: JQuery;
         id?: string;
@@ -315,8 +315,8 @@ declare module Backbone {
         constructor(options?: ViewOptions);
 
         $(selector: string): JQuery;
-        model: Model<{}>;
-        collection: Collection<Model<{}>, {}>;
+        model: Model;
+        collection: Collection<Model>;
         make(tagName: string, attrs?: any, opts?: any): View;
         setElement(element: HTMLElement, delegate?: boolean): any;
         setElement(element: JQuery, delegate?: boolean): any;

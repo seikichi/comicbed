@@ -4,4 +4,4 @@ npm run-script preinstall
 npm install
 grunt setup
 
-tsd install requirejs jquery underscore
+tsd install requirejs underscore

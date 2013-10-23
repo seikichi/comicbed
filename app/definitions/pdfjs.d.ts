@@ -1,5 +1,3 @@
-/// <reference path="./DefinitelyTyped/jquery/jquery.d.ts" />
-
 declare module PDFJS {
   var version: string;
   var build: string;
@@ -20,12 +18,19 @@ declare module PDFJS {
     password?: string;
   }
 
-  interface Promise<T> {
+  class Promise<T> {
     isResolved: boolean;
     isRejected: boolean;
     resolve(value: T): void;
     reject(reason: string): void;
-    then<U>(onResolve: (value :T) => U, onReject?: (reason: any) => U): Promise<U>;
+    then<U>(onResolve: (value :T) => Promise<U>,
+            onReject?: (reason: any) => U): Promise<U>;
+    then<U>(onResolve: (value :T) => U,
+            onReject?: (reason: any) => U): Promise<U>;
+    then<U>(onResolve: (value :T) => Promise<U>,
+            onReject?: (reason: any) => Promise<U>): Promise<U>;
+    then<U>(onResolve: (value :T) => U,
+            onReject?: (reason: any) => Promise<U>): Promise<U>;
   }
 
   interface RenderTask extends Promise<void> {
@@ -57,14 +62,27 @@ declare module PDFJS {
     getData(objId: string): any;
   }
 
+  interface BidiResult {
+    str: string;
+    dir: string;
+  }
+
+  interface TextContent {
+    bidiTexts: BidiResult[];
+  }
+
   interface PDFPageProxy {
     pageNumber: number;
     objs: PDFObjects;
     pageInfo: { pageIndex: number; rotate: number; }
     view: number[];
     getViewport(scale: number, rotate?: number): PageViewport;
-    render(context: RenderContext): RenderContext;
+    getTextContent(): Promise<TextContent>;
+    render(context: RenderContext): RenderTask;
     destroy(): void;
+
+    // this method is added by seikichi
+    loadXObject(): Promise<void>;
   }
 }
 

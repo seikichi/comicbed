@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Test'em</title>
+    <link rel="stylesheet" href="assets/vendor/mocha/css/mocha.css"/>
+    <script src="assets/vendor/mocha/js/mocha.js"></script>
+    <script src="assets/vendor/chai/js/chai.js"></script>
+    <script src="assets/vendor/sinon/index.js"></script>
+    <script type="text/javascript">
+      mocha.setup('bdd');
+    </script>
+    <script src="/testem.js"></script>
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script type="text/javascript" defer>
+      var testfiles = [];
+      {{#serve_files}}testfiles.push("../{{src}}");{{/serve_files}}
+    </script>
+    <script data-main="app/test" src="assets/vendor/requirejs/js/require.js"></script>
+  </body>
+</html>

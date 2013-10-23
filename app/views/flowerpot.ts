@@ -1,53 +1,152 @@
-import $ = require('jquery');
-import templates = require('templates');
-import CompositeView = require('views/composite');
-
-// models
-import Book = require('models/book');
+import Factory = require('models/factory');
+import Reader = require('models/reader');
 import Setting = require('models/setting');
-
-// subviews
-import ContentView = require('views/content');
-import KeyEventHandler = require('views/key');
-import InputView = require('views/input');
-import FooterView = require('views/footer');
+import CompositeView = require('views/composite');
+import ScreenCollectionView = require('views/screens');
+import ModalView = require('views/modal');
+import ProgressView = require('views/progress');
 import HeaderView = require('views/header');
+import FooterView = require('views/footer');
 
-// exports FlowerpotView
+import templates = require('templates');
+import strings = require('utils/strings');
+
 export = FlowerpotView;
 
 class FlowerpotView extends CompositeView {
-  private template: (data: {[key:string]: any;}) => string;
-  private setting: Setting.ModelInterface;
-  private book: Book.ModelInterface;
-  private queryOptions: {[field:string]:string;};
-  private _keyEventHandler: KeyEventHandler;
+  private _template: HTMLTemplate;
+  private _queryOptions: {[field:string]:string;};
 
-  constructor(options: {[field:string]:string;}) {
-    this.template = templates.flowerpot;
-    this.setting = Setting.create(options);
-    this.book = Book.create(this.setting);
-    this.queryOptions = options;
-    this._keyEventHandler = new KeyEventHandler(this.book);
+  private _reader: Reader.Reader;
+  private _setting: Setting.Setting;
+  private _modal: ModalView;
+  private _header: HeaderView;
+  private _footer: FooterView;
 
-    super();
+  events: {[event:string]: any};
+
+  constructor(template: HTMLTemplate,
+              options: {[field:string]:string;}) {
+    this._template = template;
+    this._queryOptions = options;
+    this._modal = null;
+
+    this.events = {
+      'drop': 'onDrop',
+      'dragover': 'onDragOver',
+      'mouseenter #content': 'onLeaveMenu',
+      'mouseleave #content': 'onEnterMenu',
+    };
+    super({});
   }
 
-  initialize() {
-    if ('url' in this.queryOptions) {
-      this.book.openURL(this.queryOptions['url']);
+  initialize(): void {
+    this._setting = Factory.createSetting(this._queryOptions);
+    this._reader = Factory.createReader({
+      width: this.$el.width(),
+      height: this.$el.height()
+    }, this._setting);
+
+    this._header = new HeaderView({
+      template: templates.header,
+      reader: this._reader,
+    });
+    this.assign('#header', this._header);
+
+    this._footer = new FooterView({
+      template: templates.footer,
+      reader: this._reader,
+      setting: this._setting.screenSetting(),
+    });
+    this.assign('#footer', this._footer);
+
+    // Note: for debug
+    (<any>window).reader = this._reader;
+
+    this.listenTo(this._reader, 'change:status', () => {
+      // TODO(seikichi): fix those ugly code ...
+      var status = this._reader.status();
+      if (status === Reader.Status.Opened) {
+        this.assign('#content', new ScreenCollectionView({
+          el: this.$('#content'),
+          screens: this._reader.screens(),
+          setting: this._setting.screenSetting(),
+          mover: this._reader,
+          template: templates.screens,
+        }));
+
+        this.dissociate('#modal');
+        this.render();
+      } else {
+        this.dissociate('#content');
+
+        if (status === Reader.Status.Opening) {
+          this._modal = new ModalView({
+            title: 'Opening a new book',
+            el: this.$('#modal'),
+            template: templates.modal,
+            innerView: new ProgressView({reader: this._reader}),
+            buttonTexts: ['Cancel']
+          });
+          this.assign('#modal', this._modal);
+          this._modal.on('Cancel', () => {
+            console.log('cancel');
+            this._reader.close();
+          });
+        } else {
+          this.dissociate('#modal');
+        }
+        this.render();
+      }
+    });
+
+    if ('url' in this._queryOptions) {
+      // TODO(seikichi): is this safe?
+      var loc = document.location;
+      var url = encodeURI(this._queryOptions['url']);
+      var origin = loc.protocol + '//' + loc.host;
+      if (!strings.startsWith(url, loc.protocol + '//' + loc.host)) {
+        url = origin + '/' + url;
+      }
+
+      this._reader.openURL(url);
     }
+  }
 
-    this.assign('#content', new ContentView({book: this.book}));
-    this.listenTo(this.book, 'change:status', this.render);
+  onEnterMenu() {
+    this.showMenu();
+  }
 
-    this.assign('#input', new InputView(this.book, templates.input));
-    this.assign('#header', new HeaderView(this.book, templates.header));
-    this.assign('#footer', new FooterView(this.book, templates.footer));
+  onLeaveMenu() {
+    this.hideMenu();
+  }
+
+  showMenu(): void {
+    this._header.show();
+    this._footer.show();
+  }
+
+  hideMenu(): void {
+    this._header.hide();
+    this._footer.hide();
   }
 
   presenter(): string {
-    return this.template({});
+    return this._template({});
+  }
+
+  onDragOver(jqEvent: any) {
+   var event: DragEvent = jqEvent.originalEvent;
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  onDrop(jqEvent: any) {
+    var event: DragEvent = jqEvent.originalEvent;
+    event.stopPropagation();
+    event.preventDefault();
+    var files = event.dataTransfer.files;
+    if (files.length === 0) { return; }
+    this._reader.openFile(files[0]);
   }
 }
-

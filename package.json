@@ -22,6 +22,6 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "preinstall": "npm install -g grunt-cli requirejs typescript tsd"
+    "preinstall": "npm install -g grunt-cli requirejs typescript tsd testem"
   }
 }

@@ -1,90 +1,212 @@
 import _ = require('underscore');
 import Backbone = require('backbone');
-import logger = require('utils/logger');
+
+import Sort = require('models/sort');
+import Cache = require('models/cache');
+import Page = require('models/page');
+import Screen = require('models/screen');
+import Scaler = require('models/scaler');
+import Unarchiver = require('models/unarchiver');
+import Prefetch = require('models/prefetch');
 
 export = Setting;
 
 module Setting {
-  // public
-  export enum ViewMode { OnePage, TwoPage, }
-  export enum PageDirection { L2R, R2L, }
-  export interface ModelInterface {
-    // getter
-    viewMode(): ViewMode;
-    pageDirection(): PageDirection;
-    page(): number;
-    detectsSpreadPage(): boolean;
-    displaysOnlyImageInPdf(): boolean;
-    canvasScale(): number;
-    // setter
-    // TODO (seikichi): refactor these codes by using Typescirpt's property
-    setViewMode(mode: ViewMode): void;
-    setPageDirection(direction: PageDirection): void;
+  export interface ScreenSetting extends Screen.Setting {
     setDetectsSpreadPage(value: boolean): void;
-    setDisplaysOnlyImageInPdf(value: boolean): void;
-    setCanvasScale(scale: number): void;
+    setViewMode(mode: Screen.ViewMode): void;
+    setPageDirection(direction: Screen.PageDirection): void;
 
-    toJSON(): {[attrib:string]:any;};
-  }
-  export function create(options: {[key:string]:string;} = {}): ModelInterface {
-    var attributes: Attributes = {};
-    if ('viewMode' in options && options['viewMode'] in ViewMode) {
-      attributes.viewMode = ViewMode[options['viewMode']];
-    }
-    if ('pageDirection' in options && options['pageDirection'] in PageDirection) {
-      attributes.pageDirection = PageDirection[options['pageDirection']];
-    }
-    if ('page' in options && !_.isNaN(parseInt(options['page'], 10))) {
-      attributes.page = parseInt(options['page'], 10);
-    }
-    if ('canvasScale' in options && !_.isNaN(parseFloat(options['canvasScale']))) {
-      attributes.canvasScale = parseInt(options['canvasScale'], 10);
-    }
-    if ('detectsSpreadPage' in options) {
-      attributes.detectsSpreadPage = true;
-    }
-    if ('displaysOnlyImageInPdf' in options) {
-      attributes.displaysOnlyImageInPdf = true;
-    }
-    logger.info('SettingModel is created: attributes:', JSON.stringify(attributes));
-    return new SettingModel(attributes);
+    toggleViewMode(): void;
   }
 
-  // private
-  interface Attributes {
-    viewMode?: ViewMode;
-    pageDirection?: PageDirection;
-    page?: number;
-    detectsSpreadPage?: boolean;
-    displaysOnlyImageInPdf?: boolean;
-    canvasScale?: number;
+  export interface UnarchiverSetting extends Unarchiver.Setting {
+    setPdfjsCanvasScale(scale: number): void;
+    setDetectsImageXObjectPageInPdf(value: boolean): void;
   }
 
-  class SettingModel extends Backbone.Model<Attributes> implements ModelInterface {
-    defaults(): Attributes {
-      return {
-        viewMode: ViewMode.OnePage,
-        pageDirection: PageDirection.L2R,
-        page: 1,
-        detectsSpreadPage: false,
-        displaysOnlyImageInPdf: false,
-        canvasScale: 1,
-      };
-    }
-    constructor(attributes?: Attributes) {
-      super(attributes);
-    }
-    viewMode() { return <ViewMode>this.get('viewMode'); }
-    pageDirection() { return <PageDirection>this.get('pageDirection'); }
-    page() { return <number>this.get('page'); }
-    detectsSpreadPage() { return <boolean>this.get('detectsSpreadPage'); }
-    displaysOnlyImageInPdf() { return <boolean>this.get('displaysOnlyImageInPdf'); }
-    canvasScale() { return <number>this.get('canvasScale'); }
-
-    setViewMode(mode: ViewMode): void { this.set('viewMode', mode); }
-    setPageDirection(direction: PageDirection): void { this.set('pageDirection', direction); }
-    setDetectsSpreadPage(value: boolean): void { this.set('detectsSpreadPage', value); }
-    setDisplaysOnlyImageInPdf(value: boolean): void { this.set('displaysOnlyImageInPdf', value); }
-    setCanvasScale(scale: number): void { this.set('canvasScale', scale); }
+  export interface SortSetting extends Sort.Setting {
+    setOrder(order: Sort.Order): void;
+    setReverse(value: boolean): void;
   }
+
+  export interface CacheSetting extends Cache.Setting {
+    setCacheScreenNum(value: number): void;
+    setCachePageNum(value: number): void;
+  }
+
+  export interface Setting {
+    screenSetting(): ScreenSetting;
+    unarchiverSetting(): UnarchiverSetting;
+    sortSetting(): SortSetting;
+    cacheSetting(): CacheSetting;
+
+    scalerSetting(): Scaler.Setting;
+    prefetchSetting(): Prefetch.Setting;
+  }
+
+  export function create(params: {[key: string]:string;}): Setting {
+    return new SettingImpl(params);
+  }
+}
+
+class ScreenSettingModel extends Backbone.Model implements Setting.ScreenSetting {
+  defaults() {
+    return {
+      detectsSpreadPage: true,
+      viewMode: Screen.ViewMode.TwoPage,
+      pageDirection: Screen.PageDirection.R2L,
+    };
+  }
+  detectsSpreadPage() { return <boolean>this.get('detectsSpreadPage'); }
+  viewMode() { return <Screen.ViewMode>this.get('viewMode'); }
+  pageDirection() { return <Screen.PageDirection>this.get('pageDirection'); }
+  isSpreadPage(content: Page.Content): boolean {
+    return content.width > content.height;
+  }
+
+  setDetectsSpreadPage(value: boolean) { this.set('detectsSpreadPage', value); }
+  setViewMode(mode: Screen.ViewMode) { this.set('viewMode', mode); }
+  setPageDirection(direction: Screen.PageDirection) { this.set('pageDirection', direction); }
+
+  toggleViewMode(): void {
+    if (this.viewMode() === Screen.ViewMode.OnePage) {
+      this.set('viewMode', Screen.ViewMode.TwoPage);
+    } else {
+      this.set('viewMode', Screen.ViewMode.OnePage);
+    }
+  }
+}
+
+class CacheSettingModel extends Backbone.Model implements Setting.CacheSetting {
+  defaults() {
+    return {
+      cacheScreenNum: 7,
+      cachePageNum: 25,
+    };
+  }
+  cacheScreenNum() { return <number>this.get('cacheScreenNum'); }
+  cachePageNum() { return <number>this.get('cachePageNum'); }
+
+  setCacheScreenNum(value: number): void { this.set('cacheScreenNum', value)}
+  setCachePageNum(value: number): void { this.set('cachePageNum', value)}
+}
+
+class PrefetchSettingModel extends Backbone.Model implements Prefetch.Setting {
+  pagePrefetchNum() { return 10; }
+}
+
+class ScalerSettingModel extends Backbone.Model implements Scaler.Setting {
+  scaleMode() { return Scaler.ScaleMode.AlignVertical; }
+}
+
+class UnarchiverSettingModel extends Backbone.Model implements Unarchiver.Setting {
+  pageFileExtensions(): string[] {
+    return ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'tif', 'tiff'];
+  }
+  defaults() {
+    return {
+      pdfjsCanvasScale: 2,
+      detectsImageXObjectPageInPdf: true,
+    };
+  }
+  pdfjsCanvasScale(): number { return <number>this.get('pdfjsCanvasScale'); }
+  detectsImageXObjectPageInPdf(): boolean { return <boolean>this.get('detectsImageXObjectPageInPdf'); }
+
+  setPdfjsCanvasScale(scale: number) { this.set('pdfjsCanvasScale', scale); }
+  setDetectsImageXObjectPageInPdf(value: boolean) { this.set('detectsImageXObjectPageInPdf', value); }
+}
+
+
+class SortSettingModel extends Backbone.Model implements Sort.Setting {
+  defaults() {
+    return {
+      order: Sort.Order.NameNatural,
+      reverse: false,
+    };
+  }
+  order() { return <Sort.Order>this.get('order'); }
+  reverse() { return <boolean>this.get('reverse'); }
+
+  setOrder(order: Sort.Order) { this.set('order', order); }
+  setReverse(value: boolean) { this.set('reverse', value); }
+}
+
+
+class SettingImpl implements Setting.Setting {
+  private _screenSetting: Setting.ScreenSetting;
+  private _unarchiverSetting: UnarchiverSettingModel;
+  private _cacheSetting: CacheSettingModel;
+  private _sortSetting: SortSettingModel;
+  private _scalerSetting: Scaler.Setting;
+  private _prefetchSetting: Prefetch.Setting;
+
+  constructor(urlParams: {[key: string]:string;}) {
+    this._screenSetting = new ScreenSettingModel();
+    this._scalerSetting = new ScalerSettingModel();
+    this._unarchiverSetting = new UnarchiverSettingModel();
+    this._cacheSetting = new CacheSettingModel();
+    this._sortSetting = new SortSettingModel();
+    this._prefetchSetting = new PrefetchSettingModel();
+
+    // sort
+    if ('sort.reverse' in urlParams
+        && urlParams['sort.reverse'] !== 'false') {
+      this._sortSetting.setReverse(true);
+    }
+    if ('sort.order' in urlParams) {
+      var order = Sort.Order[urlParams['sort.order']];
+      if (typeof order !== 'undefined') {
+        this._sortSetting.setOrder(order);
+      }
+    }
+    // unarchiver
+    if ('unarchiver.pdfjsCanvasScale' in urlParams) {
+      var scale = urlParams['unarchiver.pdfjsCanvasScale'] || 1;
+      this._unarchiverSetting.setPdfjsCanvasScale(scale);
+    }
+    if ('unarchiver.detectsImageXObjectPageInPdf' in urlParams
+        && urlParams['unarchiver.detectsImageXObjectPageInPdf'] !== 'false') {
+      this._unarchiverSetting.setDetectsImageXObjectPageInPdf(true);
+    }
+    // screen
+    if ('screen.detectsSpreadPage' in urlParams &&
+        urlParams['screen.detectsSpreadPage'] !== 'false') {
+      this._screenSetting.setDetectsSpreadPage(true);
+    }
+    if ('screen.viewMode' in urlParams) {
+      var mode = Screen.ViewMode[urlParams['screen.viewMode']];
+      if (typeof mode !== 'undefined') {
+        this._screenSetting.setViewMode(mode);
+      }
+    }
+    if ('screen.pageDirection' in urlParams) {
+      var direction = Screen.PageDirection[urlParams['screen.pageDirection']];
+      if (typeof direction !== 'undefined') {
+        this._screenSetting.setPageDirection(direction);
+      }
+    }
+    // cache
+    if ('cache.cachePageNum' in urlParams) {
+      var value = parseInt(urlParams['cache.cachePageNum'], 10);
+      if (value) {
+        this._cacheSetting.setCachePageNum(value);
+      }
+    }
+    if ('cache.cacheScreenNum' in urlParams) {
+      var value = parseInt(urlParams['cache.cacheScreenNum'], 10);
+      if (value) {
+        this._cacheSetting.setCacheScreenNum(value);
+      }
+    }
+
+    // scaler (TODO)
+  }
+
+  screenSetting() { return this._screenSetting; }
+  unarchiverSetting() { return this._unarchiverSetting; }
+  scalerSetting() { return this._scalerSetting; }
+  cacheSetting() { return this._cacheSetting; }
+  sortSetting() { return this._sortSetting; }
+  prefetchSetting() { return this._prefetchSetting; }
 }

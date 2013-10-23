@@ -1,4 +1,3 @@
-import $ = require('jquery');
 import Backbone = require('backbone');
 
 export = BaseView;
@@ -21,9 +20,3 @@ class BaseView extends Backbone.View {
     this.remove();
   }
 }
-
-// module BaseView {
-//   interface Options {
-//     $el: JQuery;
-//   }
-// }

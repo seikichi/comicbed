@@ -45,7 +45,7 @@ module.exports = function(grunt) {
       },
       release: {
         options: {
-          port: 9000,
+          port: 9001,
           base: 'dist/',
           keepalive: true
         }
@@ -101,9 +101,46 @@ module.exports = function(grunt) {
     requirejs: {
       compile: {
         options: {
+          baseUrl: 'app',
           mainConfigFile: "app/config.js",
-          out: "dist/app/config.js",
-          name: 'config',
+          out: "dist/app/main.js",
+          name: 'main',
+          wrap: false
+        }
+      },
+      pdf_unarchiver: {
+        options: {
+          baseUrl: 'app',
+          mainConfigFile: "app/config.js",
+          out: "dist/app/models/pdf_unarchiver.js",
+          name: 'models/pdf_unarchiver',
+          wrap: false
+        }
+      },
+      zip_unarchiver: {
+        options: {
+          baseUrl: 'app',
+          mainConfigFile: "app/config.js",
+          out: "dist/app/models/zip_unarchiver.js",
+          name: 'models/zip_unarchiver',
+          wrap: false
+        }
+      },
+      rar_unarchiver: {
+        options: {
+          baseUrl: 'app',
+          mainConfigFile: "app/config.js",
+          out: "dist/app/models/rar_unarchiver.js",
+          name: 'models/rar_unarchiver',
+          wrap: false
+        }
+      },
+      app: {
+        options: {
+          baseUrl: 'app',
+          mainConfigFile: "app/config.js",
+          out: "dist/app/app.js",
+          name: 'app',
           wrap: false
         }
       }

@@ -22,7 +22,16 @@ class CompositeView extends BaseView {
   }
 
   assign(selector: string, view: BaseView): void {
+    if (selector in this.subViews) { this.dissociate(selector); }
     this.subViews[selector] = view;
+  }
+
+  dissociate(selector: string): void {
+    var view = this.subViews[selector];
+    if (view) {
+      view.close();
+    }
+    delete this.subViews[selector];
   }
 
   close(): void {
