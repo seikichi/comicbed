@@ -33,7 +33,7 @@ class ZipUnarchiver implements Unarchiver.Unarchiver {
     var filenames = this._reader.getFileNames();
     var extensions = this._setting.pageFileExtensions();
     for (var i = 0, len = filenames.length; i < len; ++i) {
-      if (extensions.indexOf(filenames[i].split('.').pop()) !== -1) {
+      if (extensions.indexOf(filenames[i].split('.').pop().toLowerCase()) !== -1) {
         this._filenames.push(filenames[i]);
       }
     }
