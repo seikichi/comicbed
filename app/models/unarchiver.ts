@@ -72,6 +72,7 @@ class FactoryImpl implements Unarchiver.Factory {
         fileType = FileType.Pdf;
         break;
       case 'application/zip':
+      case 'application/x-zip':
         fileType = FileType.Zip;
         break;
       case 'application/rar':
@@ -85,6 +86,9 @@ class FactoryImpl implements Unarchiver.Factory {
     }
     if (fileType === FileType.Other) {
       var extension = url.split('?').shift().split('.').pop();
+      if (options.name) {
+        extension = options.name.split('?').shift().split('.').pop();
+      }
       switch (extension) {
       case 'pdf':
         fileType = FileType.Pdf;
