@@ -9,8 +9,8 @@ require(['config'], () => {
       $.mobile.hashListeningEnabled = false;
       $.mobile.pushStateEnabled = false;
       $.mobile.phonegapNavigationEnabled = true;
-      $.mobile.page.prototype.options.domCache = false;
-      $.mobile.page.prototype.options.degradeInputs.date = true;
+      // $.mobile.page.prototype.options.domCache = false;
+      // $.mobile.page.prototype.options.degradeInputs.date = true;
     });
 
     require(['jquerymobile'], ($: typeof $) => {

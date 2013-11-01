@@ -30,10 +30,13 @@ class HeaderView extends BaseView {
   }
 
   initialize() {
-    // this.listenTo(this._reader, 'change', () => { this.render(); });
     this.listenTo(this._reader, 'change', () => {
-      this.$('.title').html(this._reader.title());
+      this.render();
+      this.$el.trigger('create');
     });
+    // this.listenTo(this._reader, 'change', () => {
+    //   this.$('.title').html(this._reader.title());
+    // });
   }
 
   presenter() {
