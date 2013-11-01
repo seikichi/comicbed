@@ -1,5 +1,5 @@
 {{#if opened}}
-<label for="page-slider">{{currentPageNum}}/{{totalPageNum}}</label>
+<label id="page-slider-label" for="page-slider">{{currentPageNum}}/{{totalPageNum}}</label>
 <input class="{{#if reverse}}reverse-range{{/if}}"
        type="range"
        name="slider"
@@ -9,11 +9,27 @@
        max="{{totalPageNum}}"
        data-highlight="true" />
 {{/if}}
+<div style="height: 0px;width:0px; overflow:hidden;">
+  <input id="file-input" type="file" value="upload"/>
+</div>
 <div data-role="navbar">
   <ul>
-    <li><button data-role="button" data-icon="file" data-iconpos="bottom">File</button></li>
-    <li><button data-role="button" data-icon="dropbox" data-iconpos="bottom">Dropbox</button></li>
-    <li><button data-role="button" data-icon="google-drive" data-iconpos="bottom">Google Drive</button></li>
-    <li><button data-role="button" data-icon="gear" data-iconpos="bottom">Config</button></li>
+    <li><button id="file-button"
+                data-role="button"
+                data-icon="file"
+                data-iconpos="bottom">File</button></li>
+    <li><button id="dropbox-button"
+                data-role="button"
+                data-icon="dropbox"
+                data-iconpos="bottom">Dropbox</button></li>
+    <li><button id="google-drive-button"
+                data-role="button"
+                data-icon="google-drive"
+                data-iconpos="bottom">Google Drive</button></li>
+    <li><button id="setting-button"
+                data-role="button"
+                data-icon="gear"
+                data-iconpos="bottom">Config</button></li>
   </ul>
 </div>
+

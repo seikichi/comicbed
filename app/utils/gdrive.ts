@@ -27,17 +27,43 @@ module GoogleDriveStorage {
     });
   }
 
+  function waitUntilAuthorizable(gapi: any, trial: number, timeout: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      var rest = trial;
+      var f = () => {
+        setTimeout(() => {
+          if ('auth' in gapi && 'authorize' in gapi.auth) {
+            resolve(null);
+            return;
+          }
+          rest -= 1;
+          if (rest <= 0) {
+            reject('gapi.auth.authorize');
+            return;
+          }
+          f();
+        }, timeout);
+      };
+      f();
+    });
+  }
+
   export function createPicker(): Picker.FilePicker {
     return {
       pick: () => {
         var gapi: any = null;
         return PromiseUtil.require('gapi').then((_gapi: typeof gapi) => {
           return PromiseUtil.require('gclient');
-        }).then(PromiseUtil.wait(1)).then((_gapi: any) => {
+        }).then((_gapi: any) => {
           gapi = _gapi;
-          return authorizeGoogleDrive(gapi, true)
+          return waitUntilAuthorizable(gapi, 10, 200);
+        }).then(() => {
+          return authorizeGoogleDrive(gapi, true);
         }).catch((reason: any) => {
-          return authorizeGoogleDrive(gapi, false)
+          if (reason === 'gapi.auth.authorize') {
+            throw reason;
+          }
+          return authorizeGoogleDrive(gapi, false);
         }).then(() => {
           return new Promise((resolve, reject) => {
             gapi.client.load('drive', 'v2', () => {

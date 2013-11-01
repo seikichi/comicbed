@@ -106,3 +106,7 @@ input.ui-slider-input { display : none !important; }
     -moz-box-shadow: inset 0 1px 3px rgba(0,0,0,.2) !important;
     box-shadow: inset 0 1px 3px rgba(0,0,0,.2) !important;
 }
+
+#page-slider-label {
+    font-weight: bold;
+}
