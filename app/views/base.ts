@@ -17,7 +17,11 @@ class BaseView extends Backbone.View {
   }
 
   close(): void {
-    this.remove();
+    this.$el.empty();
+    this.stopListening();
+    this.undelegateEvents();
+    this.el = null;
+    this.$el = null;
   }
 }
 

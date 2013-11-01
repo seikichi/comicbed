@@ -146,6 +146,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     }).progressed((progression: Progress.Progression) => {
       this._progress.update(progression);
     }).catch((reason: any) => {
+      console.log(reason.stack);
       if (reason.name === 'CancellationError') {
         this.setStatus(Reader.Status.Closed);
       } else {

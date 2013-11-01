@@ -65,9 +65,9 @@ class FlowerpotView extends CompositeView {
     (<any>window).reader = this._reader;
 
     this.listenTo(this._reader, 'change:status', () => {
-      // TODO(seikichi): fix those ugly code ...
       var status = this._reader.status();
-      if (status === Reader.Status.Opened) {
+      switch (status) {
+      case Reader.Status.Opened:
         this.assign('#content', new ScreenCollectionView({
           el: this.$('#content'),
           screens: this._reader.screens(),
@@ -75,29 +75,10 @@ class FlowerpotView extends CompositeView {
           mover: this._reader,
           template: templates.screens,
         }));
-
-        // this.dissociate('#modal');
-        // this.render();
-      } else {
+        break;
+      case Reader.Status.Closed:
         this.dissociate('#content');
-
-        if (status === Reader.Status.Opening) {
-          this._modal = new ModalView({
-            title: 'Opening a new book',
-            el: this.$('#modal'),
-            template: templates.modal,
-            innerView: new ProgressView({reader: this._reader}),
-            buttonTexts: ['Cancel']
-          });
-          this.assign('#modal', this._modal);
-          this._modal.on('Cancel', () => {
-            console.log('cancel');
-            this._reader.close();
-          });
-        } else {
-          this.dissociate('#modal');
-        }
-        // this.render();
+        break;
       }
     });
 
@@ -113,24 +94,6 @@ class FlowerpotView extends CompositeView {
       this._reader.openURL(url);
     }
   }
-
-  // onEnterMenu() {
-  //   this.showMenu();
-  // }
-
-  // onLeaveMenu() {
-  //   this.hideMenu();
-  // }
-
-  // showMenu(): void {
-  //   this._header.show();
-  //   this._footer.show();
-  // }
-
-  // hideMenu(): void {
-  //   this._header.hide();
-  //   this._footer.hide();
-  // }
 
   presenter(): string {
     return this._template({});
