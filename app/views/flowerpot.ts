@@ -55,12 +55,11 @@ class FlowerpotView extends CompositeView {
       reader: this._reader,
     }));
 
-    // this._footer = new FooterView({
-    //   template: templates.footer,
-    //   reader: this._reader,
-    //   setting: this._setting.screenSetting(),
-    // });
-    // this.assign('#footer', this._footer);
+    this.assign('#footer', new FooterView({
+      template: templates.footer,
+      reader: this._reader,
+      setting: this._setting.screenSetting(),
+    }));
 
     // Note: for debug
     (<any>window).reader = this._reader;

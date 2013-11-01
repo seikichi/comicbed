@@ -1,47 +1,60 @@
-// import Backbone = require('backbone');
-// import BaseView = require('views/composite');
-import CompositeView = require('views/composite');
-// import Reader = require('models/reader');
-// import templates = require('templates');
-// import Screen = require('models/screen');
+import Backbone = require('backbone');
+import BaseView = require('views/base');
+import Reader = require('models/reader');
+import templates = require('templates');
+import Screen = require('models/screen');
 
 export = FooterView;
 
-class FooterView extends CompositeView {
-//   private _reader: Reader.Reader;
-//   private _template: HTMLTemplate;
-//   private _setting: Screen.Setting;
+class FooterView extends BaseView {
+  private _reader: Reader.Reader;
+  private _template: HTMLTemplate;
+  private _setting: Screen.Setting;
 
-//   private _options: FooterView.Options;
-//   events: {[event:string]:string;};
+  private _options: FooterView.Options;
+  events: {[event:string]:string;};
 
-//   constructor(options: FooterView.Options) {
-//     this._options = options;
-//     this._reader = options.reader;
-//     this._template = options.template;
-//     this._setting = options.setting;
-//     super(options);
-//   }
+  constructor(options: FooterView.Options) {
+    this._options = options;
+    this._reader = options.reader;
+    this._template = options.template;
+    this._setting = options.setting;
+    super(options);
+  }
 
-//   show() {
-//     this.$('#footer-content-wrapper').slideDown();
-//   }
-//   hide() {
-//     this.$('#footer-content-wrapper').slideUp();
-//   }
+  initialize() {
+    this.listenTo(this._reader, 'change', () => {
+      this.render();
+      this.$el.trigger('create');
+    });
+  }
 
-//   initialize() {
-//     this.assign('#footer-content', new FooterContentView({
-//       reader: this._reader,
-//       template: templates.footercontent,
-//       setting: this._setting,
-//     }));
-//   }
+  presenter() {
+    var opened = this._reader.status() === Reader.Status.Opened;
+    var total = this._reader.totalPageNum();
+    var current = this._reader.currentPageNum() + 1;
+    var value = current;
+    var reverse = this._setting.pageDirection() === Screen.PageDirection.R2L;
+    if (reverse) {
+      value = total - value + 1;
+    }
+    return this._template({
+      opened: opened,
+      alignedCurrentPageNum: value,
+      currentPageNum: current,
+      totalPageNum: total,
+      reverse: reverse,
+    });
+  }
+}
 
-//   presenter() {
-//     return this._template({});
-//   }
-// }
+module FooterView {
+  export interface Options {
+    reader: Reader.Reader;
+    template: HTMLTemplate;
+    setting: Screen.Setting;
+  }
+}
 
 // module FooterView {
 //   export interface Options extends Backbone.ViewOptions {
@@ -109,4 +122,4 @@ class FooterView extends CompositeView {
 //     }
 //     this._reader.goToPage(value - 1);
 //   }
-}
+// }

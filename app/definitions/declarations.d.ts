@@ -82,7 +82,6 @@ declare module "templates" {
     flowerpot: HTMLTemplate;
     modal: HTMLTemplate;
     progress: HTMLTemplate;
-    content: HTMLTemplate;
     footer: HTMLTemplate;
     header: HTMLTemplate;
     screens: HTMLTemplate;
