@@ -1,3 +1,4 @@
+import Backbone = require('backbone');
 import Promise = require('promise');
 import PromiseUtil = require('utils/promise');
 import Page = require('models/page');
@@ -19,15 +20,31 @@ module Prefetch {
 }
 
 // private
-class PagePrefetchScreensImpl implements Screens.Screens {
+class PagePrefetchScreensImpl extends Backbone.Model implements Screens.Screens {
+  private _inner: Screens.Screens;
+  private _setting: Prefetch.Setting;
   private _prefetchPromise: Promise<void>;
 
-  constructor(private _inner: Screens.Screens, private _setting: Prefetch.Setting) {
+  constructor(inner: Screens.Screens, setting: Prefetch.Setting) {
+    this._inner = inner;
+    this._setting = setting;
     this._prefetchPromise = Promise.fulfilled(null);
+    super();
   }
+
+  initialize() {
+    this.listenTo(this._inner, 'all', (event: string) => {
+      this.trigger(event);
+    });
+  }
+
   currentScreen() { return this._inner.currentScreen(); }
   prevScreens() { return this._inner.prevScreens(); }
   nextScreens() { return this._inner.nextScreens(); }
+
+  current() { return this._inner.current(); }
+  prev() { return this._inner.prev(); }
+  next() { return this._inner.next(); }
 
   update(pages: Pages.Collection, params: Screen.UpdateParams): Promise<void> {
     this._prefetchPromise.cancel();

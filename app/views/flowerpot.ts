@@ -1,3 +1,4 @@
+import $ = require('jquery');
 import Factory = require('models/factory');
 import Reader = require('models/reader');
 import Setting = require('models/setting');
@@ -20,8 +21,7 @@ class FlowerpotView extends CompositeView {
   private _reader: Reader.Reader;
   private _setting: Setting.Setting;
   private _modal: ModalView;
-  private _header: HeaderView;
-  private _footer: FooterView;
+  // private _footer: FooterView;
 
   events: {[event:string]: any};
 
@@ -30,6 +30,9 @@ class FlowerpotView extends CompositeView {
     this._template = template;
     this._queryOptions = options;
     this._modal = null;
+
+    this.attributes = {'data-role': 'page'};
+    this.id = 'flowerpot';
 
     this.events = {
       'drop': 'onDrop',
@@ -47,18 +50,17 @@ class FlowerpotView extends CompositeView {
       height: this.$el.height()
     }, this._setting);
 
-    this._header = new HeaderView({
+    this.assign('#header', new HeaderView({
       template: templates.header,
       reader: this._reader,
-    });
-    this.assign('#header', this._header);
+    }));
 
-    this._footer = new FooterView({
-      template: templates.footer,
-      reader: this._reader,
-      setting: this._setting.screenSetting(),
-    });
-    this.assign('#footer', this._footer);
+    // this._footer = new FooterView({
+    //   template: templates.footer,
+    //   reader: this._reader,
+    //   setting: this._setting.screenSetting(),
+    // });
+    // this.assign('#footer', this._footer);
 
     // Note: for debug
     (<any>window).reader = this._reader;
@@ -75,8 +77,8 @@ class FlowerpotView extends CompositeView {
           template: templates.screens,
         }));
 
-        this.dissociate('#modal');
-        this.render();
+        // this.dissociate('#modal');
+        // this.render();
       } else {
         this.dissociate('#content');
 
@@ -96,7 +98,7 @@ class FlowerpotView extends CompositeView {
         } else {
           this.dissociate('#modal');
         }
-        this.render();
+        // this.render();
       }
     });
 
@@ -113,23 +115,23 @@ class FlowerpotView extends CompositeView {
     }
   }
 
-  onEnterMenu() {
-    this.showMenu();
-  }
+  // onEnterMenu() {
+  //   this.showMenu();
+  // }
 
-  onLeaveMenu() {
-    this.hideMenu();
-  }
+  // onLeaveMenu() {
+  //   this.hideMenu();
+  // }
 
-  showMenu(): void {
-    this._header.show();
-    this._footer.show();
-  }
+  // showMenu(): void {
+  //   this._header.show();
+  //   this._footer.show();
+  // }
 
-  hideMenu(): void {
-    this._header.hide();
-    this._footer.hide();
-  }
+  // hideMenu(): void {
+  //   this._header.hide();
+  //   this._footer.hide();
+  // }
 
   presenter(): string {
     return this._template({});

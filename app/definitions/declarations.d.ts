@@ -84,9 +84,7 @@ declare module "templates" {
     progress: HTMLTemplate;
     content: HTMLTemplate;
     footer: HTMLTemplate;
-    footercontent: HTMLTemplate;
     header: HTMLTemplate;
-    headercontent: HTMLTemplate;
     screens: HTMLTemplate;
     screen: HTMLTemplate;
   };

@@ -20,3 +20,4 @@ class BaseView extends Backbone.View {
     this.remove();
   }
 }
+

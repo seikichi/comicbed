@@ -14,13 +14,18 @@ module Screens {
     at(index: number): Screen.Screen;
   }
 
-  export interface Screens {
-    currentScreen(): Screen.Screen;
-    prevScreens(): Collection;
-    nextScreens(): Collection;
+  export interface Screens extends Events.Events {
+    current(): Screen.Screen;
+    prev(): Screen.Screen;
+    next(): Screen.Screen;
 
     update(pages: Pages.Collection, params: Screen.UpdateParams): Promise<void>;
     resize(width: number, height: number): void;
+
+    // deprecated
+    currentScreen(): Screen.Screen;
+    prevScreens(): Collection;
+    nextScreens(): Collection;
   }
 
   export function create(size: Screen.Size, factory: Screen.Factory): Screens {
@@ -28,10 +33,9 @@ module Screens {
   }
 }
 
-class ScreenCollection extends Backbone.Collection<Screen.Screen> implements Screens.Collection {
-}
+class ScreenCollection extends Backbone.Collection<Screen.Screen> implements Screens.Collection {}
 
-class ScreenWithOnePrevNext implements Screens.Screens {
+class ScreenWithOnePrevNext extends Backbone.Model implements Screens.Screens {
   private _size: Screen.Size;
   private _factory: Screen.Factory;
 
@@ -53,6 +57,16 @@ class ScreenWithOnePrevNext implements Screens.Screens {
     this._nextScreens.add(this._factory.create(this._size));
 
     this._previousUpdatePromise = Promise.fulfilled(null);
+
+    super();
+  }
+
+  current(): Screen.Screen { return this._currentScreen; }
+  prev(): Screen.Screen {
+    return this._prevScreens.length > 0 ? this._prevScreens.at(0) : null;
+  }
+  next(): Screen.Screen {
+    return this._nextScreens.length > 0 ? this._nextScreens.at(0) : null;
   }
 
   currentScreen(): Screen.Screen { return this._currentScreen; }
@@ -79,6 +93,8 @@ class ScreenWithOnePrevNext implements Screens.Screens {
     else if (this._nextScreens.length === 0) {
       this._nextScreens.add(this._factory.create(this._size));
     }
+
+    this.trigger('change');
 
     var currentScreenPages: number = 1;
     this._previousUpdatePromise = this._currentScreen.update(pages, params).then(() => {

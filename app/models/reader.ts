@@ -17,11 +17,12 @@ module Reader {
 
   export interface Reader extends Events.Events {
     // open/close
-    openURL(url: string, options?: Options): Promise<Reader>;
-    openFile(file: File): Promise<Reader>;
+    openURL(url: string, options?: Options): Promise<Screens.Screens>;
+    openFile(file: File): Promise<Screens.Screens>;
     close(): void;
     progress(): Progress.Progress;
     // properties
+    title(): string;
     status(): Status;
     currentPageNum(): number;
     totalPageNum(): number;
@@ -31,8 +32,9 @@ module Reader {
     goPrevScreen(): void;
     goToPage(pageNum: number): void;
     // other
-    screens(): Screens.Screens;
     resize(width: number, height: number): void;
+    // deprecated
+    screens(): Screens.Screens;
   }
 
   export function create(bookFactory: Book.Factory,
@@ -57,7 +59,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   private _setting: Setting.Setting;
   // mutable members
   private _book: Book.Book;
-  private _promise: Promise<Reader.Reader>;
+  private _promise: Promise<Screens.Screens>;
   private _progress: Progress.Progress;
 
   // ctor & initializer (TODO);
@@ -99,6 +101,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     };
   }
   //// getter
+  title(): string { return this._book !== null ? this._book.title() : ''; }
   status(): Reader.Status { return <Reader.Status>this.get('status'); }
   currentPageNum(): number { return <number>this.get('currentPageNum'); }
   totalPageNum(): number { return <number>this.get('totalPageNum'); }
@@ -116,7 +119,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   progress(): Progress.Progress { return this._progress; }
 
   // open/close;
-  openFile(file: File): Promise<Reader.Reader> {
+  openFile(file: File): Promise<Screens.Screens> {
     var url: string = (<any>window).URL.createObjectURL(file);
     return this.openURL(url, {
       name: file.name,
@@ -124,7 +127,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     });
   }
 
-  openURL(url: string, options?: Reader.Options): Promise<Reader.Reader> {
+  openURL(url: string, options?: Reader.Options): Promise<Screens.Screens> {
     this.close();
     this.setStatus(Reader.Status.Opening);
     this._progress.update({
@@ -139,7 +142,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
       this.resetReadingInfo();
       this.setStatus(Reader.Status.Opened);
       this.goToPage(this.currentPageNum());
-      return this;
+      return this._screens;
     }).progressed((progression: Progress.Progression) => {
       this._progress.update(progression);
     }).catch((reason: any) => {
