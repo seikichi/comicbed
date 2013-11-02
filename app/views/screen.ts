@@ -5,11 +5,13 @@ import Spinner = require('spin');
 export = ScreenView;
 
 class ScreenView extends BaseView {
+  private _isCenter: boolean;
   private _screen: Screen.Screen;
   private _spinner: Spinner;
   private _template: HTMLTemplate;
 
   constructor(options: ScreenView.Options) {
+    this._isCenter = options.isCenter;
     this._screen = options.screen;
     this._spinner = new Spinner();
     this._template = options.template;
@@ -27,7 +29,7 @@ class ScreenView extends BaseView {
   }
 
   presenter() {
-    return this._template({});
+    return this._template({isCenter: this._isCenter});
   }
 
   render() {
@@ -54,6 +56,7 @@ class ScreenView extends BaseView {
 
 module ScreenView {
   export interface Options extends Backbone.ViewOptions {
+    isCenter: boolean;
     screen: Screen.Screen;
     template: HTMLTemplate;
   }

@@ -103,6 +103,7 @@ class ScreenCollectionView extends BaseView {
     // create child views and insert those render result
     for (var i = 0, len = screens.length; i < len; ++i) {
       var view = new ScreenView({
+        isCenter: i === centerPageIndex,
         tagName: 'li',
         screen: screens[i],
         template: templates.screen,

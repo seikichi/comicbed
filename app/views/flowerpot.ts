@@ -20,8 +20,6 @@ class FlowerpotView extends CompositeView {
 
   private _reader: Reader.Reader;
   private _setting: Setting.Setting;
-  private _modal: ModalView;
-  // private _footer: FooterView;
 
   events: {[event:string]: any};
 
@@ -29,7 +27,6 @@ class FlowerpotView extends CompositeView {
               options: {[field:string]:string;}) {
     this._template = template;
     this._queryOptions = options;
-    this._modal = null;
 
     this.attributes = {'data-role': 'page'};
     this.id = 'flowerpot';
@@ -37,8 +34,8 @@ class FlowerpotView extends CompositeView {
     this.events = {
       'drop': 'onDrop',
       'dragover': 'onDragOver',
-      'mouseenter #content': 'onLeaveMenu',
-      'mouseleave #content': 'onEnterMenu',
+      'mouseleave #menu-remove-area': 'onEnterMenu',
+      'mouseenter #menu-remove-area': 'onLeaveMenu',
     };
     super({});
   }
@@ -93,6 +90,14 @@ class FlowerpotView extends CompositeView {
 
       this._reader.openURL(url);
     }
+  }
+
+  onEnterMenu() {
+    this.$('#header, #footer').slideDown();
+  }
+
+  onLeaveMenu() {
+    this.$('#header, #footer').slideUp();
   }
 
   presenter(): string {

@@ -114,3 +114,9 @@ input.ui-slider-input { display : none !important; }
 #page-slider-label {
     font-weight: bold;
 }
+
+#content #menu-remove-area {
+    top: 10%;
+    height: 80%;
+    background-color: rgba(0, 0, 0, 0);
+}
