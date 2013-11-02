@@ -1,6 +1,7 @@
 import BaseView = require('views/base');
 import Screen = require('models/screen');
 import Spinner = require('spin');
+import device = require('utils/device')
 
 export = ScreenView;
 
@@ -29,7 +30,10 @@ class ScreenView extends BaseView {
   }
 
   presenter() {
-    return this._template({isCenter: this._isCenter});
+    return this._template({
+      isMobile: device.isMobile,
+      isCenter: this._isCenter
+    });
   }
 
   render() {

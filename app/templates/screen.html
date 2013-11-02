@@ -1,6 +1,14 @@
 <div class="screen"></div>
 {{#if isCenter}}
 <div class="input">
+  {{#if isMobile}}
+  <div id="mobile-touch-area">
+    <div id="mobile-touch-move-left"></div>
+    <div id="mobile-touch-toggle-menu"></div>
+    <div id="mobile-touch-move-right"></div>
+  </div>
+  {{else}}
   <div id="menu-remove-area"></div>
+  {{/if}}
 </div>
 {{/if}}

@@ -8,6 +8,7 @@ import Screens = require('collections/screens');
 import Reader = require('models/reader');
 import fullscreen = require('utils/fullscreen');
 import templates = require('templates');
+import device = require('utils/device');
 
 export = ScreenCollectionView;
 
@@ -53,6 +54,12 @@ class ScreenCollectionView extends BaseView {
       'contextmenu': 'onRightClick',
       'keydown': 'onKeyDown',
     };
+    if (device.isMobile()) {
+      this.events = {
+        'tap #mobile-touch-move-left': 'onMobileLeft',
+        'tap #mobile-touch-move-right': 'onMobileRight',
+      };
+    }
     super(options);
   }
 
@@ -175,6 +182,24 @@ class ScreenCollectionView extends BaseView {
 
   goPrev(): void {
     this._mover.goPrevScreen();
+  }
+
+  onMobileLeft(event: Event): void {
+    var pageDirection = this._setting.pageDirection();
+    if (pageDirection === Screen.PageDirection.R2L) {
+      this.onLeftClick();
+    } else {
+      this.onRightClick(event);
+    }
+  }
+
+  onMobileRight(event: Event): void {
+    var pageDirection = this._setting.pageDirection();
+    if (pageDirection === Screen.PageDirection.L2R) {
+      this.onLeftClick();
+    } else {
+      this.onRightClick(event);
+    }
   }
 
   onLeftClick(): void {

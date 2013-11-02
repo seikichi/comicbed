@@ -36,6 +36,7 @@ class FlowerpotView extends CompositeView {
       'dragover': 'onDragOver',
       'mouseleave #menu-remove-area': 'onEnterMenu',
       'mouseenter #menu-remove-area': 'onLeaveMenu',
+      'tap #mobile-touch-toggle-menu': 'onToggleMenu',
     };
     super({});
   }
@@ -73,8 +74,10 @@ class FlowerpotView extends CompositeView {
           template: templates.screens,
         }));
         break;
+      case Reader.Status.Error:
       case Reader.Status.Closed:
         this.dissociate('#content');
+        this.onEnterMenu();
         break;
       }
     });
@@ -98,6 +101,10 @@ class FlowerpotView extends CompositeView {
 
   onLeaveMenu() {
     this.$('#header, #footer').slideUp();
+  }
+
+  onToggleMenu() {
+    this.$('#header, #footer').slideToggle();
   }
 
   presenter(): string {
