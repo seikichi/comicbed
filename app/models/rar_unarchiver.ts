@@ -1,3 +1,4 @@
+import _ = require('underscore');
 import Promise = require('promise');
 import PromiseUtil = require('utils/promise');
 import Unarchiver = require('models/unarchiver');
@@ -38,12 +39,15 @@ class RarUnarchiver implements Unarchiver.Unarchiver {
         this._filenames.push(entry.name);
       }
     }
+    // TODO(seikichi): fix
+    this._filenames = _.uniq(this._filenames);
     this._previousUnpackPromise = Promise.fulfilled(null);
   }
 
   archiveName(): string { return this._name; }
   filenames(): string[] { return this._filenames; }
   unpack(name: string): Promise<Unarchiver.Content> {
+    console.log(name);
     this._previousUnpackPromise.cancel();
 
     this._previousUnpackPromise = PromiseUtil.wait<void>(1)(null)
