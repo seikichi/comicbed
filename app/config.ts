@@ -9,7 +9,7 @@ require.config({
     sprintf: '../assets/vendor/sprintf/js/sprintf',
     jsziptools: '../assets/vendor/jsziptools/js/jsziptools.min',
     spin: '../assets/vendor/spin.js/js/spin',
-    iscroll: '../assets/vendor/iscroll/js/iscroll-zoom-min',
+    iscroll: '../assets/vendor/iscroll/js/iscroll-min',
     promise: '../assets/vendor/bluebird/index',
 
     pdfjs: '../assets/app/pdfjs/js/pdf',

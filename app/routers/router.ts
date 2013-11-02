@@ -27,6 +27,7 @@ class FlowerpotRouter extends Backbone.Router {
     var querydict = querystring.parse(query);
     this.currentView = new FlowerpotView(templates.flowerpot, querydict);
     $(document.body).html(this.currentView.render().el);
+    $(document.body).trigger('create');
     mobile.changePage(this.currentView.$el, { reverse: false, changeHash: false });
   }
 }

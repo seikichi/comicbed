@@ -131,24 +131,16 @@ class ScreenCollectionView extends BaseView {
       this._scroll.destroy();
     }
     this._scroll = new IScroll(this.$('#screen-scroller').get(0), {
-      zoom: true,
-      mouseWheel: true,
-      wheelAction: 'zoom',
       snap: true,
       momentum: false,
       scrollX: true,
       scrollY: true,
-      click: false,
+      click: true,
       bounce: false,
       snapThreshold: 0.1,
       // snapSpeed: 100,
     });
     this.goCenterPage();
-
-    this._scroll.on('scrollStart', () => {
-      this.goCenterPage();
-      this._scroll.zoom(1, 0, 0, undefined);
-    });
 
     this._scroll.on('scrollEnd', () => {
       var newPageIndex = this._scroll.currentPage.pageX;
