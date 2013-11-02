@@ -104,6 +104,7 @@ module GoogleDriveStorage {
                 'Authorization': 'Bearer ' + gapi.auth.getToken().access_token
               };
               resolve({
+                name: resp.title,
                 url: downloadUrl,
                 httpHeaders: httpHeaders,
                 mimeType: file.mimeType

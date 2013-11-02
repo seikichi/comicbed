@@ -16,12 +16,16 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
 
   static createFromURL(url: string, setting: Unarchiver.Setting, options: Unarchiver.Options)
   : Promise<Unarchiver.Unarchiver> {
+    var name = '';
+    if ('name' in options) {
+      name = options.name;
+    }
     return Promise.cast<PDFJS.PDFDocumentProxy>(PDFJS.getDocument({
       url: url,
       httpHeaders: options.httpHeaders,
       bytes: options.bytes,
     })).then((doc: PDFJS.PDFDocumentProxy) => {
-      return new PdfUnarchiver(doc, setting);
+      return new PdfUnarchiver(name, doc, setting);
     });
   }
 
@@ -36,10 +40,10 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
   private _previousUnpackPromise: Promise<Unarchiver.Content>;
   private _nextResolver: PromiseResolver<void>;
 
-  constructor(pdfDocument: PDFJS.PDFDocumentProxy, setting: Unarchiver.Setting) {
+  constructor(name: string, pdfDocument: PDFJS.PDFDocumentProxy, setting: Unarchiver.Setting) {
     this._document = pdfDocument;
     this._setting = setting;
-    this._archiveName = (<any>this._document).pdfInfo.info.Title;
+    this._archiveName = name ? name : (<any>this._document).pdfInfo.info.Title;
     this._names = [];
     this._nameToPageNum = {};
     this._canvas = document.createElement('canvas');
