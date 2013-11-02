@@ -29,11 +29,13 @@ class RarUnarchiver implements Unarchiver.Unarchiver {
               private _unrar: Unrar,
               private _setting: Unarchiver.Setting) {
     this._filenames = [];
-    var filenames = this._unrar.getFilenames();
+    var entries = this._unrar.getEntries();
     var extensions = this._setting.pageFileExtensions();
-    for (var i = 0, len = filenames.length; i < len; ++i) {
-      if (extensions.indexOf(filenames[i].split('.').pop().toLowerCase()) !== -1) {
-        this._filenames.push(filenames[i]);
+    for (var i = 0, len = entries.length; i < len; ++i) {
+      var entry = entries[i];
+      if (!entry.isDirectory() &&
+          extensions.indexOf(entry.name.split('.').pop().toLowerCase()) !== -1) {
+        this._filenames.push(entry.name);
       }
     }
     this._previousUnpackPromise = Promise.fulfilled(null);

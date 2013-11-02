@@ -39,6 +39,7 @@ class CompositeView extends BaseView {
     _.each(this.subViews, (view, selector) => {
       view.close();
     });
+    this.subViews = null;
   }
  }
 

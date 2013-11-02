@@ -1,20 +1,3 @@
-declare module "unrarlib" {
-  var Module: {
-    cwrap: (name: string, retType: string, argTypes: string[]) => (...data: any[]) => any;
-    FS_createDataFile(parent: string,
-                      name: string,
-                      data: ArrayBuffer,
-                      canRead: boolean,
-                      canWrite: boolean): void;
-    FS_deleteFile(path: string): void;
-    getValue(ptr: number, type: string): number;
-    Pointer_stringify(ptr: number): string;
-
-    HEAPU8: Uint8Array;
-  };
-  export = Module;
-}
-
 declare module "iscroll" {
   export = IScroll;
 }
@@ -28,10 +11,15 @@ declare module "tiff" {
   export = Tiff;
 }
 
+interface RarEntry {
+  name: string;
+  isDirectory(): boolean;
+}
+
 declare module "unrar" {
   class Unrar {
     constructor(buffer: ArrayBuffer);
-    getFilenames(): string[];
+    getEntries(): RarEntry[];
     decompress(filename: string): Uint8Array;
     close(): void;
   }
