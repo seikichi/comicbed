@@ -82,6 +82,9 @@ module GoogleDriveStorage {
               .setDeveloperKey(developerKey)
               .addView(google.picker.ViewId.DOCS)
               .setCallback((data: any) => {
+                if (data.action === google.picker.Action.CANCEL) {
+                  reject('picker cancel');
+                }
                 if (data.action !== google.picker.Action.PICKED) { return; }
                 resolve(data);
               })

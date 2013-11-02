@@ -54,6 +54,7 @@ class FooterView extends BaseView {
   }
 
   onClickFileButton() {
+    if (this._chooserOpened) { return; }
     this.$('#file-input').click();
   }
 
