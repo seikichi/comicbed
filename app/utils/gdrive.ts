@@ -5,6 +5,7 @@ import PromiseUtil = require('utils/promise');
 export = GoogleDriveStorage;
 
 declare var google: any;
+declare var gapi: any;
 
 module GoogleDriveStorage {
   var clientId = '125417905454-r4b5nl32a5q34db5t7bc0hkugbd2j4ep.apps.googleusercontent.com';
@@ -48,10 +49,55 @@ module GoogleDriveStorage {
     });
   }
 
+  function showPicker(gapi: any): Promise<Picker.Result> {
+    return new Promise((resolve, reject) => {
+      var picker = new google.picker.PickerBuilder()
+        .enableFeature(google.picker.Feature.NAV_HIDDEN)
+        .setOAuthToken(gapi.auth.getToken().access_token)
+        .setDeveloperKey(developerKey)
+        .addView(google.picker.ViewId.DOCS)
+        .setCallback((data: any) => {
+          if (data.action === google.picker.Action.CANCEL) {
+            reject('picker cancel');
+          }
+          if (data.action !== google.picker.Action.PICKED) { return; }
+          resolve(data);
+        })
+        .build();
+      picker.setVisible(true);
+    }).then((response: any) => {
+      return new Promise((resolve, reject) => {
+        var file = response.docs[0];
+        var file_id = file.id;
+        var request = (<any>gapi.client).drive.files.get({
+          fileId: file_id
+        });
+        request.execute((resp: any) => {
+          var downloadUrl = resp.downloadUrl;
+          var httpHeaders = {
+            'Authorization': 'Bearer ' + gapi.auth.getToken().access_token
+          };
+          resolve({
+            name: resp.title,
+            url: downloadUrl,
+            httpHeaders: httpHeaders,
+            mimeType: file.mimeType
+          })
+        });
+      });
+    });
+  }
+
   export function createPicker(): Picker.FilePicker {
     return {
       pick: () => {
-        var gapi: any = null;
+        if ('google' in window &&
+            'gapi' in window &&
+            google && google.picker &&
+            gapi && gapi.auth) {
+          return showPicker(gapi);
+        }
+
         return PromiseUtil.require('gapi').then((_gapi: typeof gapi) => {
           return PromiseUtil.require('gclient');
         }).then((_gapi: any) => {
@@ -74,44 +120,7 @@ module GoogleDriveStorage {
           return new Promise((resolve, reject) => {
             (<any>gapi).load('picker', {callback: resolve});
           });
-        }).then(() => {
-          return new Promise((resolve, reject) => {
-            var picker = new google.picker.PickerBuilder()
-              .enableFeature(google.picker.Feature.NAV_HIDDEN)
-              .setOAuthToken(gapi.auth.getToken().access_token)
-              .setDeveloperKey(developerKey)
-              .addView(google.picker.ViewId.DOCS)
-              .setCallback((data: any) => {
-                if (data.action === google.picker.Action.CANCEL) {
-                  reject('picker cancel');
-                }
-                if (data.action !== google.picker.Action.PICKED) { return; }
-                resolve(data);
-              })
-              .build();
-            picker.setVisible(true);
-          });
-        }).then((response: any) => {
-          return new Promise((resolve, reject) => {
-            var file = response.docs[0];
-            var file_id = file.id;
-            var request = (<any>gapi.client).drive.files.get({
-              fileId: file_id
-            });
-            request.execute((resp: any) => {
-              var downloadUrl = resp.downloadUrl;
-              var httpHeaders = {
-                'Authorization': 'Bearer ' + gapi.auth.getToken().access_token
-              };
-              resolve({
-                name: resp.title,
-                url: downloadUrl,
-                httpHeaders: httpHeaders,
-                mimeType: file.mimeType
-              })
-            });
-          });
-        });
+        }).then(() => showPicker(gapi));
       }
     }
   }
