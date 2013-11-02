@@ -1,5 +1,3 @@
-// require(['config', 'app'], () => {});
-
 require(['config'], () => {
   require(['jquery'], ($: typeof $) => {
 
@@ -8,13 +6,21 @@ require(['config'], () => {
       $.mobile.linkBindingEnabled = false;
       $.mobile.hashListeningEnabled = false;
       $.mobile.pushStateEnabled = false;
-      $.mobile.phonegapNavigationEnabled = true;
-      // $.mobile.page.prototype.options.domCache = false;
-      // $.mobile.page.prototype.options.degradeInputs.date = true;
     });
 
-    require(['jquerymobile'], ($: typeof $) => {
-      require(['app'], (app: any) => {
+    require(['jquerymobile'], (mobile: any) => {
+      require([
+        'backbone',
+        'promise',
+        'routers/router'
+      ], (
+        Backbone: typeof Backbone,
+        Promise: typeof Promise,
+        FlowerpotRouter: typeof FlowerpotRouter
+      ) => {
+        Promise.longStackTraces();
+        var router = new FlowerpotRouter();
+        Backbone.history.start();
       });
     });
   });

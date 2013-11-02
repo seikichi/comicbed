@@ -105,7 +105,8 @@ module.exports = function(grunt) {
           mainConfigFile: "app/config.js",
           out: "dist/app/main.js",
           name: 'main',
-          wrap: false
+          wrap: false,
+          findNestedDependencies: true
         }
       },
       pdf_unarchiver: {
@@ -132,15 +133,6 @@ module.exports = function(grunt) {
           mainConfigFile: "app/config.js",
           out: "dist/app/models/rar_unarchiver.js",
           name: 'models/rar_unarchiver',
-          wrap: false
-        }
-      },
-      app: {
-        options: {
-          baseUrl: 'app',
-          mainConfigFile: "app/config.js",
-          out: "dist/app/app.js",
-          name: 'app',
           wrap: false
         }
       }

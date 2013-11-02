@@ -41,10 +41,6 @@ require.config({
     sprintf: {
       exports: 'sprintf'
     },
-    jquerymobile: {
-      deps: ['jquery'],
-      exports: '$'
-    },
     jsziptools: {
       exports: 'jz'
     },

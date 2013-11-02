@@ -1,4 +1,5 @@
 import $ = require('jquery');
+import mobile = require('jquerymobile');
 import _ = require('underscore');
 import Backbone = require('backbone');
 import templates = require('templates');
@@ -27,6 +28,6 @@ class FlowerpotRouter extends Backbone.Router {
     var querydict = querystring.parse(query);
     this.currentView = new FlowerpotView(templates.flowerpot, querydict);
     $(document.body).html(this.currentView.render().el);
-    (<any>$).mobile.changePage(this.currentView.$el, { reverse: false, changeHash: false });
+    mobile.changePage(this.currentView.$el, { reverse: false, changeHash: false });
   }
 }
