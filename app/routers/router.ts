@@ -17,7 +17,6 @@ class FlowerpotRouter extends Backbone.Router {
   constructor() {
     this.routes = { '(?*querystring)': 'index', };
     this.currentView = null;
-    // this.$el = $('#flowerpot');
     super();
   }
 

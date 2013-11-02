@@ -9,6 +9,10 @@ body {
     background-color: rgb(100, 100, 100);
 }
 
+body > div {
+    background-color: rgb(100, 100, 100) !important;
+}
+
 #flowerpot,
 #content,
 #content div {
