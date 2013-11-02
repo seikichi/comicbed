@@ -7,7 +7,7 @@ import Promise = require('promise');
 // TODO(seikichi): move to unarchiver.setting
 PDFJS.workerSrc = 'assets/app/pdfjs/js/pdf.worker.js';
 PDFJS.disableWorker = false;
-PDFJS.disableAutoFetch = false;
+PDFJS.disableAutoFetch = true;
 PDFJS.disableRange = false;
 
 export = PdfUnarchiver;

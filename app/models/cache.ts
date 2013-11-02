@@ -80,7 +80,6 @@ class UnarchiverContentCache {
 class CacheUnarchiver implements Unarchiver.Unarchiver {
   private _cache: UnarchiverContentCache;
 
-  private _previousUnpackName: string;
   private _previousUnpackPromise: Promise<Unarchiver.Content>;
 
   constructor(private _inner: Unarchiver.Unarchiver,
@@ -88,7 +87,6 @@ class CacheUnarchiver implements Unarchiver.Unarchiver {
               private _cacheSetting: Cache.Setting) {
     this._cache = new UnarchiverContentCache(this._cacheSetting);
     this._unarchiverSetting.on('change', this._cache.clean, this);
-    this._previousUnpackName = null;
     this._previousUnpackPromise = Promise.fulfilled(null);
   }
 
@@ -102,12 +100,6 @@ class CacheUnarchiver implements Unarchiver.Unarchiver {
       return Promise.fulfilled(cachedContent);
     }
 
-    // if the request equals to the one before unpack requests,
-    // return the previous promise
-    if (name === this._previousUnpackName) {
-      return this._previousUnpackPromise.uncancellable();
-    }
-    this._previousUnpackName = name;
     this._previousUnpackPromise.cancel();
     this._previousUnpackPromise =  this._inner.unpack(name)
       .then((content: Unarchiver.Content) => {
