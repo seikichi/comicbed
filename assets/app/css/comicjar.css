@@ -63,18 +63,18 @@ body > div {
 }
 
 .ui-icon-file:after {
-    background-image: url('../image/file-open.png');
+    background-image: url('images/file-open.png');
     background-size: 15px 11px;
 }
 
 .ui-icon-dropbox:after {
-    background-image: url('../image/dropbox.png');
+    background-image: url('images/dropbox.png');
     background-position: right 1px bottom 1px;
     background-size: 25px 25px;
 }
 
 .ui-icon-google-drive:after {
-    background-image: url('../image/google-drive.png');
+    background-image: url('images/google-drive.png');
     background-size: 16px 16px;
 }
 

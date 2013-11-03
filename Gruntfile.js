@@ -64,7 +64,12 @@ module.exports = function(grunt) {
       release: {
         files: [
           {
-            src: ['index.html', 'assets/**/*'],
+            src: [
+              'index.html',
+              'assets/app/pdfjs/js/pdf.worker.js',
+              'assets/app/css/**/*',
+              'assets/app/jquery-mobile/css/**/*',
+            ],
             dest: 'dist/',
             expand: true
           }
