@@ -14,9 +14,9 @@ require(['config'], () => {
         'routers/router'
       ], (
         Backbone: typeof Backbone,
-        ComicJarRouter: typeof ComicJarRouter
+        ComicBedRouter: typeof ComicBedRouter
       ) => {
-        var router = new ComicJarRouter();
+        var router = new ComicBedRouter();
         Backbone.history.start();
       });
     });

@@ -68,7 +68,7 @@ interface HTMLTemplate {
 
 declare module "templates" {
   var JST: {
-    comicjar: HTMLTemplate;
+    comicbed: HTMLTemplate;
     modal: HTMLTemplate;
     progress: HTMLTemplate;
     footer: HTMLTemplate;

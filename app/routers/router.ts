@@ -5,11 +5,11 @@ import Backbone = require('backbone');
 import templates = require('templates');
 import querystring = require('utils/querystring');
 import BaseView = require('views/base');
-import ComicJarView = require('views/comicjar');
+import ComicBedView = require('views/comicbed');
 
-export = ComicJarRouter;
+export = ComicBedRouter;
 
-class ComicJarRouter extends Backbone.Router {
+class ComicBedRouter extends Backbone.Router {
   private routes: {[route:string]: string};
   private $el: JQuery;
   private currentView: BaseView;
@@ -25,7 +25,7 @@ class ComicJarRouter extends Backbone.Router {
     if (!_.isNull(this.currentView)) { this.currentView.close(); }
 
     var querydict = querystring.parse(query);
-    this.currentView = new ComicJarView(templates.comicjar, querydict);
+    this.currentView = new ComicBedView(templates.comicbed, querydict);
     $(document.body).html(this.currentView.render().el);
     $(document.body).trigger('create');
     mobile.changePage(this.currentView.$el, { reverse: false, changeHash: false });
