@@ -68,7 +68,7 @@ interface HTMLTemplate {
 
 declare module "templates" {
   var JST: {
-    flowerpot: HTMLTemplate;
+    comicjar: HTMLTemplate;
     modal: HTMLTemplate;
     progress: HTMLTemplate;
     footer: HTMLTemplate;

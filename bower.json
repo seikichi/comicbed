@@ -1,7 +1,7 @@
 {
-  "name": "flowerpot",
+  "name": "comicjar",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "dist/app/main.js",
   "ignore": [
     "**/.*",
     "node_modules",

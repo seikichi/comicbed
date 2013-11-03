@@ -12,9 +12,9 @@ import FooterView = require('views/footer');
 import templates = require('templates');
 import strings = require('utils/strings');
 
-export = FlowerpotView;
+export = ComicJarView;
 
-class FlowerpotView extends CompositeView {
+class ComicJarView extends CompositeView {
   private _template: HTMLTemplate;
   private _queryOptions: {[field:string]:string;};
 
@@ -29,7 +29,7 @@ class FlowerpotView extends CompositeView {
     this._queryOptions = options;
 
     this.attributes = {'data-role': 'page'};
-    this.id = 'flowerpot';
+    this.id = 'comicjar';
 
     this.events = {
       'drop': 'onDrop',
