@@ -1,0 +1,142 @@
+html,
+body {
+    width: 100%;
+    height:100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    background-color: rgb(100, 100, 100);
+}
+
+body > div {
+    background-color: rgb(100, 100, 100) !important;
+}
+
+#comicbed,
+#content,
+#content div {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    position: absolute;
+}
+
+#screen-scroller {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#screen-scroller ul {
+    /* width: ????; */
+    float: left;
+    height: 100%;
+    list-style: none outside none;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+#screen-scroller li {
+    /* width: ????; */
+    float: left;
+    height: 100%;
+}
+
+#content #screen-scroller .screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#content #screen-scroller .input {
+    position: relative;
+    left: 0;
+    top: -100%;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.ui-icon-file:after {
+    background-image: url('images/file-open.png');
+    background-size: 15px 11px;
+}
+
+.ui-icon-dropbox:after {
+    background-image: url('images/dropbox.png');
+    background-position: right 1px bottom 1px;
+    background-size: 25px 25px;
+}
+
+.ui-icon-google-drive:after {
+    background-image: url('images/google-drive.png');
+    background-size: 16px 16px;
+}
+
+.ui-slider-track {
+    margin: 0 15px 0 15px !important;
+}
+input.ui-slider-input { display : none !important; }
+.ui-slider-track {
+    -webkit-border-radius: 0 !important;
+    border-radius: 0 !important;
+}
+
+.reverse-range ~ div.ui-slider-track {
+    background-color: #06f !important;
+    color: #fff !important;
+    text-shadow: 0 1px 0 #03f !important;
+
+    /* border-color: #03f !important; */
+    border-color: #ddd !important;
+
+    -webkit-border-radius: 0 !important;
+    border-radius: 0 !important;
+}
+
+.reverse-range ~ div div.ui-slider-bg {
+    background-color: #f1f1f1 !important;
+    border-color: #ddd !important;
+    color: #111 !important;
+    text-shadow: 0 1px 0 #eee !important;
+
+    -webkit-box-shadow: inset 0 1px 3px rgba(0,0,0,.2) !important;
+    -moz-box-shadow: inset 0 1px 3px rgba(0,0,0,.2) !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.2) !important;
+}
+
+#page-slider-label {
+    font-weight: bold;
+}
+
+#content #menu-remove-area {
+    top: 10%;
+    height: 80%;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#content #mobile-touch-area #mobile-touch-move-left {
+    float: left;
+    position: relative;
+    width: 20%;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#content #mobile-touch-area #mobile-touch-toggle-menu {
+    float: left;
+    position: relative;
+    width: 60%;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#content #mobile-touch-area #mobile-touch-move-right {
+    float: left;
+    position: relative;
+    width: 20%;
+    background-color: rgba(0, 0, 0, 0);
+}
