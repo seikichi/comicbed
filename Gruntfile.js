@@ -184,6 +184,7 @@ module.exports = function(grunt) {
           'app/main.js',
           'assets/vendor/requirejs/js/require.js',
           '**/*.css',
+          'assets/app/jquery-mobile/css/images/ajax-loader.gif',
           'assets/app/css/images/*.png'
         ],
         dest: 'dist/manifest.appcache'
