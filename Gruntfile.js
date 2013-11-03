@@ -12,6 +12,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks("grunt-contrib-handlebars");
   grunt.loadNpmTasks("grunt-contrib-requirejs");
   grunt.loadNpmTasks("grunt-contrib-uglify");
+  grunt.loadNpmTasks("grunt-manifest");
   grunt.loadNpmTasks("grunt-typescript");
   grunt.loadNpmTasks("grunt-preprocess");
   // tasks
@@ -29,6 +30,7 @@ module.exports = function(grunt) {
     'preprocess',
     'uglify',
     'requirejs',
+    'manifest',
     'connect:release'
   ]);
   grunt.registerTask('server:release', ['connect:release']);
@@ -68,7 +70,7 @@ module.exports = function(grunt) {
               'index.html',
               'assets/app/pdfjs/js/pdf.worker.js',
               'assets/app/css/**/*',
-              'assets/app/jquery-mobile/css/**/*',
+              'assets/app/jquery-mobile/css/**/*'
             ],
             dest: 'dist/',
             expand: true
@@ -165,6 +167,26 @@ module.exports = function(grunt) {
         options: {
           livereload: true
         }
+      }
+    },
+    manifest: {
+      generate: {
+        options: {
+          basePath: 'dist/',
+          network: ['*'],
+          fallback: [],
+          exclude: [],
+          preferOnline: true,
+          timestamp: true,
+        },
+        src: [
+          'index.html',
+          'app/main.js',
+          'assets/vendor/requirejs/js/require.js',
+          '**/*.css',
+          'assets/app/css/images/*.png'
+        ],
+        dest: 'dist/manifest.appcache'
       }
     },
     // install
