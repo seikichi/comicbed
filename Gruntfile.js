@@ -27,6 +27,7 @@ module.exports = function(grunt) {
     'typescript',
     'handlebars',
     'copy',
+    'cssmin',
     'preprocess',
     'uglify',
     'requirejs',
@@ -69,11 +70,20 @@ module.exports = function(grunt) {
             src: [
               'index.html',
               'assets/app/pdfjs/js/pdf.worker.js',
-              'assets/app/css/**/*',
-              'assets/app/jquery-mobile/css/**/*'
+              'assets/app/css/images/*',
             ],
             dest: 'dist/',
             expand: true
+          }, {
+            cwd: 'assets/app/jquery-mobile/css/images/',
+            src: [
+              'ajax-loader.gif',
+              '*/delete-white.*',
+              '*/info-white.*',
+              '*/gear-white.*',
+            ],
+            dest: 'dist/assets/app/css/images',
+            expand: true,
           }
         ]
       }
@@ -144,6 +154,16 @@ module.exports = function(grunt) {
         }
       }
     },
+    cssmin: {
+      release: {
+        files: {
+          'dist/assets/app/css/comicbed.css': [
+            'assets/app/css/comicbed.css',
+            'assets/app/jquery-mobile/css/jquery.mobile-1.4.0-rc.1.min.css'
+          ]
+        }
+      }
+    },
     uglify: {
       release: {
         files: {
@@ -183,8 +203,8 @@ module.exports = function(grunt) {
           'index.html',
           'app/main.js',
           'assets/vendor/requirejs/js/require.js',
-          '**/*.css',
-          'assets/app/jquery-mobile/css/images/ajax-loader.gif',
+          'assets/app/css/comicbed.css',
+          'assets/app/css/images/ajax-loader.gif',
           'assets/app/css/images/*.png'
         ],
         dest: 'dist/manifest.appcache'
