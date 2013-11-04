@@ -70,6 +70,7 @@ module.exports = function(grunt) {
             src: [
               'index.html',
               'assets/app/pdfjs/js/pdf.worker.js',
+              'assets/app/tiff/js/tiff.min.js',
               'assets/app/css/images/*',
             ],
             dest: 'dist/',
