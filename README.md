@@ -30,6 +30,7 @@ see [demo](http://seikichi.github.io/comicbed/#?url=comicbed/LH01_hq.pdf&screen.
 + cache.cacheScreenNum: number
 + sort.reverse: boolean
 + sort.order: 'NameNatural' or 'NameDirectory' or 'Entry'
++ unarchiver.enablesRangeRequestInPdf: boolean
 
 ## License
 GPL v3 or later
