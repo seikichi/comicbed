@@ -1,3 +1,19 @@
-<span>{{message}}</span>
-<div class="progressbar"></div>
+<div data-role="header" class="ui-corner-top">
+  <h1>Progress</h1>
+</div>
+<div data-role="content" class="ui-corner-bottom ui-content">
+  <p id="progress-dialog-message">{{message}}</p>
 
+  <div class="progress">
+    <div class="progress-bar progress-striped"
+         aria-valuetransitiongoal="{{progress}}"
+         aria-valuemin="0" aria-valuemax="100">
+    </div>
+  </div>
+
+  <a href="#"
+     id="progress-dialog-cancel"
+     data-role="button"
+     data-inline="true"
+     data-rel="back">Cancel</a>
+</div>

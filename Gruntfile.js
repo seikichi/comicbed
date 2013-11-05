@@ -160,6 +160,7 @@ module.exports = function(grunt) {
         files: {
           'dist/assets/app/css/comicbed.css': [
             'assets/app/css/comicbed.css',
+            'assets/vendor/bootstrap-progressbar/css/bootstrap-progressbar-3.0.0-rc2.min.css',
             'assets/app/jquery-mobile/css/jquery.mobile-1.4.0-rc.1.min.css'
           ]
         }

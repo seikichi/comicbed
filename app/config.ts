@@ -11,6 +11,7 @@ require.config({
     spin: '../assets/vendor/spin.js/js/spin',
     iscroll: '../assets/vendor/iscroll/js/iscroll-min',
     promise: '../assets/vendor/bluebird/index',
+    progressbar: '../assets/vendor/bootstrap-progressbar/js/bootstrap-progressbar.min',
 
     pdfjs: '../assets/app/pdfjs/js/pdf',
     unrar: '../assets/app/unrarlib/js/unrar.min',
@@ -46,6 +47,9 @@ require.config({
     },
     iscroll: {
       exports: 'IScroll'
+    },
+    progressbar: {
+      deps: ['jquery']
     },
     dropbox: {
       exports: 'Dropbox'

@@ -82,13 +82,23 @@ class ComicBedView extends CompositeView {
       }),
     }));
 
-    // Note: for debug
-    (<any>window).reader = this._reader;
+    this.assign('#progress-dialog-holder', new DialogView({
+      id: 'progress-dialog',
+      template: templates.dialog,
+      innerView: new ProgressView({
+        template: templates.progress,
+        reader: this._reader,
+      }),
+    }));
 
     this.listenTo(this._reader, 'change:status', () => {
       var status = this._reader.status();
       switch (status) {
+      case Reader.Status.Opening:
+        (<any>this.$('#progress-dialog')).popup('open');
+        break;
       case Reader.Status.Opened:
+        (<any>this.$('#progress-dialog')).popup('close');
         this.assign('#content', new ScreenCollectionView({
           el: this.$('#content'),
           screens: this._reader.screens(),
@@ -102,6 +112,7 @@ class ComicBedView extends CompositeView {
       case Reader.Status.Closed:
         this.dissociate('#content');
         this.onEnterMenu();
+        (<any>this.$('#progress-dialog')).popup('close');
         break;
       }
     });

@@ -20,6 +20,7 @@
     "spin.js": "*",
     "iscroll": "*",
     "bluebird": "https://raw.github.com/petkaantonov/bluebird/master/js/browser/bluebird.js",
+    "bootstrap-progressbar": "*",
     "chai": "*",
     "mocha": "*",
     "sinon": "http://sinonjs.org/releases/sinon-1.7.3.js"
@@ -36,6 +37,7 @@
     "jsziptools": { "js": "dist/*.js" },
     "iscroll": { "js": "dist/*.js" },
     "spin.js": { "js": "dist/spin.js" },
+    "bootstrap-progressbar": { "js": "*.js", "css": "css/bootstrap-progressbar-3.0.0-rc2.min.css" },
     "chai": { "js": "chai.js" },
     "mocha": { "js": "mocha.js", "css": "mocha.css" }
   }

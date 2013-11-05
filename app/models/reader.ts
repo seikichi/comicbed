@@ -135,7 +135,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
     this.close();
     this.setStatus(Reader.Status.Opening);
     this._progress.update({
-      message: 'opening the book ...',
+      message: 'Downloading ...',
       progress: 0,
       done: false,
     });

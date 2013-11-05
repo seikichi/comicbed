@@ -56,14 +56,14 @@ module PromiseUtil {
         resolver.reject({ status: xhr.status, statusText: xhr.statusText });
         return;
       }
-      resolver.progress({ message: 'downloading ...', progress: 100 });
+      resolver.progress({ message: 'Downloading ...', progress: 100 });
       var buffer: ArrayBuffer = xhr.response;
       resolver.fulfill(buffer);
     };
     xhr.onprogress = (ev: ProgressEvent) => {
       if (ev.lengthComputable) {
         var progress = Math.round((ev.loaded / ev.total) * 100);
-        resolver.progress({ message: 'downloading ...', progress: progress });
+        resolver.progress({ message: 'Downloading ...', progress: progress });
       }
     };
     xhr.onerror = (error: any) => {

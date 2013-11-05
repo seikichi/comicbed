@@ -51,6 +51,10 @@ declare module "jquerymobile" {
   export = mobile;
 }
 
+declare module "progressbar" {
+  export = $;
+}
+
 declare module "jsziptools" {
   export = jz;
 }
@@ -69,7 +73,6 @@ interface HTMLTemplate {
 declare module "templates" {
   var JST: {
     comicbed: HTMLTemplate;
-    modal: HTMLTemplate;
     progress: HTMLTemplate;
     footer: HTMLTemplate;
     header: HTMLTemplate;
