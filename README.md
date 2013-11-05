@@ -14,5 +14,22 @@ see [demo](http://seikichi.github.io/comicbed/#?url=comicbed/LH01_hq.pdf&screen.
 ## Known Issues
 + sometimes crashes in mobile browsers ;-p
 
+## Keyboard Shortcuts
++ left/right-arrow key: move page
++ space: toggle view mode between one page and two pages
++ enter: toggle fullscreen
+
+## Query String Parameters
+[example](http://seikichi.github.io/comicbed/#?url=comicbed/LH01_hq.pdf&screen.viewMode=TwoPage&screen.pageDirection=R2L)
+
++ url: string
++ screen.viewMode: 'OnePage' or 'TwoPage'
++ screen.pageDirection: 'L2R' or 'R2L'
++ screen.detectsSpreadPage: boolean
++ cache.cachePageNum: number
++ cache.cacheScreenNum: number
++ sort.reverse: boolean
++ sort.order: 'NameNatural' or 'NameDirectory' or 'Entry'
+
 ## License
 GPL v3 or later
