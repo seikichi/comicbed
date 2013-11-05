@@ -108,6 +108,7 @@ class ComicBedView extends CompositeView {
         }));
         break;
       case Reader.Status.Error:
+        (<any>this.$('#progress-dialog')).popup('close');
         (<any>this.$('#error-dialog')).popup('open');
       case Reader.Status.Closed:
         this.dissociate('#content');
