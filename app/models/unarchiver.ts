@@ -119,7 +119,8 @@ class FactoryImpl implements Unarchiver.Factory {
       var moduleName = 'models/rar_unarchiver';
       break;
     default:
-      return Promise.rejected({ message: 'uknown filetype: ' + url});
+      var name = options.name ? options.name : url;
+      return Promise.rejected({ message: 'Unsupported File Format: ' + name});
       break;
     }
 

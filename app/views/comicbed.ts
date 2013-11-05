@@ -8,9 +8,14 @@ import ModalView = require('views/modal');
 import ProgressView = require('views/progress');
 import HeaderView = require('views/header');
 import FooterView = require('views/footer');
+import DialogView = require('views/dialog');
+import ErrorView = require('views/error');
+import InfoView = require('views/info');
 
 import templates = require('templates');
 import strings = require('utils/strings');
+
+// god class ლ(╹◡╹ლ)
 
 export = ComicBedView;
 
@@ -37,6 +42,7 @@ class ComicBedView extends CompositeView {
       'mouseleave #menu-remove-area': 'onEnterMenu',
       'mouseenter #menu-remove-area': 'onLeaveMenu',
       'tap #mobile-touch-toggle-menu': 'onToggleMenu',
+      'click #info-button': 'onInfoButtonClick',
     };
     super({});
   }
@@ -59,6 +65,23 @@ class ComicBedView extends CompositeView {
       setting: this._setting.screenSetting(),
     }));
 
+    this.assign('#error-dialog-holder', new DialogView({
+      id: 'error-dialog',
+      template: templates.dialog,
+      innerView: new ErrorView({
+        template: templates.error,
+        reader: this._reader,
+      }),
+    }));
+
+    this.assign('#info-dialog-holder', new DialogView({
+      id: 'info-dialog',
+      template: templates.dialog,
+      innerView: new InfoView({
+        template: templates.info
+      }),
+    }));
+
     // Note: for debug
     (<any>window).reader = this._reader;
 
@@ -75,6 +98,7 @@ class ComicBedView extends CompositeView {
         }));
         break;
       case Reader.Status.Error:
+        (<any>this.$('#error-dialog')).popup('open');
       case Reader.Status.Closed:
         this.dissociate('#content');
         this.onEnterMenu();
@@ -124,5 +148,9 @@ class ComicBedView extends CompositeView {
     var files = event.dataTransfer.files;
     if (files.length === 0) { return; }
     this._reader.openFile(files[0]);
+  }
+
+  onInfoButtonClick() {
+    (<any>this.$('#info-dialog')).popup('open');
   }
 }

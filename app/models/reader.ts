@@ -24,6 +24,7 @@ module Reader {
     // properties
     title(): string;
     status(): Status;
+    message(): string;
     currentPageNum(): number;
     totalPageNum(): number;
     readingDirection(): Screen.ReadingDirection;
@@ -98,11 +99,13 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
       currentPageNum: 0,
       totalPageNum: 0,
       readingDirection: Screen.ReadingDirection.Forward,
+      message: '',
     };
   }
   //// getter
   title(): string { return this._book !== null ? this._book.title() : ''; }
   status(): Reader.Status { return <Reader.Status>this.get('status'); }
+  message(): string { return <string>this.get('message'); }
   currentPageNum(): number { return <number>this.get('currentPageNum'); }
   totalPageNum(): number { return <number>this.get('totalPageNum'); }
   readingDirection(): Screen.ReadingDirection {
@@ -110,6 +113,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
   }
   //// setter
   setStatus(status: Reader.Status) { this.set('status', status); }
+  setMessage(message: string) { this.set('message', message); }
   setCurrentPageNum(currentPageNum: number) { this.set('currentPageNum', currentPageNum); }
   setTotalPageNum(totalPageNum: number) { this.set('totalPageNum', totalPageNum); }
   setReadingDirection(readingDirection: Screen.ReadingDirection) {
@@ -149,6 +153,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
       if (reason.name === 'CancellationError') {
         this.setStatus(Reader.Status.Closed);
       } else {
+        this.setMessage(reason.message);
         this.setStatus(Reader.Status.Error);
       }
       return Promise.rejected(reason);

@@ -75,6 +75,9 @@ declare module "templates" {
     header: HTMLTemplate;
     screens: HTMLTemplate;
     screen: HTMLTemplate;
+    dialog: HTMLTemplate;
+    error: HTMLTemplate;
+    info: HTMLTemplate;
   };
   export = JST;
 }

@@ -36,6 +36,9 @@ class BookFactory implements Book.Factory {
     return this.unarchiverFactory.getUnarchiverFromURL(url, options)
       .then((unarchiver: Unarchiver.Unarchiver) => {
         var filenames = unarchiver.filenames();
+        if (filenames.length === 0) {
+          throw { message: 'Image file not found' };
+        }
         var pages: Page.Page[] = [];
         for (var i = 0, len = filenames.length; i < len; ++i) {
           ((name: string) => {
