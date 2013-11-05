@@ -4,7 +4,6 @@ import Reader = require('models/reader');
 import Setting = require('models/setting');
 import CompositeView = require('views/composite');
 import ScreenCollectionView = require('views/screens');
-import ModalView = require('views/modal');
 import ProgressView = require('views/progress');
 import HeaderView = require('views/header');
 import FooterView = require('views/footer');
