@@ -29,5 +29,6 @@ class ComicBedRouter extends Backbone.Router {
     $(document.body).html(this.currentView.render().el);
     $(document.body).trigger('create');
     mobile.changePage(this.currentView.$el, { reverse: false, changeHash: false });
+    this.currentView.trigger('initialized');
   }
 }

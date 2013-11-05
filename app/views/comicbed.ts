@@ -129,7 +129,7 @@ class ComicBedView extends CompositeView {
       }
     });
 
-    this.listenOnce(this, 'render', () => {
+    this.listenToOnce(this, 'initialized', () => {
       if ('url' in this._queryOptions) {
         var loc = document.location;
         var url = encodeURI(this._queryOptions['url']);
@@ -156,12 +156,6 @@ class ComicBedView extends CompositeView {
 
   presenter(): string {
     return this._template({});
-  }
-
-  render() {
-    super.render();
-    this.trigger('render');
-    return this;
   }
 
   onDragOver(jqEvent: any) {
