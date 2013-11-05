@@ -9,7 +9,7 @@ declare var gapi: any;
 
 module GoogleDriveStorage {
   var clientId = '125417905454-r4b5nl32a5q34db5t7bc0hkugbd2j4ep.apps.googleusercontent.com';
-  var scope = 'https://www.googleapis.com/auth/drive';
+  var scope = 'https://www.googleapis.com/auth/drive.readonly';
   var developerKey = 'AIzaSyCnf2EefO8vRhA1Mu5iRJrX4bNO9zUD-EE';
   // var appId = '125417905454';
 
