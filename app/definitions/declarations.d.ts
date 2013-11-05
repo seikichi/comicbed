@@ -81,6 +81,7 @@ declare module "templates" {
     dialog: HTMLTemplate;
     error: HTMLTemplate;
     help: HTMLTemplate;
+    setting: HTMLTemplate;
   };
   export = JST;
 }

@@ -157,3 +157,11 @@ input.ui-slider-input { display : none !important; }
 #comicbed #progress-dialog {
     width: 400px;
 }
+
+#comicbed #setting-dialog legend {
+    font-weight: bold;
+}
+
+#comicbed #setting-dialog fieldset {
+    padding-bottom: 12px;
+}

@@ -175,7 +175,6 @@ class SettingImpl implements Setting.Setting {
     }
     if ('unarchiver.enablesRangeRequestInPdf' in urlParams
         && urlParams['unarchiver.enablesRangeRequestInPdf'] === 'false') {
-      console.log('AA');
       this._unarchiverSetting.setEnablesRangeRequestInPdf(false);
     }
     // screen

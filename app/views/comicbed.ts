@@ -11,6 +11,7 @@ import FooterView = require('views/footer');
 import DialogView = require('views/dialog');
 import ErrorView = require('views/error');
 import HelpView = require('views/help');
+import SettingView = require('views/setting');
 
 import templates = require('templates');
 import strings = require('utils/strings');
@@ -43,6 +44,7 @@ class ComicBedView extends CompositeView {
       'mouseenter #menu-remove-area': 'onLeaveMenu',
       'tap #mobile-touch-toggle-menu': 'onToggleMenu',
       'click #help-button': 'onHelpButtonClick',
+      'click #setting-button': 'onSettingButtonClick',
     };
     super({});
   }
@@ -88,6 +90,14 @@ class ComicBedView extends CompositeView {
       innerView: new ProgressView({
         template: templates.progress,
         reader: this._reader,
+      }),
+    }));
+
+    this.assign('#setting-dialog-holder', new DialogView({
+      id: 'setting-dialog',
+      template: templates.dialog,
+      innerView: new SettingView({
+        template: templates.setting,
       }),
     }));
 
@@ -164,5 +174,9 @@ class ComicBedView extends CompositeView {
 
   onHelpButtonClick() {
     (<any>this.$('#help-dialog')).popup('open');
+  }
+
+  onSettingButtonClick() {
+    (<any>this.$('#setting-dialog')).popup('open');
   }
 }
