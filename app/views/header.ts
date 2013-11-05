@@ -23,7 +23,7 @@ class HeaderView extends BaseView {
   }
 
   initialize() {
-    this.listenTo(this._reader, 'change', () => {
+    this.listenTo(this._reader, 'change:title change:status', () => {
       this.render();
       this.$el.trigger('create');
     });
@@ -31,7 +31,8 @@ class HeaderView extends BaseView {
 
   presenter() {
     return this._template({
-      title: this._reader.title()
+      title: this._reader.title(),
+      opened: this._reader.status() === Reader.Status.Opened,
     });
   }
 
