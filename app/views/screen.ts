@@ -31,7 +31,7 @@ class ScreenView extends BaseView {
 
   presenter() {
     return this._template({
-      isMobile: device.isMobile,
+      isMobile: device.isMobile(),
       isCenter: this._isCenter
     });
   }

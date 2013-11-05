@@ -78,6 +78,11 @@ body > div {
     background-size: 16px 16px;
 }
 
+.ui-icon-question:after {
+    background-image: url('images/question.png');
+    background-size: 16px 16px;
+}
+
 .ui-slider-track {
     margin: 0 15px 0 15px !important;
 }

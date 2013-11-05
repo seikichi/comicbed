@@ -10,7 +10,7 @@ import HeaderView = require('views/header');
 import FooterView = require('views/footer');
 import DialogView = require('views/dialog');
 import ErrorView = require('views/error');
-import InfoView = require('views/info');
+import HelpView = require('views/help');
 
 import templates = require('templates');
 import strings = require('utils/strings');
@@ -42,7 +42,7 @@ class ComicBedView extends CompositeView {
       'mouseleave #menu-remove-area': 'onEnterMenu',
       'mouseenter #menu-remove-area': 'onLeaveMenu',
       'tap #mobile-touch-toggle-menu': 'onToggleMenu',
-      'click #info-button': 'onInfoButtonClick',
+      'click #help-button': 'onHelpButtonClick',
     };
     super({});
   }
@@ -74,11 +74,11 @@ class ComicBedView extends CompositeView {
       }),
     }));
 
-    this.assign('#info-dialog-holder', new DialogView({
-      id: 'info-dialog',
+    this.assign('#help-dialog-holder', new DialogView({
+      id: 'help-dialog',
       template: templates.dialog,
-      innerView: new InfoView({
-        template: templates.info
+      innerView: new HelpView({
+        template: templates.help
       }),
     }));
 
@@ -150,7 +150,7 @@ class ComicBedView extends CompositeView {
     this._reader.openFile(files[0]);
   }
 
-  onInfoButtonClick() {
-    (<any>this.$('#info-dialog')).popup('open');
+  onHelpButtonClick() {
+    (<any>this.$('#help-dialog')).popup('open');
   }
 }
