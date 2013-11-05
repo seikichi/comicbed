@@ -80,6 +80,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
 
   initialize() {
     this.listenTo(this._setting.screenSetting(), 'change', () => {
+      if (!this._book) { return; }
       this.update(this.currentPageNum(), this.readingDirection());
     });
 
