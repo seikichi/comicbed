@@ -2,33 +2,50 @@
   <h1>Config</h1>
 </div>
 <div data-role="content" class="ui-corner-bottom ui-content">
+  <form>
+    <fieldset data-role="controlgroup" data-type="horizontal">
+      <legend>View mode</legend>
+      <input name="view-mode-radio-choice"
+             id="view-mode-radio-choice-one"
+             value="OnePage"
+             {{#if OnePage}}checked="checked"{{/if}}
+             type="radio">
+      <label id="view-mode-radio-choice-one-label"
+             for="view-mode-radio-choice-one">one page</label>
+      <input name="view-mode-radio-choice"
+             id="view-mode-radio-choice-two"
+             value="TwoPage"
+             {{#if TwoPage}}checked="checked"{{/if}}
+             type="radio">
+      <label id="view-mode-radio-choice-two-label"
+             for="view-mode-radio-choice-two">two pages</label>
+    </fieldset>
 
-  <fieldset data-role="controlgroup" data-type="horizontal">
-    <legend>View mode</legend>
-    <input name="radio-choice-h-2"
-           id="radio-choice-h-2a"
-           value="L2R"
-           checked="checked"
-           type="radio">
-    <label for="radio-choice-h-2a">one page</label>
-    <input name="radio-choice-h-2"
-           id="radio-choice-h-2b"
-           value="R2L"
-           type="radio">
-    <label for="radio-choice-h-2b">two pages</label>
-  </fieldset>
+    <fieldset data-role="controlgroup" data-type="horizontal">
+      <legend>Page direction</legend>
+      <input name="page-direction-radio-choice"
+             id="page-direction-radio-choice-L2R"
+             value="L2R"
+             {{#if L2R}}checked="checked"{{/if}}
+             type="radio">
+      <label id="page-direction-radio-choice-L2R-label"
+             for="page-direction-radio-choice-L2R">left to right</label>
+      <input name="page-direction-radio-choice"
+             id="page-direction-radio-choice-R2L"
+             value="R2L"
+             {{#if R2L}}checked="checked"{{/if}}
+             type="radio">
+      <label id="page-direction-radio-choice-R2L-label"
+             for="page-direction-radio-choice-R2L">right to left</label>
+    </fieldset>
 
-  <fieldset data-role="controlgroup" data-type="horizontal">
-    <legend>Page direction</legend>
-    <input name="radio-choice-h-2" id="radio-choice-h-2a" value="on" checked="checked" type="radio">
-    <label for="radio-choice-h-2a">left to right</label>
-    <input name="radio-choice-h-2" id="radio-choice-h-2b" value="off" type="radio">
-    <label for="radio-choice-h-2b">right to left</label>
-  </fieldset>
-
-  <label>
-    <input name="checkbox-0" type="checkbox">Enable Range-Request when reading PDF files
-  </label>
+    <input name="range-request-choice"
+           id="range-request-checkbox"
+           {{#if enablesRangeRequestInPdf}}checked="checked"{{/if}}
+           type="checkbox">
+    <label id="range-request-checkbox-label"
+           for="range-request-checkbox">Enable Range-Request when reading PDF files</label>
+  </form>
 </div>
 <div data-role="footer" class="ui-bar">
   <div align="right">

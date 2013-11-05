@@ -31,10 +31,6 @@ class DialogView extends CompositeView {
     this.$el.trigger('create');
     return this;
   }
-
-  open(): void {
-    (<any>this.$el).popup('open');
-  }
 }
 
 module DialogView {

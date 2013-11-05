@@ -98,6 +98,7 @@ class ComicBedView extends CompositeView {
       template: templates.dialog,
       innerView: new SettingView({
         template: templates.setting,
+        setting: this._setting,
       }),
     }));
 
