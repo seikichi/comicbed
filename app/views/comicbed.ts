@@ -129,17 +129,17 @@ class ComicBedView extends CompositeView {
       }
     });
 
-    if ('url' in this._queryOptions) {
-      // TODO(seikichi): is this safe?
-      var loc = document.location;
-      var url = encodeURI(this._queryOptions['url']);
-      var origin = loc.protocol + '//' + loc.host;
-      if (!strings.startsWith(url, loc.protocol + '//' + loc.host)) {
-        url = origin + '/' + url;
+    this.listenOnce(this, 'render', () => {
+      if ('url' in this._queryOptions) {
+        var loc = document.location;
+        var url = encodeURI(this._queryOptions['url']);
+        var origin = loc.protocol + '//' + loc.host;
+        if (!strings.startsWith(url, loc.protocol + '//' + loc.host)) {
+          url = origin + '/' + url;
+        }
+        this._reader.openURL(url);
       }
-
-      this._reader.openURL(url);
-    }
+    });
   }
 
   onEnterMenu() {
@@ -156,6 +156,12 @@ class ComicBedView extends CompositeView {
 
   presenter(): string {
     return this._template({});
+  }
+
+  render() {
+    super.render();
+    this.trigger('render');
+    return this;
   }
 
   onDragOver(jqEvent: any) {
