@@ -23,6 +23,7 @@ module Setting {
   export interface UnarchiverSetting extends Unarchiver.Setting {
     setPdfjsCanvasScale(scale: number): void;
     setDetectsImageXObjectPageInPdf(value: boolean): void;
+    setEnablesRangeRequestInPdf(value: boolean): void;
   }
 
   export interface SortSetting extends Sort.Setting {
@@ -108,13 +109,16 @@ class UnarchiverSettingModel extends Backbone.Model implements Unarchiver.Settin
     return {
       pdfjsCanvasScale: 2,
       detectsImageXObjectPageInPdf: true,
+      enablesRangeRequestInPdf: true,
     };
   }
   pdfjsCanvasScale(): number { return <number>this.get('pdfjsCanvasScale'); }
   detectsImageXObjectPageInPdf(): boolean { return <boolean>this.get('detectsImageXObjectPageInPdf'); }
+  enablesRangeRequestInPdf(): boolean { return <boolean>this.get('enablesRangeRequestInPdf'); }
 
   setPdfjsCanvasScale(scale: number) { this.set('pdfjsCanvasScale', scale); }
   setDetectsImageXObjectPageInPdf(value: boolean) { this.set('detectsImageXObjectPageInPdf', value); }
+  setEnablesRangeRequestInPdf(value: boolean) { this.set('enablesRangeRequestInPdf', value); }
 }
 
 
@@ -168,6 +172,11 @@ class SettingImpl implements Setting.Setting {
     if ('unarchiver.detectsImageXObjectPageInPdf' in urlParams
         && urlParams['unarchiver.detectsImageXObjectPageInPdf'] !== 'false') {
       this._unarchiverSetting.setDetectsImageXObjectPageInPdf(true);
+    }
+    if ('unarchiver.enablesRangeRequestInPdf' in urlParams
+        && urlParams['unarchiver.enablesRangeRequestInPdf'] === 'false') {
+      console.log('AA');
+      this._unarchiverSetting.setEnablesRangeRequestInPdf(false);
     }
     // screen
     if ('screen.detectsSpreadPage' in urlParams &&

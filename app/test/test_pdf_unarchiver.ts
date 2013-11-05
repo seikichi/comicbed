@@ -21,6 +21,7 @@ describe('PdfImageUnarchiver', function () {
     pdfjsCanvasScale: () => 1,
     detectsImageXObjectPageInPdf: () => true,
     pageFileExtensions: () => [''],
+    enablesRangeRequestInPdf: () => true,
   });
   var PAGE_SIZE = 2;
   var pdfDir = location.protocol + '//' + location.host + '/testdata/pdf/';

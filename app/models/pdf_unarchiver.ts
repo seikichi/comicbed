@@ -3,6 +3,7 @@ import PDFJS = require('pdfjs');
 import sprintf = require('sprintf');
 import ImageUtil = require('utils/image');
 import Promise = require('promise');
+import PromiseUtil = require('utils/promise');
 
 // TODO(seikichi): move to unarchiver.setting
 PDFJS.workerSrc = 'assets/app/pdfjs/js/pdf.worker.js';
@@ -20,13 +21,23 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
     if ('name' in options) {
       name = options.name;
     }
-    return Promise.cast<PDFJS.PDFDocumentProxy>(PDFJS.getDocument({
-      url: url,
-      httpHeaders: options.httpHeaders,
-      bytes: options.bytes,
-    })).then((doc: PDFJS.PDFDocumentProxy) => {
-      return new PdfUnarchiver(name, doc, setting);
-    });
+
+    if (setting.enablesRangeRequestInPdf()) {
+      return Promise.cast<PDFJS.PDFDocumentProxy>(PDFJS.getDocument({
+        url: url,
+        httpHeaders: options.httpHeaders,
+        bytes: options.bytes,
+      })).then((doc: PDFJS.PDFDocumentProxy) => {
+        return new PdfUnarchiver(name, doc, setting);
+      });
+    } else {
+      return PromiseUtil.getArrayBufferByXHR(url, options.httpHeaders)
+        .then((buffer: ArrayBuffer) => {
+          return Promise.cast<PDFJS.PDFDocumentProxy>(PDFJS.getDocument({data: buffer}));
+        }).then((doc: PDFJS.PDFDocumentProxy) => {
+          return new PdfUnarchiver(name, doc, setting);
+        });
+    }
   }
 
   private _document: PDFJS.PDFDocumentProxy;
