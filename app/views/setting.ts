@@ -3,6 +3,7 @@ import BaseView = require('views/base');
 import Setting = require('models/setting');
 import Screen = require('models/screen');
 import Unarchiver = require('models/unarchiver');
+import fullscreen = require('utils/fullscreen');
 
 export = SettingView;
 
@@ -23,12 +24,14 @@ class SettingView extends BaseView {
       'click #view-mode-radio-choice-two-label': 'onTwoPageClick',
       'click #page-direction-radio-choice-L2R-label': 'onL2RClick',
       'click #page-direction-radio-choice-R2L-label': 'onR2LClick',
+      'click #fullscreen-checkbox-label': 'onFullscreenClick',
 
       'touchstart #range-request-checkbox-label': 'onRangeClick',
       'touchstart #view-mode-radio-choice-one-label': 'onOnePageClick',
       'touchstart #view-mode-radio-choice-two-label': 'onTwoPageClick',
       'touchstart #page-direction-radio-choice-L2R-label': 'onL2RClick',
       'touchstart #page-direction-radio-choice-R2L-label': 'onR2LClick',
+      'touchstart #fullscreen-checkbox-label': 'onFullscreenClick',
     };
     super(options);
   }
@@ -38,6 +41,9 @@ class SettingView extends BaseView {
       this.render();
     });
     this.listenTo(this._setting.unarchiverSetting(), 'change', () => {
+      this.render();
+    });
+    $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', () => {
       this.render();
     });
   }
@@ -55,6 +61,7 @@ class SettingView extends BaseView {
       OnePage: OnePage,
       TwoPage: TwoPage,
       enablesRangeRequestInPdf: enablesRangeRequestInPdf,
+      fullscreen: fullscreen.isEnabled(),
     });
   }
 
@@ -62,6 +69,12 @@ class SettingView extends BaseView {
     super.render();
     this.$el.trigger('create');
     return this;
+  }
+
+  onFullscreenClick(event: Event) {
+    event.stopPropagation();
+    event.preventDefault();
+    fullscreen.toggle(document.body);
   }
 
   onRangeClick(event: Event) {
@@ -86,6 +99,11 @@ class SettingView extends BaseView {
 
   onR2LClick() {
     this._setting.screenSetting().setPageDirection(Screen.PageDirection.R2L);
+  }
+
+  close() {
+    $(document).off('webkitfullscreenchange mozfullscreenchange fullscreenchange');
+    super.close();
   }
 }
 

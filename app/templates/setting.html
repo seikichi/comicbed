@@ -20,7 +20,6 @@
       <label id="view-mode-radio-choice-two-label"
              for="view-mode-radio-choice-two">two pages</label>
     </fieldset>
-
     <fieldset data-role="controlgroup" data-type="horizontal">
       <legend>Page direction</legend>
       <input name="page-direction-radio-choice"
@@ -38,6 +37,13 @@
       <label id="page-direction-radio-choice-R2L-label"
              for="page-direction-radio-choice-R2L">right to left</label>
     </fieldset>
+
+    <input name="fullscreen-choice"
+           id="fullscreen-checkbox"
+           {{#if fullscreen}}checked="checked"{{/if}}
+           type="checkbox">
+    <label id="fullscreen-checkbox-label"
+           for="fullscreen-checkbox">Enable Fullscreen</label>
 
     <input name="range-request-choice"
            id="range-request-checkbox"
