@@ -31,7 +31,7 @@ module.exports = function(grunt) {
     'preprocess',
     'uglify',
     'requirejs',
-    'manifest',
+    // 'manifest',
     'connect:release'
   ]);
   grunt.registerTask('server:release', ['connect:release']);
