@@ -45,6 +45,9 @@ class SettingView extends BaseView {
     });
     $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', () => {
       this.render();
+      setTimeout(() => {
+        (<any>this.$el).popup('reposition', 'positionTo: window');
+      }, 800);
     });
   }
 
@@ -61,7 +64,8 @@ class SettingView extends BaseView {
       OnePage: OnePage,
       TwoPage: TwoPage,
       enablesRangeRequestInPdf: enablesRangeRequestInPdf,
-      fullscreen: fullscreen.isEnabled(),
+      fullscreenIsSupported: fullscreen.isSupported(),
+      fullscreenIsActive: fullscreen.isActive(),
     });
   }
 

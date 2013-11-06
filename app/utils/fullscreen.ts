@@ -1,7 +1,12 @@
 export = fullscreen;
 
 module fullscreen {
-  export function isEnabled(): boolean {
+  export function isSupported(): boolean {
+    var doc = <any>document;
+    return !!(doc.mozFullScreenEnabled || doc.webkitFullscreenEnabled);
+  }
+
+  export function isActive(): boolean {
     var doc = <any>document;
     return !!(doc.mozFullScreen || doc.webkitIsFullScreen);
   }
@@ -9,11 +14,11 @@ module fullscreen {
   export function toggle(element: HTMLElement) {
     var elem = <any>element;
     var doc = <any>document;
-    if (!doc.mozFullScreen && !doc.webkitIsFullScreen) {
+    if (!isActive()) {
       if (elem.mozRequestFullScreen) {
         elem.mozRequestFullScreen();
       } else {
-        elem.webkitRequestFullScreen((<any>Element).ALLOW_KEYBOARD_INPUT);
+        elem.webkitRequestFullscreen((<any>Element).ALLOW_KEYBOARD_INPUT);
       }
     } else {
       if (doc.mozCancelFullScreen) {
