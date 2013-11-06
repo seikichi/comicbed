@@ -1,4 +1,8 @@
 require(['config'], () => {
+
+  var win: any = window;
+  win.URL = win.URL || win.webkitURL;
+
   require(['jquery'], ($: typeof $) => {
 
     $(document).bind("mobileinit", function(){
