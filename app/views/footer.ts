@@ -95,6 +95,10 @@ class FooterView extends BaseView {
       this.render();
       this.$el.trigger('create');
     });
+    this.listenTo(this._setting, 'change', () => {
+      this.render();
+      this.$el.trigger('create');
+    });
   }
 
   presenter() {
