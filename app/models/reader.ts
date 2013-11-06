@@ -154,7 +154,7 @@ class ReaderModel extends Backbone.Model implements Reader.Reader {
       if (reason.name === 'CancellationError') {
         this.setStatus(Reader.Status.Closed);
       } else {
-        this.setMessage(reason.message);
+        this.setMessage(reason.message || reason);
         this.setStatus(Reader.Status.Error);
       }
       return Promise.rejected(reason);
