@@ -23,6 +23,12 @@ class SettingView extends BaseView {
       'click #view-mode-radio-choice-two-label': 'onTwoPageClick',
       'click #page-direction-radio-choice-L2R-label': 'onL2RClick',
       'click #page-direction-radio-choice-R2L-label': 'onR2LClick',
+
+      'touchstart #range-request-checkbox-label': 'onRangeClick',
+      'touchstart #view-mode-radio-choice-one-label': 'onOnePageClick',
+      'touchstart #view-mode-radio-choice-two-label': 'onTwoPageClick',
+      'touchstart #page-direction-radio-choice-L2R-label': 'onL2RClick',
+      'touchstart #page-direction-radio-choice-R2L-label': 'onR2LClick',
     };
     super(options);
   }
@@ -33,9 +39,6 @@ class SettingView extends BaseView {
     });
     this.listenTo(this._setting.unarchiverSetting(), 'change', () => {
       this.render();
-      // TODO(seikichi): ??????????????????
-      var $check = (<any>this.$('#range-request-checkbox'));
-      $check.prop('checked', (typeof $check.attr('checked') === 'undefined')).checkboxradio('refresh');
     });
   }
 
@@ -61,7 +64,9 @@ class SettingView extends BaseView {
     return this;
   }
 
-  onRangeClick() {
+  onRangeClick(event: Event) {
+    event.stopPropagation();
+    event.preventDefault();
     var setting = this._setting.unarchiverSetting();
     var enablesRangeRequestInPdf = setting.enablesRangeRequestInPdf();
     setting.setEnablesRangeRequestInPdf(!enablesRangeRequestInPdf);
