@@ -14,5 +14,6 @@ Thumb.db
 *.js.map
 DefinitelyTyped
 assets/vendor
+assets/app/pdfjs
 
 tmp/
