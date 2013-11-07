@@ -80,7 +80,8 @@ module GoogleDriveStorage {
             name: resp.title,
             url: downloadUrl,
             httpHeaders: httpHeaders,
-            mimeType: file.mimeType
+            mimeType: file.mimeType,
+            isGoogleDrive: true
           })
         });
       });

@@ -23,6 +23,7 @@ module Unarchiver {
     mimeType?: string;
     httpHeaders?: {[key: string]:string};
     bytes?: number;
+    isGoogleDrive?: number;
   }
 
   export interface Setting extends Events.Events {

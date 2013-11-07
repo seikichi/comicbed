@@ -8,8 +8,8 @@ import PromiseUtil = require('utils/promise');
 // TODO(seikichi): move to unarchiver.setting
 PDFJS.workerSrc = 'assets/app/pdfjs/js/pdf.worker.js';
 PDFJS.disableWorker = false;
-PDFJS.disableAutoFetch = true;
-PDFJS.disableRange = false;
+// PDFJS.disableAutoFetch = true;
+// PDFJS.disableRange = false;
 
 export = PdfUnarchiver;
 
@@ -22,11 +22,12 @@ class PdfUnarchiver implements Unarchiver.Unarchiver {
       name = options.name;
     }
 
-    if (setting.enablesRangeRequestInPdf()) {
+    if (setting.enablesRangeRequestInPdf() && !PDFJS.disableRange) {
       return Promise.cast<PDFJS.PDFDocumentProxy>(PDFJS.getDocument({
         url: url,
         httpHeaders: options.httpHeaders,
         bytes: options.bytes,
+        isGoogleDrive: options.isGoogleDrive,
       })).then((doc: PDFJS.PDFDocumentProxy) => {
         return new PdfUnarchiver(name, doc, setting);
       });

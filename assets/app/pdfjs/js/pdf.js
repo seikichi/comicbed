@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '0.8.635';
-PDFJS.build = '5beefde';
+PDFJS.version = '0.8.663';
+PDFJS.build = '90fb92d';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -3858,7 +3858,7 @@ var LinkAnnotation = (function LinkAnnotationClosure() {
     if (action) {
       var linkType = action.get('S').name;
       if (linkType === 'URI') {
-        var url = action.get('URI');
+        var url = addDefaultProtocolToUrl(action.get('URI'));
         // TODO: pdf spec mentions urls can be relative to a Base
         // entry in the dictionary.
         if (!isValidUrl(url, false)) {
@@ -3892,6 +3892,14 @@ var LinkAnnotation = (function LinkAnnotationClosure() {
       var dest = dict.get('Dest');
       data.dest = isName(dest) ? dest.name : dest;
     }
+  }
+
+  // Lets URLs beginning with 'www.' default to using the 'http://' protocol.
+  function addDefaultProtocolToUrl(url) {
+    if (url.indexOf('www.') === 0) {
+      return ('http://' + url);
+    }
+    return url;
   }
 
   Util.inherit(LinkAnnotation, Annotation, {
@@ -4344,17 +4352,6 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
       );
       return promise;
     },
-    loadXObject: function PDFPageProxy_loadXObject() {
-      var promise = new PDFJS.Promise();
-      this.transport.messageHandler.send('LoadXObject', {
-          pageIndex: this.pageNumber - 1
-        },
-        function loadXObjectCallback() {
-          promise.resolve();
-        }
-      );
-      return promise;
-    },
     /**
      * Stub for future feature.
      */
@@ -4460,11 +4457,14 @@ var WorkerTransport = (function WorkerTransportClosure() {
           if (supportTypedArray) {
             this.worker = worker;
             this.setupMessageHandler(messageHandler);
+            workerInitializedPromise.resolve();
           } else {
             globalScope.PDFJS.disableWorker = true;
-            this.setupFakeWorker();
+            this.loadFakeWorkerFiles().then(function() {
+              this.setupFakeWorker();
+              workerInitializedPromise.resolve();
+            }.bind(this));
           }
-          workerInitializedPromise.resolve();
         }.bind(this));
 
         var testObj = new Uint8Array(1);
@@ -6586,6 +6586,12 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var bounds = Util.getAxialAlignedBoundingBox(
                     group.bbox,
                     currentCtx.mozCurrentTransform);
+      // Clip the bounding box to the current canvas.
+      var canvasBounds = [0,
+                          0,
+                          currentCtx.canvas.width,
+                          currentCtx.canvas.height];
+      bounds = Util.intersect(bounds, canvasBounds) || [0, 0, 0, 0];
       // Use ceil in case we're between sizes so we don't create canvas that is
       // too small and make the canvas at least 1x1 pixels.
       var drawnWidth = Math.max(Math.ceil(bounds[2] - bounds[0]), 1);
