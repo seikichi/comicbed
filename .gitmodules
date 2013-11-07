@@ -1,0 +1,3 @@
+[submodule "submodules/pdf.js"]
+	path = submodules/pdf.js
+	url = https://github.com/seikichi/pdf.js.git
