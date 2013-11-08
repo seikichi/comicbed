@@ -1,3 +1,9 @@
 [submodule "submodules/pdf.js"]
 	path = submodules/pdf.js
 	url = https://github.com/seikichi/pdf.js.git
+[submodule "submodules/tiff.js"]
+	path = submodules/tiff.js
+	url = https://github.com/seikichi/tiff.js.git
+[submodule "submodules/unrar.js"]
+	path = submodules/unrar.js
+	url = https://github.com/seikichi/unrar.js.git
