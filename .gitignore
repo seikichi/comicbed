@@ -17,5 +17,6 @@ assets/vendor
 assets/app/pdfjs
 assets/app/tiff
 assets/app/unrarlib
+assets/app/jquery-mobile
 
 tmp/
