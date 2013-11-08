@@ -15,5 +15,7 @@ Thumb.db
 DefinitelyTyped
 assets/vendor
 assets/app/pdfjs
+assets/app/tiff
+assets/app/unrarlib
 
 tmp/
