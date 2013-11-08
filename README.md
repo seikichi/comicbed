@@ -5,6 +5,7 @@ A browser based comic book reader ([English](https://github.com/seikichi/comicbe
 see [demo](http://seikichi.github.io/comicbed/#?url=comicbed/LH01_hq.pdf&screen.viewMode=TwoPage&screen.pageDirection=R2L). The pdf file used in the demo site is downloaded from [J-comi](http://www.j-comi.jp/book/comic/1).
 
 ## Features
++ JavaScript & HTML5
 + runs in both desktop and mobile modern browsers.
   + IE10+, Firefox 24+, Chrome29+, Safari 6+, Chrome for Android 30+, iOS Safari 6+
 + supports several archive formats (**pdf, zip, rar, cbz, cbr**) and image formats (**jpeg, png, gif, bmp, tiff**).
